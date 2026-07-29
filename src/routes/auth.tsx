@@ -58,7 +58,7 @@ function AuthPage() {
   async function signUp(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email: form.email.trim(),
       password: form.password,
       options: {
@@ -68,9 +68,18 @@ function AuthPage() {
     });
     setLoading(false);
     if (error) return toast.error("Não foi possível criar a conta", { description: error.message });
+
+    if (!data.session) {
+      toast.success("Conta criada!", {
+        description: "Confirme o e-mail que enviamos para ativar seu teste grátis de 2 dias.",
+      });
+      return;
+    }
+
     toast.success("Conta criada! Teste grátis de 2 dias liberado.");
     navigate({ to: "/dashboard", replace: true });
   }
+
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
