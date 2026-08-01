@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ConviteCodigoRouteImport } from './routes/convite.$codigo'
 import { Route as AuthenticatedVendasRouteImport } from './routes/_authenticated/vendas'
 import { Route as AuthenticatedIaRouteImport } from './routes/_authenticated/ia'
 import { Route as AuthenticatedFinanceiroRouteImport } from './routes/_authenticated/financeiro'
@@ -32,6 +33,11 @@ const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConviteCodigoRoute = ConviteCodigoRouteImport.update({
+  id: '/convite/$codigo',
+  path: '/convite/$codigo',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedVendasRoute = AuthenticatedVendasRouteImport.update({
@@ -81,6 +87,7 @@ export interface FileRoutesByFullPath {
   '/financeiro': typeof AuthenticatedFinanceiroRoute
   '/ia': typeof AuthenticatedIaRoute
   '/vendas': typeof AuthenticatedVendasRoute
+  '/convite/$codigo': typeof ConviteCodigoRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -92,6 +99,7 @@ export interface FileRoutesByTo {
   '/financeiro': typeof AuthenticatedFinanceiroRoute
   '/ia': typeof AuthenticatedIaRoute
   '/vendas': typeof AuthenticatedVendasRoute
+  '/convite/$codigo': typeof ConviteCodigoRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -105,6 +113,7 @@ export interface FileRoutesById {
   '/_authenticated/financeiro': typeof AuthenticatedFinanceiroRoute
   '/_authenticated/ia': typeof AuthenticatedIaRoute
   '/_authenticated/vendas': typeof AuthenticatedVendasRoute
+  '/convite/$codigo': typeof ConviteCodigoRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -118,6 +127,7 @@ export interface FileRouteTypes {
     | '/financeiro'
     | '/ia'
     | '/vendas'
+    | '/convite/$codigo'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -129,6 +139,7 @@ export interface FileRouteTypes {
     | '/financeiro'
     | '/ia'
     | '/vendas'
+    | '/convite/$codigo'
   id:
     | '__root__'
     | '/'
@@ -141,12 +152,14 @@ export interface FileRouteTypes {
     | '/_authenticated/financeiro'
     | '/_authenticated/ia'
     | '/_authenticated/vendas'
+    | '/convite/$codigo'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  ConviteCodigoRoute: typeof ConviteCodigoRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -170,6 +183,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/convite/$codigo': {
+      id: '/convite/$codigo'
+      path: '/convite/$codigo'
+      fullPath: '/convite/$codigo'
+      preLoaderRoute: typeof ConviteCodigoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/vendas': {
@@ -251,6 +271,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  ConviteCodigoRoute: ConviteCodigoRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
