@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { LegalLayout, Section } from "./termos";
+import { LegalLayout, Section } from "@/components/legal-layout";
 
 export const Route = createFileRoute("/privacidade")({
   head: () => ({
