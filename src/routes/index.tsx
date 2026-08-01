@@ -155,7 +155,15 @@ function Landing() {
       </section>
 
       <footer className="border-t border-border py-8 text-center text-sm text-muted-foreground">
-        Gestto · Gestão empresarial para pequenos, médios e grandes negócios.
+        <p>Gestto · Gestão empresarial para pequenos, médios e grandes negócios.</p>
+        <nav className="mt-3 flex justify-center gap-5">
+          <Link to="/termos" className="hover:text-foreground">
+            Termos de Uso
+          </Link>
+          <Link to="/privacidade" className="hover:text-foreground">
+            Política de Privacidade
+          </Link>
+        </nav>
       </footer>
     </div>
   );

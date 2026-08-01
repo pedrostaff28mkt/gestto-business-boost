@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Crown, Briefcase, ShoppingBag, ChefHat, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -21,17 +21,10 @@ export const Route = createFileRoute("/auth")({
   component: AuthPage,
 });
 
-const roles = [
-  { value: "owner", label: "Dono / Admin", desc: "Acesso total e permissões", icon: Crown },
-  { value: "manager", label: "Gerente", desc: "Acesso amplo por módulo", icon: Briefcase },
-  { value: "seller", label: "Vendedor", desc: "PIX, cartão, metas", icon: ShoppingBag },
-  { value: "production", label: "Produção", desc: "Tarefas e insumos", icon: ChefHat },
-] as const;
 
 function AuthPage() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const [role, setRole] = useState<string>("owner");
   const [form, setForm] = useState({ email: "", password: "", fullName: "", companyName: "" });
 
   useEffect(() => {
@@ -63,7 +56,7 @@ function AuthPage() {
       password: form.password,
       options: {
         emailRedirectTo: window.location.origin,
-        data: { full_name: form.fullName, company_name: form.companyName, role },
+        data: { full_name: form.fullName, company_name: form.companyName },
       },
     });
     setLoading(false);
@@ -121,28 +114,6 @@ function AuthPage() {
 
           <TabsContent value="signup">
             <form onSubmit={signUp} className="surface mt-4 space-y-4 p-5">
-              <div>
-                <Label className="mb-2 block">Qual é o seu papel?</Label>
-                <div className="grid grid-cols-2 gap-2">
-                  {roles.map((r) => {
-                    const active = role === r.value;
-                    return (
-                      <button
-                        type="button"
-                        key={r.value}
-                        onClick={() => setRole(r.value)}
-                        className={`rounded-xl border p-3 text-left transition-colors ${
-                          active ? "border-primary bg-primary-soft" : "border-border hover:bg-secondary"
-                        }`}
-                      >
-                        <r.icon className={`size-4 ${active ? "text-primary" : "text-muted-foreground"}`} />
-                        <p className="mt-1.5 text-sm font-medium">{r.label}</p>
-                        <p className="text-[11px] text-muted-foreground">{r.desc}</p>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
               <div className="space-y-1.5">
                 <Label htmlFor="fullName">Seu nome</Label>
                 <Input id="fullName" required value={form.fullName} onChange={set("fullName")} placeholder="Maria Silva" />
@@ -163,7 +134,20 @@ function AuthPage() {
                 {loading && <Loader2 className="size-4 animate-spin" />} Criar conta e testar grátis
               </Button>
               <p className="text-center text-xs text-muted-foreground">
-                2 dias grátis. Depois <span className="num">R$ 69,99</span> no 1º mês.
+                Você cria a conta como Dono/Admin da sua empresa. Depois convide gerentes, vendedores e produção
+                em Equipe.
+              </p>
+              <p className="text-center text-xs text-muted-foreground">
+                2 dias grátis. Depois <span className="num">R$ 69,99</span> no 1º mês. Ao criar a conta você
+                aceita os{" "}
+                <Link to="/termos" className="underline">
+                  Termos de Uso
+                </Link>{" "}
+                e a{" "}
+                <Link to="/privacidade" className="underline">
+                  Política de Privacidade
+                </Link>
+                .
               </p>
             </form>
           </TabsContent>
