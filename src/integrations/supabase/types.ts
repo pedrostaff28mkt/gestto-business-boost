@@ -120,6 +120,72 @@ export type Database = {
         }
         Relationships: []
       }
+      invites: {
+        Row: {
+          branch_id: string | null
+          code: string
+          company_id: string
+          created_at: string
+          created_by: string
+          email: string | null
+          expires_at: string
+          full_name: string | null
+          id: string
+          module_permissions: Json
+          role: Database["public"]["Enums"]["app_role"]
+          updated_at: string
+          used_at: string | null
+          used_by: string | null
+        }
+        Insert: {
+          branch_id?: string | null
+          code?: string
+          company_id: string
+          created_at?: string
+          created_by?: string
+          email?: string | null
+          expires_at?: string
+          full_name?: string | null
+          id?: string
+          module_permissions?: Json
+          role: Database["public"]["Enums"]["app_role"]
+          updated_at?: string
+          used_at?: string | null
+          used_by?: string | null
+        }
+        Update: {
+          branch_id?: string | null
+          code?: string
+          company_id?: string
+          created_at?: string
+          created_by?: string
+          email?: string | null
+          expires_at?: string
+          full_name?: string | null
+          id?: string
+          module_permissions?: Json
+          role?: Database["public"]["Enums"]["app_role"]
+          updated_at?: string
+          used_at?: string | null
+          used_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invites_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invites_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       memberships: {
         Row: {
           active: boolean
@@ -546,6 +612,17 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_invite_preview: {
+        Args: { _code: string }
+        Returns: {
+          company_name: string
+          email: string
+          expired: boolean
+          full_name: string
+          role: Database["public"]["Enums"]["app_role"]
+          used: boolean
+        }[]
+      }
       has_company_role: {
         Args: {
           _company_id: string
