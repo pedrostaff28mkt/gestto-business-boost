@@ -127,6 +127,7 @@ function Shell({ children }: { children: ReactNode }) {
 
       <div className="lg:pl-60">
         <header className="sticky top-0 z-20 border-b border-border bg-background/85 backdrop-blur">
+          <TrialStrip />
           <div className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 py-3">
             <div className="lg:hidden">
               <Logo />
@@ -147,8 +148,7 @@ function Shell({ children }: { children: ReactNode }) {
         </header>
 
         <main className="mx-auto max-w-5xl px-4 pt-4 pb-28 lg:pb-12">
-          <TrialBanner />
-          <div className="mt-4">{children}</div>
+          <div>{children}</div>
         </main>
       </div>
 
