@@ -49,7 +49,7 @@ function Logo({ tone = "light" }: { tone?: "light" | "dark" }) {
   );
 }
 
-function TrialBanner() {
+function TrialStrip() {
   const { isPaywalled, trialDaysLeft, session } = useGestto();
   const { open } = usePaywall();
   if (!isPaywalled || !session) return null;
@@ -58,25 +58,24 @@ function TrialBanner() {
   return (
     <button
       onClick={open}
-      className="flex w-full items-center justify-between gap-3 rounded-xl border border-border bg-warning-soft px-4 py-3 text-left"
+      className="flex w-full items-center justify-center gap-2 bg-warning-soft px-4 py-1.5 text-center text-xs text-warning-foreground"
     >
-      <div className="flex items-center gap-2 text-sm">
-        <Lock className="size-4 shrink-0 text-warning-foreground" />
-        <span>
-          {expired ? (
-            <>Acesso somente leitura. Ative por <span className="num font-semibold">R$ 69,99</span> no 1º mês.</>
-          ) : (
-            <>
-              Teste grátis: <span className="num font-semibold">{trialDaysLeft}</span> dia(s). Ações ficam
-              bloqueadas até ativar.
-            </>
-          )}
-        </span>
-      </div>
-      <span className="shrink-0 text-sm font-semibold text-primary">Ativar</span>
+      <Lock className="size-3.5 shrink-0" />
+      <span>
+        {expired ? (
+          <>Modo demonstração — assinatura inativa. Ative por <span className="num font-semibold">R$ 69,99</span> no 1º mês.</>
+        ) : (
+          <>
+            Você está no teste grátis — <span className="num font-semibold">{trialDaysLeft}</span> dia(s)
+            restante(s).
+          </>
+        )}
+      </span>
+      <span className="font-semibold underline">Ativar</span>
     </button>
   );
 }
+
 
 function Shell({ children }: { children: ReactNode }) {
   const { session, can } = useGestto();
