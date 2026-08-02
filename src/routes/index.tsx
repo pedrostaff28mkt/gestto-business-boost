@@ -17,13 +17,13 @@ import { testimonials } from "@/lib/testimonials";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Gestto Beta — Clareza para gerir o seu negócio" },
+      { title: "Gestto — Clareza para gerir o seu negócio" },
       {
         name: "description",
         content:
           "Veja o que entra, o que sai e quanto sobra de verdade. Vendas no PIX e cartão, estoque e equipe num só lugar. 2 dias grátis, R$ 69,99 no 1º mês.",
       },
-      { property: "og:title", content: "Gestto Beta — Clareza para gerir o seu negócio" },
+      { property: "og:title", content: "Gestto — Clareza para gerir o seu negócio" },
       {
         property: "og:description",
         content:
@@ -57,7 +57,7 @@ function Landing() {
           >
             G
           </div>
-          <span className="font-display text-xl font-bold">Gestto Beta</span>
+          <span className="font-display text-xl font-bold">Gestto</span>
         </div>
         <Button asChild variant="ghost">
           <Link to="/auth">Entrar</Link>
@@ -167,7 +167,7 @@ function Landing() {
       <section className="mx-auto max-w-6xl px-5 py-16">
         <div className="surface p-7 text-center lg:p-10">
           <span className="inline-flex items-center rounded-full bg-primary-soft px-3 py-1 text-xs font-medium text-primary">
-            Plano Gestto Beta
+            Plano Gestto
           </span>
           <h2 className="mt-4 text-2xl font-bold lg:text-3xl">Um plano, tudo liberado</h2>
           <p className="mt-2 text-sm text-muted-foreground">
@@ -219,7 +219,7 @@ function Landing() {
       </section>
 
       <footer className="border-t border-border py-8 text-center text-sm text-muted-foreground">
-        <p>Gestto Beta · Clareza para gerir pequenos, médios e grandes negócios.</p>
+        <p>Gestto · Clareza para gerir pequenos, médios e grandes negócios.</p>
         <nav className="mt-3 flex justify-center gap-5">
           <Link to="/termos" className="hover:text-foreground">
             Termos de Uso
