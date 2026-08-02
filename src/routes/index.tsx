@@ -135,6 +135,34 @@ function Landing() {
         </div>
       </section>
 
+      <section className="mx-auto max-w-6xl px-5 pt-4 pb-8">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold lg:text-3xl">Quem já enxerga o próprio negócio com clareza</h2>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Donos que trocaram achismo por decisão tomada com número na mão.
+          </p>
+        </div>
+        <div className="mt-8 grid gap-4 md:grid-cols-3">
+          {testimonials.map((t) => (
+            <figure key={t.name} className="surface flex flex-col rounded-2xl p-6">
+              <div className="flex items-center gap-1" aria-label={`Avaliação ${t.rating} de 5`}>
+                {Array.from({ length: t.rating }).map((_, i) => (
+                  <Star key={i} className="size-4 fill-warning text-warning" />
+                ))}
+              </div>
+              <blockquote className="mt-4 flex-1 text-sm leading-relaxed text-foreground">
+                “{t.quote}”
+              </blockquote>
+              <figcaption className="mt-5 border-t border-border pt-4">
+                <p className="font-semibold">{t.name}</p>
+                <p className="text-sm text-muted-foreground">{t.business}</p>
+                <p className="mt-1 text-xs text-muted-foreground">{t.since}</p>
+              </figcaption>
+            </figure>
+          ))}
+        </div>
+      </section>
+
       <section className="mx-auto max-w-6xl px-5 py-16">
         <div className="surface p-7 text-center lg:p-10">
           <span className="inline-flex items-center rounded-full bg-primary-soft px-3 py-1 text-xs font-medium text-primary">
@@ -162,28 +190,17 @@ function Landing() {
               "Equipe: convite de funcionário com permissão sob medida, ponto pelo celular",
               "Multiempresa e múltiplas filiais",
               "Auditoria completa de cada ação da equipe",
+              "Financeiro: contas, folha de pagamento e fluxo de caixa",
+              "CRM: histórico de clientes e fidelização",
+              "IA embutida: insights automáticos e respostas sobre o seu negócio",
             ].map((item) => (
               <li key={item} className="flex items-start gap-2">
                 <Check className="mt-0.5 size-4 shrink-0 text-success" />
                 <span>{item}</span>
               </li>
             ))}
-            {[
-              "Financeiro: contas, folha de pagamento e fluxo de caixa",
-              "CRM: histórico de clientes e fidelização",
-              "IA embutida: insights automáticos e respostas sobre o seu negócio",
-            ].map((item) => (
-              <li key={item} className="flex items-start gap-2">
-                <Clock className="mt-0.5 size-4 shrink-0 text-warning" />
-                <span className="flex flex-wrap items-center gap-1.5">
-                  {item}
-                  <span className="inline-flex items-center gap-1 rounded-md bg-warning-soft px-1.5 py-0.5 text-xs font-medium text-warning-foreground">
-                    <Sparkles className="size-3" /> Em breve
-                  </span>
-                </span>
-              </li>
-            ))}
           </ul>
+
 
           <p className="mt-6 text-sm text-muted-foreground">
             Novos módulos incluídos automaticamente na sua assinatura, sem custo extra.
