@@ -80,13 +80,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Gestto Beta — Gestão empresarial" },
+      { title: "Gestto — Gestão empresarial" },
       {
         name: "description",
         content: "Vendas com PIX e cartão, estoque, financeiro e equipe em um só app.",
       },
-      { name: "author", content: "Gestto Beta" },
-      { property: "og:title", content: "Gestto Beta — Gestão empresarial" },
+      { name: "author", content: "Gestto" },
+      { property: "og:title", content: "Gestto — Gestão empresarial" },
       {
         property: "og:description",
         content: "Vendas com PIX e cartão, estoque, financeiro e equipe em um só app.",

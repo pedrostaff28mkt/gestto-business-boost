@@ -93,7 +93,7 @@ function InvitePage() {
           >
             G
           </div>
-          <span className="font-display text-xl font-bold">Gestto Beta</span>
+          <span className="font-display text-xl font-bold">Gestto</span>
         </Link>
 
         {isLoading ? (
