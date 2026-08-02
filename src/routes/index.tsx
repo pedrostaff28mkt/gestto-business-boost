@@ -9,37 +9,42 @@ import {
   ArrowRight,
   Check,
   ShieldCheck,
-  Clock,
+  Star,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { testimonials } from "@/lib/testimonials";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Gestto — Gestão completa para o seu negócio" },
+      { title: "Gestto Beta — Clareza para gerir o seu negócio" },
       {
         name: "description",
         content:
-          "Vendas com PIX e cartão, estoque, financeiro e equipe em um só app. Teste grátis por 2 dias. R$ 69,99 no primeiro mês.",
+          "Veja o que entra, o que sai e quanto sobra de verdade. Vendas no PIX e cartão, estoque e equipe num só lugar. 2 dias grátis, R$ 69,99 no 1º mês.",
       },
-      { property: "og:title", content: "Gestto — Gestão completa para o seu negócio" },
+      { property: "og:title", content: "Gestto Beta — Clareza para gerir o seu negócio" },
       {
         property: "og:description",
-        content: "PIX, cartão, estoque, financeiro e equipe no celular. Teste grátis por 2 dias.",
+        content:
+          "Saiba todos os dias quanto vendeu, quanto sobrou e o que precisa da sua atenção. Teste grátis por 2 dias.",
       },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: Landing,
 });
 
 const modules = [
-  { icon: QrCode, title: "Vendas", text: "QR Code PIX, cartão com parcelas, comanda e metas por vendedor." },
-  { icon: Package, title: "Estoque", text: "Custo, margem, mínimo/máximo, validade e ficha técnica." },
-  { icon: Wallet, title: "Financeiro", text: "Contas, folha, fluxo de caixa, DRE e simulador de imposto." },
-  { icon: LineChart, title: "Dashboard", text: "Lucro líquido real já descontando a taxa da maquininha." },
-  { icon: Users, title: "Equipe", text: "Ponto pelo celular, checklists, auditoria e permissões." },
-  { icon: Sparkles, title: "IA embutida", text: "Insights de estoque e vendas e respostas sobre o seu negócio." },
+  { icon: QrCode, title: "Vendas", text: "Receba no PIX na hora ou no cartão parcelado, com meta clara para cada vendedor." },
+  { icon: Package, title: "Estoque", text: "Saiba o que está acabando, o que vence e quanto cada produto realmente custa." },
+  { icon: Wallet, title: "Financeiro", text: "Contas a pagar, folha e fluxo de caixa sem planilha e sem susto no fim do mês." },
+  { icon: LineChart, title: "Dashboard", text: "O lucro que sobra de verdade, já com a taxa da maquininha descontada." },
+  { icon: Users, title: "Equipe", text: "Ponto pelo celular, tarefas do dia e cada pessoa vendo só o que precisa ver." },
+  { icon: Sparkles, title: "IA embutida", text: "Respostas simples sobre o seu negócio e avisos do que merece atenção agora." },
 ];
+
 
 function Landing() {
   return (
