@@ -43,7 +43,7 @@ function Logo({ tone = "light" }: { tone?: "light" | "dark" }) {
       <span
         className={`font-display text-lg font-bold tracking-tight ${tone === "dark" ? "text-background" : "text-foreground"}`}
       >
-        Gestto
+        Gestto Beta
       </span>
     </div>
   );

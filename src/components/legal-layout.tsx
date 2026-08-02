@@ -20,7 +20,7 @@ export function LegalLayout({
           >
             G
           </div>
-          <span className="font-display text-xl font-bold">Gestto</span>
+          <span className="font-display text-xl font-bold">Gestto Beta</span>
         </Link>
         <Link to="/auth" className="text-sm text-muted-foreground hover:text-foreground">
           Entrar

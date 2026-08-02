@@ -12,9 +12,9 @@ export const Route = createFileRoute("/auth")({
   ssr: false,
   head: () => ({
     meta: [
-      { title: "Entrar no Gestto" },
+      { title: "Entrar no Gestto Beta" },
       { name: "description", content: "Acesse o Gestto: vendas, estoque, financeiro e equipe do seu negócio." },
-      { property: "og:title", content: "Entrar no Gestto" },
+      { property: "og:title", content: "Entrar no Gestto Beta" },
       { property: "og:description", content: "Acesse a gestão do seu negócio: vendas, estoque e financeiro." },
     ],
   }),
@@ -84,7 +84,7 @@ function AuthPage() {
           >
             G
           </div>
-          <span className="font-display text-xl font-bold">Gestto</span>
+          <span className="font-display text-xl font-bold">Gestto Beta</span>
         </Link>
 
         <h1 className="text-3xl font-bold">Bem-vindo</h1>

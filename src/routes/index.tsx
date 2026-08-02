@@ -9,37 +9,42 @@ import {
   ArrowRight,
   Check,
   ShieldCheck,
-  Clock,
+  Star,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { testimonials } from "@/lib/testimonials";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Gestto — Gestão completa para o seu negócio" },
+      { title: "Gestto Beta — Clareza para gerir o seu negócio" },
       {
         name: "description",
         content:
-          "Vendas com PIX e cartão, estoque, financeiro e equipe em um só app. Teste grátis por 2 dias. R$ 69,99 no primeiro mês.",
+          "Veja o que entra, o que sai e quanto sobra de verdade. Vendas no PIX e cartão, estoque e equipe num só lugar. 2 dias grátis, R$ 69,99 no 1º mês.",
       },
-      { property: "og:title", content: "Gestto — Gestão completa para o seu negócio" },
+      { property: "og:title", content: "Gestto Beta — Clareza para gerir o seu negócio" },
       {
         property: "og:description",
-        content: "PIX, cartão, estoque, financeiro e equipe no celular. Teste grátis por 2 dias.",
+        content:
+          "Saiba todos os dias quanto vendeu, quanto sobrou e o que precisa da sua atenção. Teste grátis por 2 dias.",
       },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: Landing,
 });
 
 const modules = [
-  { icon: QrCode, title: "Vendas", text: "QR Code PIX, cartão com parcelas, comanda e metas por vendedor." },
-  { icon: Package, title: "Estoque", text: "Custo, margem, mínimo/máximo, validade e ficha técnica." },
-  { icon: Wallet, title: "Financeiro", text: "Contas, folha, fluxo de caixa, DRE e simulador de imposto." },
-  { icon: LineChart, title: "Dashboard", text: "Lucro líquido real já descontando a taxa da maquininha." },
-  { icon: Users, title: "Equipe", text: "Ponto pelo celular, checklists, auditoria e permissões." },
-  { icon: Sparkles, title: "IA embutida", text: "Insights de estoque e vendas e respostas sobre o seu negócio." },
+  { icon: QrCode, title: "Vendas", text: "Receba no PIX na hora ou no cartão parcelado, com meta clara para cada vendedor." },
+  { icon: Package, title: "Estoque", text: "Saiba o que está acabando, o que vence e quanto cada produto realmente custa." },
+  { icon: Wallet, title: "Financeiro", text: "Contas a pagar, folha e fluxo de caixa sem planilha e sem susto no fim do mês." },
+  { icon: LineChart, title: "Dashboard", text: "O lucro que sobra de verdade, já com a taxa da maquininha descontada." },
+  { icon: Users, title: "Equipe", text: "Ponto pelo celular, tarefas do dia e cada pessoa vendo só o que precisa ver." },
+  { icon: Sparkles, title: "IA embutida", text: "Respostas simples sobre o seu negócio e avisos do que merece atenção agora." },
 ];
+
 
 function Landing() {
   return (
@@ -52,7 +57,7 @@ function Landing() {
           >
             G
           </div>
-          <span className="font-display text-xl font-bold">Gestto</span>
+          <span className="font-display text-xl font-bold">Gestto Beta</span>
         </div>
         <Button asChild variant="ghost">
           <Link to="/auth">Entrar</Link>
@@ -66,14 +71,15 @@ function Landing() {
               <ShieldCheck className="size-3.5" /> Feito para o empreendedor brasileiro
             </span>
             <h1 className="mt-5 text-4xl leading-[1.05] font-bold sm:text-6xl">
-              Sua empresa inteira
+              Clareza para o seu
               <br />
-              na palma da mão.
+              negócio, todos os dias.
             </h1>
             <p className="mt-5 max-w-lg text-lg text-muted-foreground">
-              Receba no PIX e no cartão, controle estoque, veja o lucro real já descontando a maquininha e
-              gerencie sua equipe — tudo em um só lugar.
+              Você não precisa de mais números soltos. Precisa saber quanto vendeu, quanto sobrou de verdade
+              e o que exige a sua atenção hoje — em português claro, na tela do celular.
             </p>
+
             <div className="mt-7 flex flex-wrap items-center gap-3">
               <Button asChild size="lg" className="gap-2">
                 <Link to="/auth">
@@ -130,6 +136,34 @@ function Landing() {
         </div>
       </section>
 
+      <section className="mx-auto max-w-6xl px-5 pt-4 pb-8">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold lg:text-3xl">Quem já enxerga o próprio negócio com clareza</h2>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Donos que trocaram achismo por decisão tomada com número na mão.
+          </p>
+        </div>
+        <div className="mt-8 grid gap-4 md:grid-cols-3">
+          {testimonials.map((t) => (
+            <figure key={t.name} className="surface flex flex-col rounded-2xl p-6">
+              <div className="flex items-center gap-1" aria-label={`Avaliação ${t.rating} de 5`}>
+                {Array.from({ length: t.rating }).map((_, i) => (
+                  <Star key={i} className="size-4 fill-warning text-warning" />
+                ))}
+              </div>
+              <blockquote className="mt-4 flex-1 text-sm leading-relaxed text-foreground">
+                “{t.quote}”
+              </blockquote>
+              <figcaption className="mt-5 border-t border-border pt-4">
+                <p className="font-semibold">{t.name}</p>
+                <p className="text-sm text-muted-foreground">{t.business}</p>
+                <p className="mt-1 text-xs text-muted-foreground">{t.since}</p>
+              </figcaption>
+            </figure>
+          ))}
+        </div>
+      </section>
+
       <section className="mx-auto max-w-6xl px-5 py-16">
         <div className="surface p-7 text-center lg:p-10">
           <span className="inline-flex items-center rounded-full bg-primary-soft px-3 py-1 text-xs font-medium text-primary">
@@ -157,28 +191,17 @@ function Landing() {
               "Equipe: convite de funcionário com permissão sob medida, ponto pelo celular",
               "Multiempresa e múltiplas filiais",
               "Auditoria completa de cada ação da equipe",
+              "Financeiro: contas, folha de pagamento e fluxo de caixa",
+              "CRM: histórico de clientes e fidelização",
+              "IA embutida: insights automáticos e respostas sobre o seu negócio",
             ].map((item) => (
               <li key={item} className="flex items-start gap-2">
                 <Check className="mt-0.5 size-4 shrink-0 text-success" />
                 <span>{item}</span>
               </li>
             ))}
-            {[
-              "Financeiro: contas, folha de pagamento e fluxo de caixa",
-              "CRM: histórico de clientes e fidelização",
-              "IA embutida: insights automáticos e respostas sobre o seu negócio",
-            ].map((item) => (
-              <li key={item} className="flex items-start gap-2">
-                <Clock className="mt-0.5 size-4 shrink-0 text-warning" />
-                <span className="flex flex-wrap items-center gap-1.5">
-                  {item}
-                  <span className="inline-flex items-center gap-1 rounded-md bg-warning-soft px-1.5 py-0.5 text-xs font-medium text-warning-foreground">
-                    <Sparkles className="size-3" /> Em breve
-                  </span>
-                </span>
-              </li>
-            ))}
           </ul>
+
 
           <p className="mt-6 text-sm text-muted-foreground">
             Novos módulos incluídos automaticamente na sua assinatura, sem custo extra.
@@ -196,7 +219,7 @@ function Landing() {
       </section>
 
       <footer className="border-t border-border py-8 text-center text-sm text-muted-foreground">
-        <p>Gestto · Gestão empresarial para pequenos, médios e grandes negócios.</p>
+        <p>Gestto Beta · Clareza para gerir pequenos, médios e grandes negócios.</p>
         <nav className="mt-3 flex justify-center gap-5">
           <Link to="/termos" className="hover:text-foreground">
             Termos de Uso
