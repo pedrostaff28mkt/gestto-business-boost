@@ -84,7 +84,7 @@ function AuthPage() {
           >
             G
           </div>
-          <span className="font-display text-xl font-bold">Gestto</span>
+          <span className="font-display text-xl font-bold">Gestto Beta</span>
         </Link>
 
         <h1 className="text-3xl font-bold">Bem-vindo</h1>
