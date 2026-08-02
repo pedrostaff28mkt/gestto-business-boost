@@ -57,7 +57,7 @@ function Landing() {
           >
             G
           </div>
-          <span className="font-display text-xl font-bold">Gestto</span>
+          <span className="font-display text-xl font-bold">Gestto Beta</span>
         </div>
         <Button asChild variant="ghost">
           <Link to="/auth">Entrar</Link>
@@ -71,14 +71,15 @@ function Landing() {
               <ShieldCheck className="size-3.5" /> Feito para o empreendedor brasileiro
             </span>
             <h1 className="mt-5 text-4xl leading-[1.05] font-bold sm:text-6xl">
-              Sua empresa inteira
+              Clareza para o seu
               <br />
-              na palma da mão.
+              negócio, todos os dias.
             </h1>
             <p className="mt-5 max-w-lg text-lg text-muted-foreground">
-              Receba no PIX e no cartão, controle estoque, veja o lucro real já descontando a maquininha e
-              gerencie sua equipe — tudo em um só lugar.
+              Você não precisa de mais números soltos. Precisa saber quanto vendeu, quanto sobrou de verdade
+              e o que exige a sua atenção hoje — em português claro, na tela do celular.
             </p>
+
             <div className="mt-7 flex flex-wrap items-center gap-3">
               <Button asChild size="lg" className="gap-2">
                 <Link to="/auth">
