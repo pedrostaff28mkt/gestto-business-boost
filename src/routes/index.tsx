@@ -9,6 +9,7 @@ import {
   ArrowRight,
   Check,
   ShieldCheck,
+  Clock,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -129,28 +130,68 @@ function Landing() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-md px-5 py-16">
-        <div className="surface p-7 text-center">
-          <h2 className="text-2xl font-bold">Um plano, tudo liberado</h2>
-          <p className="num mt-4 text-5xl font-bold text-primary">R$ 69,99</p>
-          <p className="mt-1 text-sm text-muted-foreground">
-            no primeiro mês, depois <span className="num">R$ 99,99</span>/mês
+      <section className="mx-auto max-w-6xl px-5 py-16">
+        <div className="surface p-7 text-center lg:p-10">
+          <span className="inline-flex items-center rounded-full bg-primary-soft px-3 py-1 text-xs font-medium text-primary">
+            Plano Gestto Beta
+          </span>
+          <h2 className="mt-4 text-2xl font-bold lg:text-3xl">Um plano, tudo liberado</h2>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Acesso completo a todos os módulos — hoje e no que estiver por vir.
           </p>
-          <ul className="mt-6 space-y-2 text-left text-sm">
+
+          <div className="mt-6">
+            <p className="num text-5xl font-bold text-primary">R$ 69,99</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              no primeiro mês, depois <span className="num">R$ 99,99</span>/mês
+            </p>
+            <p className="mt-3 text-sm font-medium text-foreground">
+              Menos que um almoço executivo por mês para cuidar da empresa inteira.
+            </p>
+          </div>
+
+          <ul className="mt-8 grid gap-3 text-left text-sm sm:grid-cols-2">
             {[
-              "Todos os módulos e usuários",
+              "Vendas: PIX na hora e cartão parcelado, direto do celular",
+              "Estoque: controle de mínimo, validade e ficha técnica de produção",
+              "Equipe: convite de funcionário com permissão sob medida, ponto pelo celular",
               "Multiempresa e múltiplas filiais",
-              "Permissões por módulo e auditoria",
-              "2 dias de teste grátis, sem cartão",
-            ].map((i) => (
-              <li key={i} className="flex items-center gap-2">
-                <Check className="size-4 text-success" /> {i}
+              "Auditoria completa de cada ação da equipe",
+            ].map((item) => (
+              <li key={item} className="flex items-start gap-2">
+                <Check className="mt-0.5 size-4 shrink-0 text-success" />
+                <span>{item}</span>
+              </li>
+            ))}
+            {[
+              "Financeiro: contas, folha de pagamento e fluxo de caixa",
+              "CRM: histórico de clientes e fidelização",
+              "IA embutida: insights automáticos e respostas sobre o seu negócio",
+            ].map((item) => (
+              <li key={item} className="flex items-start gap-2">
+                <Clock className="mt-0.5 size-4 shrink-0 text-warning" />
+                <span className="flex flex-wrap items-center gap-1.5">
+                  {item}
+                  <span className="inline-flex items-center gap-1 rounded-md bg-warning-soft px-1.5 py-0.5 text-xs font-medium text-warning-foreground">
+                    <Sparkles className="size-3" /> Em breve
+                  </span>
+                </span>
               </li>
             ))}
           </ul>
+
+          <p className="mt-6 text-sm text-muted-foreground">
+            Novos módulos incluídos automaticamente na sua assinatura, sem custo extra.
+          </p>
+
           <Button asChild size="lg" className="mt-6 w-full">
             <Link to="/auth">Criar minha conta</Link>
           </Button>
+
+          <p className="mt-4 flex items-center justify-center gap-2 text-xs text-muted-foreground">
+            <ShieldCheck className="size-3.5" />
+            2 dias grátis, sem cartão · cancele quando quiser, sem multa
+          </p>
         </div>
       </section>
 
