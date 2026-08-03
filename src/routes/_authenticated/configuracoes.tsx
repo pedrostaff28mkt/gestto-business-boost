@@ -5,7 +5,7 @@ import { Loader2, KeyRound, CreditCard } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useGestto, roleLabels } from "@/hooks/use-gestto";
-import { usePaywall } from "@/components/paywall";
+import { usePaywall, LockedArea } from "@/components/paywall";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
