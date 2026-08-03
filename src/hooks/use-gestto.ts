@@ -64,8 +64,9 @@ async function fetchSession(): Promise<GesttoSession | null> {
   const { data: membership, error } = await supabase
     .from("memberships")
     .select(
-      "id, role, company_id, branch_id, commission_percent, monthly_goal, companies(name), module_permissions(module, can_view, can_create, can_edit, can_delete)",
+      "id, role, company_id, branch_id, commission_percent, monthly_goal, companies(name, company_size, quiz_completed_at), module_permissions(module, can_view, can_create, can_edit, can_delete)",
     )
+
     .eq("user_id", user.id)
     .eq("active", true)
     .order("created_at", { ascending: true })
