@@ -70,7 +70,8 @@ function AuthPage() {
     }
 
     toast.success("Conta criada! Teste grátis de 2 dias liberado.");
-    navigate({ to: "/dashboard", replace: true });
+    navigate({ to: "/onboarding", replace: true });
+
   }
 
 
