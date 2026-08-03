@@ -36,7 +36,10 @@ export type GesttoSession = {
   membershipId: string;
   companyId: string;
   companyName: string;
+  companySize: string | null;
+  quizCompletedAt: string | null;
   branchId: string | null;
+
   commissionPercent: number;
   monthlyGoal: number;
   subscription: {
@@ -64,8 +67,9 @@ async function fetchSession(): Promise<GesttoSession | null> {
   const { data: membership, error } = await supabase
     .from("memberships")
     .select(
-      "id, role, company_id, branch_id, commission_percent, monthly_goal, companies(name), module_permissions(module, can_view, can_create, can_edit, can_delete)",
+      "id, role, company_id, branch_id, commission_percent, monthly_goal, companies(name, company_size, quiz_completed_at), module_permissions(module, can_view, can_create, can_edit, can_delete)",
     )
+
     .eq("user_id", user.id)
     .eq("active", true)
     .order("created_at", { ascending: true })
@@ -91,15 +95,23 @@ async function fetchSession(): Promise<GesttoSession | null> {
       .maybeSingle(),
   ]);
 
+  const company = membership.companies as
+    | { name: string; company_size: string | null; quiz_completed_at: string | null }
+    | null;
+
   return {
+
     userId: user.id,
     email: user.email ?? "",
     fullName: profile?.full_name || user.email || "Usuário",
     role: membership.role as AppRole,
     membershipId: membership.id,
     companyId: membership.company_id,
-    companyName: (membership.companies as { name: string } | null)?.name ?? "Minha empresa",
+    companyName: company?.name ?? "Minha empresa",
+    companySize: company?.company_size ?? null,
+    quizCompletedAt: company?.quiz_completed_at ?? null,
     branchId: membership.branch_id,
+
     commissionPercent: Number(membership.commission_percent ?? 0),
     monthlyGoal: Number(membership.monthly_goal ?? 0),
     subscription: {

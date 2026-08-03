@@ -5,7 +5,7 @@ import { Loader2, KeyRound, CreditCard } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useGestto, roleLabels } from "@/hooks/use-gestto";
-import { usePaywall } from "@/components/paywall";
+import { usePaywall, LockedArea } from "@/components/paywall";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -100,7 +100,9 @@ function SettingsPage() {
         </div>
       </div>
 
+      <LockedArea className="space-y-4">
       <div className="surface space-y-4 p-5">
+
         <div className="flex items-center gap-2">
           <KeyRound className="size-4 text-primary" />
           <h2 className="font-display text-lg font-semibold">Chave PIX</h2>
@@ -161,6 +163,8 @@ function SettingsPage() {
       >
         {save.isPending && <Loader2 className="size-4 animate-spin" />} Salvar configurações
       </Button>
+      </LockedArea>
+
 
       <div className="surface p-5">
         <h2 className="font-display text-lg font-semibold">Seu acesso</h2>

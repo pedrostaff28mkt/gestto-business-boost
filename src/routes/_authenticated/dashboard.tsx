@@ -1,5 +1,6 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
 import {
   TrendingUp,
   TrendingDown,
@@ -12,8 +13,9 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useGestto } from "@/hooks/use-gestto";
 import { brl, num, shortDate } from "@/lib/format";
-import { LockedArea } from "@/components/paywall";
+import { LockedArea, BlurredValue, UnlockHint } from "@/components/paywall";
 import { Progress } from "@/components/ui/progress";
+
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
@@ -60,15 +62,32 @@ function Stat({
           <Icon className="size-3.5" />
         </span>
       </div>
-      <p className="num mt-2 text-2xl font-semibold">{value}</p>
-      {hint && <p className="mt-0.5 text-xs text-muted-foreground">{hint}</p>}
+      <p className="num mt-2 text-2xl font-semibold">
+        <BlurredValue>{value}</BlurredValue>
+      </p>
+      {hint && (
+        <p className="mt-0.5 text-xs text-muted-foreground">
+          <BlurredValue>{hint}</BlurredValue>
+        </p>
+      )}
+
     </div>
   );
 }
 
 function DashboardPage() {
-  const { session } = useGestto();
+  const { session, isLoading } = useGestto();
+  const navigate = useNavigate();
   const companyId = session?.companyId;
+
+  // Dono que ainda não respondeu o quiz de perfil vai para o onboarding.
+  useEffect(() => {
+    if (isLoading || !session) return;
+    if (session.role === "owner" && !session.quizCompletedAt) {
+      navigate({ to: "/onboarding", replace: true });
+    }
+  }, [isLoading, session, navigate]);
+
 
   const { data } = useQuery({
     queryKey: ["dashboard", companyId],
@@ -162,6 +181,10 @@ function DashboardPage() {
         />
       </div>
 
+      <UnlockHint />
+
+
+
       <LockedArea>
         <div className="surface p-5">
           <div className="flex items-center gap-2">
@@ -199,7 +222,10 @@ function DashboardPage() {
                   <div className="h-2 flex-1 overflow-hidden rounded-full bg-secondary">
                     <div className="h-full rounded-full bg-primary" style={{ width: `${share}%` }} />
                   </div>
-                  <span className="num w-24 text-right text-sm">{brl(total)}</span>
+                  <span className="num w-24 text-right text-sm">
+                    <BlurredValue>{brl(total)}</BlurredValue>
+                  </span>
+
                 </div>
               );
             })}
@@ -263,9 +289,14 @@ function DashboardPage() {
                   <p className="text-xs text-muted-foreground">{shortDate(s.created_at)}</p>
                 </div>
                 <div className="text-right">
-                  <p className="num text-sm font-medium">{brl(Number(s.gross_amount))}</p>
-                  <p className="num text-xs text-muted-foreground">líq. {brl(Number(s.net_amount))}</p>
+                  <p className="num text-sm font-medium">
+                    <BlurredValue>{brl(Number(s.gross_amount))}</BlurredValue>
+                  </p>
+                  <p className="num text-xs text-muted-foreground">
+                    <BlurredValue>{`líq. ${brl(Number(s.net_amount))}`}</BlurredValue>
+                  </p>
                 </div>
+
               </li>
             ))}
           </ul>

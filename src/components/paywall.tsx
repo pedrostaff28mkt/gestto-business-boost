@@ -118,3 +118,50 @@ export function LockedArea({ children, className }: { children: ReactNode; class
     </div>
   );
 }
+
+/** Valor numérico desfocado quando não há assinatura ativa. Clique abre o modal de pagamento. */
+export function BlurredValue({
+  children,
+  className,
+  label = "Ative sua assinatura para ver",
+}: {
+  children: ReactNode;
+  className?: string;
+  label?: string;
+}) {
+  const { locked, open } = usePaywall();
+  if (!locked) return <span className={className}>{children}</span>;
+
+  return (
+    <button
+      type="button"
+      onClick={open}
+      title={label}
+      aria-label={label}
+      className={`group inline-flex items-center gap-1.5 text-left ${className ?? ""}`}
+    >
+      <span className="select-none blur-[6px]" aria-hidden="true">
+        {children}
+      </span>
+      <span className="flex size-5 shrink-0 items-center justify-center rounded-md bg-graphite text-background">
+        <Lock className="size-3" />
+      </span>
+    </button>
+  );
+}
+
+/** Texto/link discreto que abre o modal de assinatura. */
+export function UnlockHint({ className }: { className?: string }) {
+  const { locked, open } = usePaywall();
+  if (!locked) return null;
+  return (
+    <button
+      type="button"
+      onClick={open}
+      className={`inline-flex items-center gap-1 text-xs text-warning-foreground underline-offset-4 hover:underline ${className ?? ""}`}
+    >
+      <Lock className="size-3" /> Ative sua assinatura para ver
+    </button>
+  );
+}
+

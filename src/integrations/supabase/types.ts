@@ -92,30 +92,45 @@ export type Database = {
       }
       companies: {
         Row: {
+          company_size: string | null
           created_at: string
           created_by: string
           document: string | null
           id: string
           legal_name: string | null
           name: string
+          quiz_completed_at: string | null
+          quiz_employees: string | null
+          quiz_revenue: string | null
+          quiz_segment: string | null
           updated_at: string
         }
         Insert: {
+          company_size?: string | null
           created_at?: string
           created_by: string
           document?: string | null
           id?: string
           legal_name?: string | null
           name: string
+          quiz_completed_at?: string | null
+          quiz_employees?: string | null
+          quiz_revenue?: string | null
+          quiz_segment?: string | null
           updated_at?: string
         }
         Update: {
+          company_size?: string | null
           created_at?: string
           created_by?: string
           document?: string | null
           id?: string
           legal_name?: string | null
           name?: string
+          quiz_completed_at?: string | null
+          quiz_employees?: string | null
+          quiz_revenue?: string | null
+          quiz_segment?: string | null
           updated_at?: string
         }
         Relationships: []

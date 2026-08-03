@@ -1,0 +1,6 @@
+ALTER TABLE public.companies
+  ADD COLUMN IF NOT EXISTS company_size TEXT,
+  ADD COLUMN IF NOT EXISTS quiz_employees TEXT,
+  ADD COLUMN IF NOT EXISTS quiz_revenue TEXT,
+  ADD COLUMN IF NOT EXISTS quiz_segment TEXT,
+  ADD COLUMN IF NOT EXISTS quiz_completed_at TIMESTAMP WITH TIME ZONE;
