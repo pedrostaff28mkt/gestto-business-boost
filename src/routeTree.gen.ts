@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TermosRouteImport } from './routes/termos'
 import { Route as PrivacidadeRouteImport } from './routes/privacidade'
+import { Route as PainelInternoRouteImport } from './routes/painel-interno'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
@@ -32,6 +33,11 @@ const TermosRoute = TermosRouteImport.update({
 const PrivacidadeRoute = PrivacidadeRouteImport.update({
   id: '/privacidade',
   path: '/privacidade',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PainelInternoRoute = PainelInternoRouteImport.update({
+  id: '/painel-interno',
+  path: '/painel-interno',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -98,6 +104,7 @@ const AuthenticatedConfiguracoesRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/painel-interno': typeof PainelInternoRoute
   '/privacidade': typeof PrivacidadeRoute
   '/termos': typeof TermosRoute
   '/configuracoes': typeof AuthenticatedConfiguracoesRoute
@@ -113,6 +120,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/painel-interno': typeof PainelInternoRoute
   '/privacidade': typeof PrivacidadeRoute
   '/termos': typeof TermosRoute
   '/configuracoes': typeof AuthenticatedConfiguracoesRoute
@@ -130,6 +138,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/painel-interno': typeof PainelInternoRoute
   '/privacidade': typeof PrivacidadeRoute
   '/termos': typeof TermosRoute
   '/_authenticated/configuracoes': typeof AuthenticatedConfiguracoesRoute
@@ -147,6 +156,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/painel-interno'
     | '/privacidade'
     | '/termos'
     | '/configuracoes'
@@ -162,6 +172,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/painel-interno'
     | '/privacidade'
     | '/termos'
     | '/configuracoes'
@@ -178,6 +189,7 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/painel-interno'
     | '/privacidade'
     | '/termos'
     | '/_authenticated/configuracoes'
@@ -195,6 +207,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  PainelInternoRoute: typeof PainelInternoRoute
   PrivacidadeRoute: typeof PrivacidadeRoute
   TermosRoute: typeof TermosRoute
   ConviteCodigoRoute: typeof ConviteCodigoRoute
@@ -214,6 +227,13 @@ declare module '@tanstack/react-router' {
       path: '/privacidade'
       fullPath: '/privacidade'
       preLoaderRoute: typeof PrivacidadeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/painel-interno': {
+      id: '/painel-interno'
+      path: '/painel-interno'
+      fullPath: '/painel-interno'
+      preLoaderRoute: typeof PainelInternoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -332,6 +352,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  PainelInternoRoute: PainelInternoRoute,
   PrivacidadeRoute: PrivacidadeRoute,
   TermosRoute: TermosRoute,
   ConviteCodigoRoute: ConviteCodigoRoute,
