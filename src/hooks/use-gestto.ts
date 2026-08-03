@@ -36,7 +36,10 @@ export type GesttoSession = {
   membershipId: string;
   companyId: string;
   companyName: string;
+  companySize: string | null;
+  quizCompletedAt: string | null;
   branchId: string | null;
+
   commissionPercent: number;
   monthlyGoal: number;
   subscription: {
