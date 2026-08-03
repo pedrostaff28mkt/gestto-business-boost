@@ -62,8 +62,15 @@ function Stat({
           <Icon className="size-3.5" />
         </span>
       </div>
-      <p className="num mt-2 text-2xl font-semibold">{value}</p>
-      {hint && <p className="mt-0.5 text-xs text-muted-foreground">{hint}</p>}
+      <p className="num mt-2 text-2xl font-semibold">
+        <BlurredValue>{value}</BlurredValue>
+      </p>
+      {hint && (
+        <p className="mt-0.5 text-xs text-muted-foreground">
+          <BlurredValue>{hint}</BlurredValue>
+        </p>
+      )}
+
     </div>
   );
 }
