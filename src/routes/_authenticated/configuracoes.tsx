@@ -100,7 +100,9 @@ function SettingsPage() {
         </div>
       </div>
 
+      <LockedArea className="space-y-4">
       <div className="surface space-y-4 p-5">
+
         <div className="flex items-center gap-2">
           <KeyRound className="size-4 text-primary" />
           <h2 className="font-display text-lg font-semibold">Chave PIX</h2>
