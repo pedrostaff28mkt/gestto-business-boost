@@ -76,8 +76,18 @@ function Stat({
 }
 
 function DashboardPage() {
-  const { session } = useGestto();
+  const { session, isLoading } = useGestto();
+  const navigate = useNavigate();
   const companyId = session?.companyId;
+
+  // Dono que ainda não respondeu o quiz de perfil vai para o onboarding.
+  useEffect(() => {
+    if (isLoading || !session) return;
+    if (session.role === "owner" && !session.quizCompletedAt) {
+      navigate({ to: "/onboarding", replace: true });
+    }
+  }, [isLoading, session, navigate]);
+
 
   const { data } = useQuery({
     queryKey: ["dashboard", companyId],
