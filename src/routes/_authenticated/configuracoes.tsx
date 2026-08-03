@@ -163,6 +163,8 @@ function SettingsPage() {
       >
         {save.isPending && <Loader2 className="size-4 animate-spin" />} Salvar configurações
       </Button>
+      </LockedArea>
+
 
       <div className="surface p-5">
         <h2 className="font-display text-lg font-semibold">Seu acesso</h2>
