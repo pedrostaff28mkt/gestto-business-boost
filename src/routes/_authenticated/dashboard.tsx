@@ -181,6 +181,10 @@ function DashboardPage() {
         />
       </div>
 
+      <UnlockHint />
+
+
+
       <LockedArea>
         <div className="surface p-5">
           <div className="flex items-center gap-2">
