@@ -282,9 +282,14 @@ function DashboardPage() {
                   <p className="text-xs text-muted-foreground">{shortDate(s.created_at)}</p>
                 </div>
                 <div className="text-right">
-                  <p className="num text-sm font-medium">{brl(Number(s.gross_amount))}</p>
-                  <p className="num text-xs text-muted-foreground">líq. {brl(Number(s.net_amount))}</p>
+                  <p className="num text-sm font-medium">
+                    <BlurredValue>{brl(Number(s.gross_amount))}</BlurredValue>
+                  </p>
+                  <p className="num text-xs text-muted-foreground">
+                    <BlurredValue>{`líq. ${brl(Number(s.net_amount))}`}</BlurredValue>
+                  </p>
                 </div>
+
               </li>
             ))}
           </ul>
