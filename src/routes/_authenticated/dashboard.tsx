@@ -218,7 +218,10 @@ function DashboardPage() {
                   <div className="h-2 flex-1 overflow-hidden rounded-full bg-secondary">
                     <div className="h-full rounded-full bg-primary" style={{ width: `${share}%` }} />
                   </div>
-                  <span className="num w-24 text-right text-sm">{brl(total)}</span>
+                  <span className="num w-24 text-right text-sm">
+                    <BlurredValue>{brl(total)}</BlurredValue>
+                  </span>
+
                 </div>
               );
             })}
