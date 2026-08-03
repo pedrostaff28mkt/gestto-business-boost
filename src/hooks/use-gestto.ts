@@ -102,8 +102,11 @@ async function fetchSession(): Promise<GesttoSession | null> {
     role: membership.role as AppRole,
     membershipId: membership.id,
     companyId: membership.company_id,
-    companyName: (membership.companies as { name: string } | null)?.name ?? "Minha empresa",
+    companyName: company?.name ?? "Minha empresa",
+    companySize: company?.company_size ?? null,
+    quizCompletedAt: company?.quiz_completed_at ?? null,
     branchId: membership.branch_id,
+
     commissionPercent: Number(membership.commission_percent ?? 0),
     monthlyGoal: Number(membership.monthly_goal ?? 0),
     subscription: {
