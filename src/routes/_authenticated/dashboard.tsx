@@ -1,5 +1,6 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
 import {
   TrendingUp,
   TrendingDown,
@@ -12,8 +13,9 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useGestto } from "@/hooks/use-gestto";
 import { brl, num, shortDate } from "@/lib/format";
-import { LockedArea } from "@/components/paywall";
+import { LockedArea, BlurredValue, UnlockHint } from "@/components/paywall";
 import { Progress } from "@/components/ui/progress";
+
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
