@@ -95,7 +95,12 @@ async function fetchSession(): Promise<GesttoSession | null> {
       .maybeSingle(),
   ]);
 
+  const company = membership.companies as
+    | { name: string; company_size: string | null; quiz_completed_at: string | null }
+    | null;
+
   return {
+
     userId: user.id,
     email: user.email ?? "",
     fullName: profile?.full_name || user.email || "Usuário",
