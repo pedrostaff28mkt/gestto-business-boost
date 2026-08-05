@@ -199,6 +199,28 @@ function Landing() {
       </section>
 
       <section className="mx-auto max-w-6xl px-5 py-16">
+        <div className="mx-auto max-w-3xl">
+          <h2 className="text-center text-2xl font-bold lg:text-3xl">Perguntas frequentes</h2>
+          <p className="mt-2 text-center text-sm text-muted-foreground">
+            Tudo o que você precisa saber antes de começar.
+          </p>
+
+          <Accordion type="single" collapsible className="mt-8 surface divide-y divide-border overflow-hidden">
+            {faqs.map((faq, index) => (
+              <AccordionItem key={index} value={`item-${index}`} className="border-0 px-5">
+                <AccordionTrigger className="py-5 text-left text-base font-semibold hover:no-underline">
+                  {faq.question}
+                </AccordionTrigger>
+                <AccordionContent className="pb-5 text-sm leading-relaxed text-muted-foreground">
+                  {faq.answer}
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-6xl px-5 py-16">
         <div className="surface p-7 text-center lg:p-10">
           <span className="inline-flex items-center rounded-full bg-primary-soft px-3 py-1 text-xs font-medium text-primary">
             Plano Gestto
