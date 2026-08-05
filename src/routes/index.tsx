@@ -12,6 +12,12 @@ import {
   Star,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { testimonials } from "@/lib/testimonials";
 
 export const Route = createFileRoute("/")({
