@@ -12,6 +12,12 @@ import {
   Star,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { testimonials } from "@/lib/testimonials";
 
 export const Route = createFileRoute("/")({
@@ -43,6 +49,34 @@ const modules = [
   { icon: LineChart, title: "Dashboard", text: "O lucro que sobra de verdade, já com a taxa da maquininha descontada." },
   { icon: Users, title: "Equipe", text: "Ponto pelo celular, tarefas do dia e cada pessoa vendo só o que precisa ver." },
   { icon: Sparkles, title: "IA embutida", text: "Respostas simples sobre o seu negócio e avisos do que merece atenção agora." },
+];
+
+const faqs = [
+  {
+    question: "Quando recebo uma venda pelo PIX ou no cartão, o dinheiro vai para mim ou para o Gestto?",
+    answer:
+      "O dinheiro vai direto para você. O Gestto gera o QR Code usando a sua própria chave PIX cadastrada e registra a venda no sistema para os relatórios — em nenhum momento o valor passa pela conta do Gestto. No cartão, o recebimento segue normalmente pela sua maquininha; o Gestto só calcula automaticamente a taxa descontada para mostrar seu lucro líquido real.",
+  },
+  {
+    question: "Preciso ter CNPJ para usar o Gestto?",
+    answer:
+      "Não é obrigatório. O Gestto funciona bem para MEI, autônomos e pequenos negócios informais, além de empresas de médio e grande porte já formalizadas. O que você vai precisar (chave PIX, maquininha de cartão etc.) depende dos seus próprios arranjos de recebimento, não do Gestto.",
+  },
+  {
+    question: "Posso cancelar a assinatura quando quiser?",
+    answer:
+      "Sim. Não existe fidelidade nem multa de cancelamento. Você pode cancelar a qualquer momento direto nas configurações da sua conta, e continua com acesso até o fim do período já pago.",
+  },
+  {
+    question: "O Gestto funciona sem internet?",
+    answer:
+      "Hoje é necessário estar conectado à internet para usar o Gestto, já que os dados ficam sincronizados em tempo real entre você e sua equipe. Um modo offline com sincronização automática está no nosso roadmap.",
+  },
+  {
+    question: "Meus dados e os da minha empresa ficam seguros? Quem pode ver essas informações?",
+    answer:
+      "Sim. Cada empresa só enxerga os próprios dados, e dentro da empresa cada pessoa só vê o que o dono liberou para o cargo dela — vendedor não vê o financeiro completo, por exemplo. Todas as ações ficam registradas em um log de auditoria, e seguimos as exigências da LGPD para tratamento de dados.",
+  },
 ];
 
 
@@ -215,6 +249,28 @@ function Landing() {
             <ShieldCheck className="size-3.5" />
             2 dias grátis, sem cartão · cancele quando quiser, sem multa
           </p>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-6xl px-5 py-16">
+        <div className="mx-auto max-w-3xl">
+          <h2 className="text-center text-2xl font-bold lg:text-3xl">Perguntas frequentes</h2>
+          <p className="mt-2 text-center text-sm text-muted-foreground">
+            Tudo o que você precisa saber antes de começar.
+          </p>
+
+          <Accordion type="single" collapsible className="mt-8 surface divide-y divide-border overflow-hidden">
+            {faqs.map((faq, index) => (
+              <AccordionItem key={index} value={`item-${index}`} className="border-0 px-5">
+                <AccordionTrigger className="py-5 text-left text-base font-semibold hover:no-underline">
+                  {faq.question}
+                </AccordionTrigger>
+                <AccordionContent className="pb-5 text-sm leading-relaxed text-muted-foreground">
+                  {faq.answer}
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
         </div>
       </section>
 
