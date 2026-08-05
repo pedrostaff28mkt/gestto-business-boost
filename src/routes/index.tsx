@@ -51,6 +51,34 @@ const modules = [
   { icon: Sparkles, title: "IA embutida", text: "Respostas simples sobre o seu negócio e avisos do que merece atenção agora." },
 ];
 
+const faqs = [
+  {
+    question: "Quando recebo uma venda pelo PIX ou no cartão, o dinheiro vai para mim ou para o Gestto?",
+    answer:
+      "O dinheiro vai direto para você. O Gestto gera o QR Code usando a sua própria chave PIX cadastrada e registra a venda no sistema para os relatórios — em nenhum momento o valor passa pela conta do Gestto. No cartão, o recebimento segue normalmente pela sua maquininha; o Gestto só calcula automaticamente a taxa descontada para mostrar seu lucro líquido real.",
+  },
+  {
+    question: "Preciso ter CNPJ para usar o Gestto?",
+    answer:
+      "Não é obrigatório. O Gestto funciona bem para MEI, autônomos e pequenos negócios informais, além de empresas de médio e grande porte já formalizadas. O que você vai precisar (chave PIX, maquininha de cartão etc.) depende dos seus próprios arranjos de recebimento, não do Gestto.",
+  },
+  {
+    question: "Posso cancelar a assinatura quando quiser?",
+    answer:
+      "Sim. Não existe fidelidade nem multa de cancelamento. Você pode cancelar a qualquer momento direto nas configurações da sua conta, e continua com acesso até o fim do período já pago.",
+  },
+  {
+    question: "O Gestto funciona sem internet?",
+    answer:
+      "Hoje é necessário estar conectado à internet para usar o Gestto, já que os dados ficam sincronizados em tempo real entre você e sua equipe. Um modo offline com sincronização automática está no nosso roadmap.",
+  },
+  {
+    question: "Meus dados e os da minha empresa ficam seguros? Quem pode ver essas informações?",
+    answer:
+      "Sim. Cada empresa só enxerga os próprios dados, e dentro da empresa cada pessoa só vê o que o dono liberou para o cargo dela — vendedor não vê o financeiro completo, por exemplo. Todas as ações ficam registradas em um log de auditoria, e seguimos as exigências da LGPD para tratamento de dados.",
+  },
+];
+
 
 function Landing() {
   return (
