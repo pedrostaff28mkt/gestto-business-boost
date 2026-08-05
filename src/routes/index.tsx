@@ -53,29 +53,29 @@ const modules = [
 
 const faqs = [
   {
-    question: "Quando recebo uma venda pelo PIX ou no cartão, o dinheiro vai para mim ou para o Gestto?",
+    question: "Quando eu recebo no PIX ou no cartão, o valor vai para mim ou para a Gestto?",
     answer:
-      "O dinheiro vai direto para você. O Gestto gera o QR Code usando a sua própria chave PIX cadastrada e registra a venda no sistema para os relatórios — em nenhum momento o valor passa pela conta do Gestto. No cartão, o recebimento segue normalmente pela sua maquininha; o Gestto só calcula automaticamente a taxa descontada para mostrar seu lucro líquido real.",
+      "O dinheiro vai direto para você. No PIX, o QR Code é gerado usando a sua própria chave PIX cadastrada em Ajustes — o valor cai direto na sua conta, o Gestto nunca fica com o dinheiro no meio do caminho. No cartão, a venda é processada na sua própria maquininha normalmente; você só registra o valor no Gestto para o sistema calcular automaticamente a taxa da operadora e o seu lucro líquido real.",
   },
   {
-    question: "Preciso ter CNPJ para usar o Gestto?",
+    question: "O que acontece quando os 2 dias de teste grátis acabarem?",
     answer:
-      "Não é obrigatório. O Gestto funciona bem para MEI, autônomos e pequenos negócios informais, além de empresas de médio e grande porte já formalizadas. O que você vai precisar (chave PIX, maquininha de cartão etc.) depende dos seus próprios arranjos de recebimento, não do Gestto.",
+      "Se você ainda não tiver assinado, o sistema continua liberado para você navegar e ver como funciona, mas os valores do dashboard ficam desfocados e as ações de lançar vendas, editar estoque e outras funções ficam bloqueadas até você ativar a assinatura. Nenhum dado é apagado — assim que ativar, tudo volta a funcionar normalmente.",
   },
   {
-    question: "Posso cancelar a assinatura quando quiser?",
+    question: "Além da mensalidade, existe alguma taxa extra?",
     answer:
-      "Sim. Não existe fidelidade nem multa de cancelamento. Você pode cancelar a qualquer momento direto nas configurações da sua conta, e continua com acesso até o fim do período já pago.",
+      "Não. A única cobrança é a mensalidade do Gestto (R$ 99,99, ou R$ 69,99 no primeiro mês). A taxa da maquininha de cartão é cobrada pela sua própria operadora de cartão, como já acontece hoje — você só informa esse percentual (ou mensalidade fixa) em Ajustes para o Gestto calcular seu lucro líquido corretamente, sem nenhuma taxa adicional cobrada pelo Gestto sobre suas vendas.",
   },
   {
-    question: "O Gestto funciona sem internet?",
+    question: "O Gestto funciona para mais de uma loja ou filial?",
     answer:
-      "Hoje é necessário estar conectado à internet para usar o Gestto, já que os dados ficam sincronizados em tempo real entre você e sua equipe. Um modo offline com sincronização automática está no nosso roadmap.",
+      "Sim. O sistema já foi criado pensando em múltiplas empresas e múltiplas filiais desde o início — você pode acompanhar o desempenho de cada unidade separadamente ou ver o consolidado.",
   },
   {
-    question: "Meus dados e os da minha empresa ficam seguros? Quem pode ver essas informações?",
+    question: "Consigo controlar o que cada funcionário enxerga no sistema?",
     answer:
-      "Sim. Cada empresa só enxerga os próprios dados, e dentro da empresa cada pessoa só vê o que o dono liberou para o cargo dela — vendedor não vê o financeiro completo, por exemplo. Todas as ações ficam registradas em um log de auditoria, e seguimos as exigências da LGPD para tratamento de dados.",
+      "Sim. Você define, por pessoa, quais módulos ela acessa e o que pode fazer em cada um (ver, criar, editar ou excluir) — um vendedor, por exemplo, não precisa ter acesso ao financeiro da empresa. Isso é configurado na tela de Equipe, na hora de convidar cada pessoa.",
   },
 ];
 
