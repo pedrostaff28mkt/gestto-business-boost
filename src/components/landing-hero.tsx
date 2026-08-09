@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import {
   ArrowRight,
@@ -61,6 +62,11 @@ function GlassCard({
 }
 
 export function LandingHero() {
+  // Recharts gera ids únicos por render; renderizamos os gráficos só no cliente
+  // para evitar divergência de hidratação.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
   return (
     <section className="hero-dark relative overflow-hidden">
       <div className="relative mx-auto grid max-w-6xl gap-14 px-5 pt-12 pb-20 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:pt-20 lg:pb-28">
@@ -114,8 +120,9 @@ export function LandingHero() {
               <p className="num text-3xl font-semibold text-hero-foreground">R$ 128.400</p>
               <span className="num pb-1 text-xs font-medium text-success">+18,4%</span>
             </div>
-            <div className="mt-3">
-              <AreaChart data={mockRevenueTrend} width={300} height={64}>
+            <div className="mt-3 h-16">
+              {mounted && (
+                <AreaChart data={mockRevenueTrend} width={300} height={64}>
                   <defs>
                     <linearGradient id="heroRevenue" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="0%" stopColor="var(--hero-accent)" stopOpacity={0.5} />
@@ -130,7 +137,8 @@ export function LandingHero() {
                     fill="url(#heroRevenue)"
                     isAnimationActive={false}
                   />
-              </AreaChart>
+                </AreaChart>
+              )}
             </div>
           </GlassCard>
 
@@ -153,8 +161,9 @@ export function LandingHero() {
           <GlassCard className="absolute bottom-[26%] left-[196px] w-[250px] max-w-full">
             <p className="text-xs text-hero-muted">Vendas por canal</p>
             <div className="mt-2 flex items-center gap-3">
-              <div className="shrink-0">
-                <PieChart width={84} height={84}>
+              <div className="size-[84px] shrink-0">
+                {mounted && (
+                  <PieChart width={84} height={84}>
                     <Pie
                       data={mockChannels}
                       dataKey="value"
@@ -168,7 +177,8 @@ export function LandingHero() {
                         <Cell key={c.name} fill={c.fill} />
                       ))}
                     </Pie>
-                </PieChart>
+                  </PieChart>
+                )}
               </div>
               <ul className="space-y-1 text-[11px]">
                 {mockChannels.map((c) => (
@@ -183,10 +193,12 @@ export function LandingHero() {
 
           <GlassCard className="absolute right-0 bottom-0 w-[215px] max-w-full">
             <p className="text-xs text-hero-muted">Fluxo de caixa</p>
-            <div className="mt-2">
-              <BarChart data={mockCashFlow} width={180} height={56}>
-                <Bar dataKey="v" fill="var(--hero-accent)" radius={3} isAnimationActive={false} />
-              </BarChart>
+            <div className="mt-2 h-14">
+              {mounted && (
+                <BarChart data={mockCashFlow} width={180} height={56}>
+                  <Bar dataKey="v" fill="var(--hero-accent)" radius={3} isAnimationActive={false} />
+                </BarChart>
+              )}
             </div>
           </GlassCard>
 
