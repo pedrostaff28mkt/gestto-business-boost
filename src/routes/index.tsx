@@ -6,7 +6,7 @@ import {
   Users,
   Sparkles,
   Wallet,
-  ArrowRight,
+  
   Check,
   ShieldCheck,
   Star,
