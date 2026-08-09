@@ -6,7 +6,7 @@ import {
   Users,
   Sparkles,
   Wallet,
-  ArrowRight,
+  
   Check,
   ShieldCheck,
   Star,
@@ -19,6 +19,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { testimonials } from "@/lib/testimonials";
+import { LandingHero } from "@/components/landing-hero";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -83,83 +84,32 @@ const faqs = [
 function Landing() {
   return (
     <div className="min-h-screen bg-background">
-      <header className="mx-auto flex max-w-6xl items-center justify-between px-5 py-5">
-        <div className="flex items-center gap-2">
-          <div
-            className="flex size-8 items-center justify-center rounded-lg font-display font-bold text-primary-foreground"
-            style={{ background: "var(--gradient-brand)" }}
+      <div className="hero-dark">
+        <header className="mx-auto flex max-w-6xl items-center justify-between px-5 py-5">
+          <div className="flex items-center gap-2">
+            <div
+              className="flex size-8 items-center justify-center rounded-lg font-display font-bold text-primary-foreground"
+              style={{ background: "var(--gradient-brand)" }}
+            >
+              G
+            </div>
+            <span className="font-display text-xl font-bold text-hero-foreground">Gestto</span>
+          </div>
+          <Button
+            asChild
+            variant="ghost"
+            className="text-hero-foreground hover:bg-hero-glass hover:text-hero-foreground"
           >
-            G
-          </div>
-          <span className="font-display text-xl font-bold">Gestto</span>
-        </div>
-        <Button asChild variant="ghost">
-          <Link to="/auth">Entrar</Link>
-        </Button>
-      </header>
+            <Link to="/auth">Entrar</Link>
+          </Button>
+        </header>
 
-      <section className="mx-auto max-w-6xl px-5 pt-8 pb-16 lg:pt-16">
-        <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
-          <div>
-            <span className="inline-flex items-center gap-2 rounded-full bg-primary-soft px-3 py-1 text-xs font-medium text-primary">
-              <ShieldCheck className="size-3.5" /> Feito para o empreendedor brasileiro
-            </span>
-            <h1 className="mt-5 text-4xl leading-[1.05] font-bold sm:text-6xl">
-              Clareza para o seu
-              <br />
-              negócio, todos os dias.
-            </h1>
-            <p className="mt-5 max-w-lg text-lg text-muted-foreground">
-              Você não precisa de mais números soltos. Precisa saber quanto vendeu, quanto sobrou de verdade
-              e o que exige a sua atenção hoje — em português claro, na tela do celular.
-            </p>
+        <LandingHero />
+      </div>
 
-            <div className="mt-7 flex flex-wrap items-center gap-3">
-              <Button asChild size="lg" className="gap-2">
-                <Link to="/auth">
-                  Começar teste grátis <ArrowRight className="size-4" />
-                </Link>
-              </Button>
-              <p className="text-sm text-muted-foreground">
-                2 dias grátis · <span className="num">R$ 69,99</span> no 1º mês
-              </p>
-            </div>
-          </div>
-
-          <div className="surface p-6">
-            <p className="text-sm text-muted-foreground">Faturamento hoje</p>
-            <p className="num mt-1 text-4xl font-semibold">R$ 4.280,00</p>
-            <div className="mt-5 grid grid-cols-2 gap-3">
-              <div className="rounded-xl bg-success-soft p-4">
-                <p className="text-xs text-muted-foreground">Lucro líquido</p>
-                <p className="num mt-1 text-xl font-semibold">R$ 1.712,40</p>
-              </div>
-              <div className="rounded-xl bg-warning-soft p-4">
-                <p className="text-xs text-muted-foreground">Taxa maquininha</p>
-                <p className="num mt-1 text-xl font-semibold">R$ 137,90</p>
-              </div>
-            </div>
-            <div className="mt-3 space-y-2">
-              {[
-                ["PIX · Ana", "R$ 89,90"],
-                ["Crédito 3x · Bruno", "R$ 340,00"],
-                ["Débito · Ana", "R$ 52,00"],
-              ].map(([label, value]) => (
-                <div
-                  key={label}
-                  className="flex items-center justify-between rounded-lg border border-border px-3 py-2 text-sm"
-                >
-                  <span className="text-muted-foreground">{label}</span>
-                  <span className="num font-medium">{value}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="border-y border-border bg-card">
+      <section id="modulos" className="border-y border-border bg-card">
         <div className="mx-auto grid max-w-6xl gap-4 px-5 py-14 sm:grid-cols-2 lg:grid-cols-3">
+
           {modules.map((m) => (
             <div key={m.title} className="rounded-xl border border-border p-5">
               <m.icon className="size-5 text-primary" />

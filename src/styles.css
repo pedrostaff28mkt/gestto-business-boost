@@ -47,6 +47,11 @@
   --color-warning-foreground: var(--warning-foreground);
   --color-warning-soft: var(--warning-soft);
   --color-graphite: var(--graphite);
+  --color-hero-foreground: var(--hero-foreground);
+  --color-hero-muted: var(--hero-muted);
+  --color-hero-accent: var(--hero-accent);
+  --color-hero-glass: var(--hero-glass);
+  --color-hero-glass-strong: var(--hero-glass-strong);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
@@ -125,6 +130,12 @@
   --gradient-graphite: linear-gradient(160deg, oklch(0.2057 0.0143 272.58), oklch(0.26 0.04 272));
   --shadow-card: 0 1px 2px oklch(0.2057 0.0143 272.58 / 6%), 0 8px 24px -12px oklch(0.2057 0.0143 272.58 / 14%);
   --shadow-brand: 0 12px 32px -14px oklch(0.4816 0.2671 273.06 / 55%);
+  --hero-foreground: oklch(0.9845 0.0026 106.45);
+  --hero-muted: oklch(0.7645 0.0167 273.72);
+  --hero-accent: oklch(0.6427 0.1896 279);
+  --hero-glass: oklch(0.9845 0.0026 106.45 / 7%);
+  --hero-glass-strong: oklch(0.9845 0.0026 106.45 / 13%);
+  --gradient-hero: linear-gradient(160deg, oklch(0.1719 0.0143 272.58), oklch(0.2257 0.0463 275) 55%, oklch(0.1719 0.0143 272.58));
 }
 
 .dark {
@@ -176,4 +187,24 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-card);
+}
+
+@utility hero-dark {
+  background: var(--gradient-hero);
+  color: var(--hero-foreground);
+}
+
+@utility hero-glass {
+  background: var(--hero-glass);
+  border: 1px solid var(--hero-glass-strong);
+  border-radius: var(--radius-xl);
+  box-shadow: 0 20px 50px -24px oklch(0 0 0 / 60%);
+  backdrop-filter: blur(14px);
+}
+
+@utility hero-phone {
+  background: var(--gradient-graphite);
+  border: 1px solid var(--hero-glass-strong);
+  border-radius: var(--radius-3xl);
+  box-shadow: 0 30px 70px -20px oklch(0 0 0 / 70%);
 }
