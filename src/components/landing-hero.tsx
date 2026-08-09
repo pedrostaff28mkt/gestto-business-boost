@@ -117,7 +117,7 @@ export function LandingHero() {
 
         {/* Composição visual — todos os números abaixo são ilustrativos (mock) */}
         <div className="relative min-h-[520px] lg:min-h-[560px]">
-          <GlassCard className="absolute top-0 left-0 w-[75%]">
+          <GlassCard className="absolute top-0 left-[6%] w-[72%]">
             <p className="text-xs text-hero-muted">Faturamento</p>
             <div className="mt-1 flex items-end gap-2">
               <p className="num text-3xl font-semibold text-hero-foreground">R$ 128.400</p>
@@ -144,7 +144,7 @@ export function LandingHero() {
             </div>
           </GlassCard>
 
-          <GlassCard className="absolute top-[26%] right-0 w-[62%]">
+          <GlassCard className="absolute top-[27%] right-0 w-[58%]">
             <p className="text-xs text-hero-muted">Visão geral</p>
             <div className="mt-3 space-y-2">
               {mockOverview.map((row) => (
@@ -160,7 +160,7 @@ export function LandingHero() {
             </div>
           </GlassCard>
 
-          <GlassCard className="absolute bottom-[10%] left-0 w-[54%]">
+          <GlassCard className="absolute bottom-[15%] left-[14%] w-[54%]">
             <p className="text-xs text-hero-muted">Vendas por canal</p>
             <div className="mt-2 flex items-center gap-3">
               <div className="size-20 shrink-0">
@@ -192,7 +192,7 @@ export function LandingHero() {
             </div>
           </GlassCard>
 
-          <GlassCard className="absolute right-[6%] bottom-0 w-[46%]">
+          <GlassCard className="absolute right-[4%] bottom-[2%] w-[44%]">
             <p className="text-xs text-hero-muted">Fluxo de caixa</p>
             <div className="mt-2 h-14">
               <ResponsiveContainer width="100%" height="100%">
@@ -205,7 +205,7 @@ export function LandingHero() {
 
           {/* Mockup de celular — ilustração de produto/roadmap, a IA em chat ainda não é uma
               funcionalidade ativa na aplicação. */}
-          <div className="hero-phone absolute top-[34%] left-[26%] w-[46%] max-w-[210px] p-3">
+          <div className="hero-phone absolute bottom-[-4%] left-[-10%] z-10 w-[44%] max-w-[196px] p-3">
             <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-hero-glass-strong" />
             <div className="flex items-center gap-2">
               <span className="hero-glass flex size-7 items-center justify-center rounded-lg">
