@@ -124,7 +124,7 @@ export function LandingHero() {
               <span className="num pb-1 text-xs font-medium text-success">+18,4%</span>
             </div>
             <div className="mt-3 h-16">
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer width="99%" height="100%" debounce={1}>
                 <AreaChart data={mockRevenueTrend}>
                   <defs>
                     <linearGradient id="heroRevenue" x1="0" y1="0" x2="0" y2="1">
@@ -160,7 +160,7 @@ export function LandingHero() {
             </div>
           </GlassCard>
 
-          <GlassCard className="absolute bottom-[15%] left-[14%] w-[54%]">
+          <GlassCard className="absolute bottom-[14%] left-[24%] w-[52%]">
             <p className="text-xs text-hero-muted">Vendas por canal</p>
             <div className="mt-2 flex items-center gap-3">
               <div className="size-20 shrink-0">
@@ -195,7 +195,7 @@ export function LandingHero() {
           <GlassCard className="absolute right-[4%] bottom-[2%] w-[44%]">
             <p className="text-xs text-hero-muted">Fluxo de caixa</p>
             <div className="mt-2 h-14">
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer width="99%" height="100%" debounce={1}>
                 <BarChart data={mockCashFlow}>
                   <Bar dataKey="v" fill="var(--hero-accent)" radius={3} />
                 </BarChart>
@@ -205,7 +205,7 @@ export function LandingHero() {
 
           {/* Mockup de celular — ilustração de produto/roadmap, a IA em chat ainda não é uma
               funcionalidade ativa na aplicação. */}
-          <div className="hero-phone absolute bottom-[-4%] left-[-10%] z-10 w-[44%] max-w-[196px] p-3">
+          <div className="hero-phone absolute bottom-[-2%] left-[-14%] z-10 w-[40%] max-w-[186px] p-3">
             <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-hero-glass-strong" />
             <div className="flex items-center gap-2">
               <span className="hero-glass flex size-7 items-center justify-center rounded-lg">
