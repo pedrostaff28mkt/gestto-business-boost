@@ -9,16 +9,7 @@ import {
   BarChart3,
   Sparkles,
 } from "lucide-react";
-import {
-  Area,
-  AreaChart,
-  Bar,
-  BarChart,
-  Cell,
-  Pie,
-  PieChart,
-  ResponsiveContainer,
-} from "recharts";
+import { Area, AreaChart, Bar, BarChart, Cell, Pie, PieChart } from "recharts";
 import { Button } from "@/components/ui/button";
 
 /**
@@ -117,15 +108,14 @@ export function LandingHero() {
 
         {/* Composição visual — todos os números abaixo são ilustrativos (mock) */}
         <div className="relative min-h-[520px] lg:min-h-[560px]">
-          <GlassCard className="absolute top-0 left-[6%] w-[72%]">
+          <GlassCard className="absolute top-0 left-[8%] w-[340px] max-w-full">
             <p className="text-xs text-hero-muted">Faturamento</p>
             <div className="mt-1 flex items-end gap-2">
               <p className="num text-3xl font-semibold text-hero-foreground">R$ 128.400</p>
               <span className="num pb-1 text-xs font-medium text-success">+18,4%</span>
             </div>
-            <div className="mt-3 h-16">
-              <ResponsiveContainer width="99%" height="100%" debounce={1}>
-                <AreaChart data={mockRevenueTrend}>
+            <div className="mt-3">
+              <AreaChart data={mockRevenueTrend} width={300} height={64}>
                   <defs>
                     <linearGradient id="heroRevenue" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="0%" stopColor="var(--hero-accent)" stopOpacity={0.5} />
@@ -139,12 +129,11 @@ export function LandingHero() {
                     strokeWidth={2}
                     fill="url(#heroRevenue)"
                   />
-                </AreaChart>
-              </ResponsiveContainer>
+              </AreaChart>
             </div>
           </GlassCard>
 
-          <GlassCard className="absolute top-[27%] right-0 w-[58%]">
+          <GlassCard className="absolute top-[27%] right-0 w-[290px] max-w-full">
             <p className="text-xs text-hero-muted">Visão geral</p>
             <div className="mt-3 space-y-2">
               {mockOverview.map((row) => (
@@ -160,12 +149,11 @@ export function LandingHero() {
             </div>
           </GlassCard>
 
-          <GlassCard className="absolute bottom-[14%] left-[24%] w-[52%]">
+          <GlassCard className="absolute bottom-[15%] left-[150px] w-[250px] max-w-full">
             <p className="text-xs text-hero-muted">Vendas por canal</p>
             <div className="mt-2 flex items-center gap-3">
-              <div className="size-20 shrink-0">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
+              <div className="shrink-0">
+                <PieChart width={84} height={84}>
                     <Pie
                       data={mockChannels}
                       dataKey="value"
@@ -178,8 +166,7 @@ export function LandingHero() {
                         <Cell key={c.name} fill={c.fill} />
                       ))}
                     </Pie>
-                  </PieChart>
-                </ResponsiveContainer>
+                </PieChart>
               </div>
               <ul className="space-y-1 text-[11px]">
                 {mockChannels.map((c) => (
@@ -192,20 +179,18 @@ export function LandingHero() {
             </div>
           </GlassCard>
 
-          <GlassCard className="absolute right-[4%] bottom-[2%] w-[44%]">
+          <GlassCard className="absolute right-0 bottom-[3%] w-[215px] max-w-full">
             <p className="text-xs text-hero-muted">Fluxo de caixa</p>
-            <div className="mt-2 h-14">
-              <ResponsiveContainer width="99%" height="100%" debounce={1}>
-                <BarChart data={mockCashFlow}>
-                  <Bar dataKey="v" fill="var(--hero-accent)" radius={3} />
-                </BarChart>
-              </ResponsiveContainer>
+            <div className="mt-2">
+              <BarChart data={mockCashFlow} width={180} height={56}>
+                <Bar dataKey="v" fill="var(--hero-accent)" radius={3} />
+              </BarChart>
             </div>
           </GlassCard>
 
           {/* Mockup de celular — ilustração de produto/roadmap, a IA em chat ainda não é uma
               funcionalidade ativa na aplicação. */}
-          <div className="hero-phone absolute bottom-[-2%] left-[-14%] z-10 w-[40%] max-w-[186px] p-3">
+          <div className="hero-phone absolute bottom-0 left-0 z-10 w-[186px] p-3">
             <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-hero-glass-strong" />
             <div className="flex items-center gap-2">
               <span className="hero-glass flex size-7 items-center justify-center rounded-lg">
