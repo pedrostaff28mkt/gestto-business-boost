@@ -158,7 +158,7 @@ export function LandingHero() {
             </div>
           </GlassCard>
 
-          <GlassCard className="absolute bottom-[26%] left-[196px] w-[250px] max-w-full">
+          <GlassCard className="absolute bottom-[19%] left-[196px] w-[250px] max-w-full">
             <p className="text-xs text-hero-muted">Vendas por canal</p>
             <div className="mt-2 flex items-center gap-3">
               <div className="size-[84px] shrink-0">
