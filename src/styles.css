@@ -188,3 +188,23 @@
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-card);
 }
+
+@utility hero-dark {
+  background: var(--gradient-hero);
+  color: var(--hero-foreground);
+}
+
+@utility hero-glass {
+  background: var(--hero-glass);
+  border: 1px solid var(--hero-glass-strong);
+  border-radius: var(--radius-xl);
+  box-shadow: 0 20px 50px -24px oklch(0 0 0 / 60%);
+  backdrop-filter: blur(14px);
+}
+
+@utility hero-phone {
+  background: var(--gradient-graphite);
+  border: 1px solid var(--hero-glass-strong);
+  border-radius: var(--radius-3xl);
+  box-shadow: 0 30px 70px -20px oklch(0 0 0 / 70%);
+}
