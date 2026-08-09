@@ -19,6 +19,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { testimonials } from "@/lib/testimonials";
+import { LandingHero } from "@/components/landing-hero";
 
 export const Route = createFileRoute("/")({
   head: () => ({
