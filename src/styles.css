@@ -47,6 +47,11 @@
   --color-warning-foreground: var(--warning-foreground);
   --color-warning-soft: var(--warning-soft);
   --color-graphite: var(--graphite);
+  --color-hero-foreground: var(--hero-foreground);
+  --color-hero-muted: var(--hero-muted);
+  --color-hero-accent: var(--hero-accent);
+  --color-hero-glass: var(--hero-glass);
+  --color-hero-glass-strong: var(--hero-glass-strong);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
