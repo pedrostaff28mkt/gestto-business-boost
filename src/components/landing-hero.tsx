@@ -128,6 +128,7 @@ export function LandingHero() {
                     stroke="var(--hero-accent)"
                     strokeWidth={2}
                     fill="url(#heroRevenue)"
+                    isAnimationActive={false}
                   />
               </AreaChart>
             </div>
@@ -149,7 +150,7 @@ export function LandingHero() {
             </div>
           </GlassCard>
 
-          <GlassCard className="absolute bottom-[15%] left-[150px] w-[250px] max-w-full">
+          <GlassCard className="absolute bottom-[26%] left-[196px] w-[250px] max-w-full">
             <p className="text-xs text-hero-muted">Vendas por canal</p>
             <div className="mt-2 flex items-center gap-3">
               <div className="shrink-0">
@@ -161,6 +162,7 @@ export function LandingHero() {
                       outerRadius={38}
                       paddingAngle={3}
                       stroke="none"
+                      isAnimationActive={false}
                     >
                       {mockChannels.map((c) => (
                         <Cell key={c.name} fill={c.fill} />
@@ -179,11 +181,11 @@ export function LandingHero() {
             </div>
           </GlassCard>
 
-          <GlassCard className="absolute right-0 bottom-[3%] w-[215px] max-w-full">
+          <GlassCard className="absolute right-0 bottom-0 w-[215px] max-w-full">
             <p className="text-xs text-hero-muted">Fluxo de caixa</p>
             <div className="mt-2">
               <BarChart data={mockCashFlow} width={180} height={56}>
-                <Bar dataKey="v" fill="var(--hero-accent)" radius={3} />
+                <Bar dataKey="v" fill="var(--hero-accent)" radius={3} isAnimationActive={false} />
               </BarChart>
             </div>
           </GlassCard>
