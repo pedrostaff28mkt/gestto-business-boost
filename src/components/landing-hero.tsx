@@ -69,7 +69,7 @@ export function LandingHero() {
 
   return (
     <section className="hero-dark relative overflow-hidden">
-      <div className="relative mx-auto grid max-w-6xl gap-14 px-5 pt-12 pb-20 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:pt-20 lg:pb-28">
+      <div className="relative mx-auto grid max-w-6xl gap-14 px-5 pt-12 pb-32 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:pt-20 lg:pb-44">
         <div>
           <h1 className="font-display text-4xl leading-[1.05] font-bold text-hero-foreground sm:text-6xl">
             Sua empresa toda,
@@ -233,6 +233,19 @@ export function LandingHero() {
           </div>
         </div>
       </div>
+
+      {/* Gradiente de saída: funde o hero escuro na cor da próxima seção. */}
+      <div className="hero-fade-out" aria-hidden="true" />
+
+      {/* Divisor em onda sutil para quebrar a linha reta entre o hero e a seção clara. */}
+      <svg
+        className="hero-wave"
+        viewBox="0 0 1440 80"
+        preserveAspectRatio="none"
+        aria-hidden="true"
+      >
+        <path d="M0,48 C360,96 1080,0 1440,48 L1440,80 L0,80 Z" />
+      </svg>
     </section>
   );
 }
