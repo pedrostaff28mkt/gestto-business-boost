@@ -12,12 +12,14 @@ import {
   Star,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Logo } from "@/components/logo";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+
 import { testimonials } from "@/lib/testimonials";
 import { LandingHero } from "@/components/landing-hero";
 
