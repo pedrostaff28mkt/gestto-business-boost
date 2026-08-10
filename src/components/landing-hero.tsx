@@ -233,6 +233,19 @@ export function LandingHero() {
           </div>
         </div>
       </div>
+
+      {/* Gradiente de saída: funde o hero escuro na cor da próxima seção. */}
+      <div className="hero-fade-out" aria-hidden="true" />
+
+      {/* Divisor em onda sutil para quebrar a linha reta entre o hero e a seção clara. */}
+      <svg
+        className="hero-wave"
+        viewBox="0 0 1440 80"
+        preserveAspectRatio="none"
+        aria-hidden="true"
+      >
+        <path d="M0,48 C360,96 1080,0 1440,48 L1440,80 L0,80 Z" />
+      </svg>
     </section>
   );
 }
