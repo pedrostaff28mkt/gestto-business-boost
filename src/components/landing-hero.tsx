@@ -69,7 +69,7 @@ export function LandingHero() {
 
   return (
     <section className="hero-dark relative overflow-hidden">
-      <div className="relative mx-auto grid max-w-6xl gap-14 px-5 pt-12 pb-20 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:pt-20 lg:pb-28">
+      <div className="relative mx-auto grid max-w-6xl gap-14 px-5 pt-12 pb-32 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:pt-20 lg:pb-44">
         <div>
           <h1 className="font-display text-4xl leading-[1.05] font-bold text-hero-foreground sm:text-6xl">
             Sua empresa toda,
