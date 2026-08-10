@@ -8,6 +8,8 @@ import { roleLabels, type AppRole } from "@/hooks/use-gestto";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Logo } from "@/components/logo";
+
 
 export const Route = createFileRoute("/convite/$codigo")({
   ssr: false,
@@ -87,14 +89,10 @@ function InvitePage() {
     <div className="flex min-h-screen flex-col bg-background">
       <div className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center px-5 py-10">
         <Link to="/" className="mb-8 flex items-center gap-2">
-          <div
-            className="flex size-9 items-center justify-center rounded-lg font-display font-bold text-primary-foreground"
-            style={{ background: "var(--gradient-brand)" }}
-          >
-            G
-          </div>
+          <Logo size={36} />
           <span className="font-display text-xl font-bold">Gestto</span>
         </Link>
+
 
         {isLoading ? (
           <div className="flex items-center gap-2 text-muted-foreground">

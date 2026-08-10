@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
+import { Logo } from "@/components/logo";
 
 export function LegalLayout({
   title,
@@ -14,18 +15,14 @@ export function LegalLayout({
     <div className="min-h-screen bg-background">
       <header className="mx-auto flex max-w-3xl items-center justify-between px-5 py-5">
         <Link to="/" className="flex items-center gap-2">
-          <div
-            className="flex size-8 items-center justify-center rounded-lg font-display font-bold text-primary-foreground"
-            style={{ background: "var(--gradient-brand)" }}
-          >
-            G
-          </div>
+          <Logo size={32} />
           <span className="font-display text-xl font-bold">Gestto</span>
         </Link>
         <Link to="/auth" className="text-sm text-muted-foreground hover:text-foreground">
           Entrar
         </Link>
       </header>
+
 
       <main className="mx-auto max-w-3xl px-5 pb-20">
         <h1 className="font-display text-3xl font-bold">{title}</h1>
