@@ -16,8 +16,10 @@ import type { ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useGestto, roleLabels, type AppModule } from "@/hooks/use-gestto";
 import { PaywallProvider, usePaywall } from "@/components/paywall";
+import { Logo } from "@/components/logo";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+
 
 type NavItem = { to: string; label: string; icon: LucideIcon; module: AppModule };
 
@@ -31,15 +33,10 @@ const NAV: NavItem[] = [
   { to: "/configuracoes", label: "Ajustes", icon: Settings, module: "settings" },
 ];
 
-function Logo({ tone = "light" }: { tone?: "light" | "dark" }) {
+function LogoMark({ tone = "light" }: { tone?: "light" | "dark" }) {
   return (
     <div className="flex items-center gap-2">
-      <div
-        className="flex size-8 items-center justify-center rounded-lg font-display text-sm font-bold text-primary-foreground"
-        style={{ background: "var(--gradient-brand)" }}
-      >
-        G
-      </div>
+      <Logo size={32} />
       <span
         className={`font-display text-lg font-bold tracking-tight ${tone === "dark" ? "text-background" : "text-foreground"}`}
       >
@@ -48,6 +45,7 @@ function Logo({ tone = "light" }: { tone?: "light" | "dark" }) {
     </div>
   );
 }
+
 
 function TrialStrip() {
   const { isPaywalled, trialDaysLeft, session } = useGestto();
