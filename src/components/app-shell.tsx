@@ -94,7 +94,7 @@ function Shell({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen bg-background">
       <aside className="fixed inset-y-0 left-0 z-30 hidden w-60 flex-col bg-sidebar px-4 py-6 lg:flex">
-        <Logo tone="dark" />
+        <LogoMark tone="dark" />
         <nav className="mt-8 flex flex-1 flex-col gap-1">
           {items.map((item) => {
             const active = pathname.startsWith(item.to);
@@ -128,8 +128,9 @@ function Shell({ children }: { children: ReactNode }) {
           <TrialStrip />
           <div className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 py-3">
             <div className="lg:hidden">
-              <Logo />
+              <LogoMark />
             </div>
+
             <div className="hidden lg:block">
               <p className="text-xs text-muted-foreground">Empresa</p>
               <p className="font-display text-base font-semibold">{session?.companyName}</p>
