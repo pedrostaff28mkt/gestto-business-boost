@@ -17,6 +17,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useGestto, roleLabels, type AppModule } from "@/hooks/use-gestto";
 import { PaywallProvider, usePaywall } from "@/components/paywall";
 import { Logo } from "@/components/logo";
+import { UserAvatar } from "@/components/user-avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
