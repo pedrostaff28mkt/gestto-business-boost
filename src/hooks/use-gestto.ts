@@ -32,6 +32,8 @@ export type GesttoSession = {
   userId: string;
   email: string;
   fullName: string;
+  avatarUrl: string | null;
+  phone: string | null;
   role: AppRole;
   membershipId: string;
   companyId: string;
