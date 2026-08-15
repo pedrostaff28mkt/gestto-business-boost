@@ -17,6 +17,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useGestto, roleLabels, type AppModule } from "@/hooks/use-gestto";
 import { PaywallProvider, usePaywall } from "@/components/paywall";
 import { Logo } from "@/components/logo";
+import { UserAvatar } from "@/components/user-avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
@@ -115,8 +116,13 @@ function Shell({ children }: { children: ReactNode }) {
           })}
         </nav>
         <div className="rounded-xl bg-sidebar-accent p-3">
-          <p className="truncate text-sm font-medium text-sidebar-foreground">{session?.fullName}</p>
-          <p className="text-xs text-sidebar-foreground/60">{session ? roleLabels[session.role] : ""}</p>
+          <div className="flex items-center gap-2">
+            <UserAvatar name={session?.fullName} avatarPath={session?.avatarUrl} className="size-9" />
+            <div className="min-w-0">
+              <p className="truncate text-sm font-medium text-sidebar-foreground">{session?.fullName}</p>
+              <p className="text-xs text-sidebar-foreground/60">{session ? roleLabels[session.role] : ""}</p>
+            </div>
+          </div>
           <Button variant="ghost" size="sm" className="mt-2 w-full justify-start gap-2 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-border" onClick={signOut}>
             <LogOut className="size-4" /> Sair
           </Button>

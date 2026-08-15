@@ -32,6 +32,8 @@ export type GesttoSession = {
   userId: string;
   email: string;
   fullName: string;
+  avatarUrl: string | null;
+  phone: string | null;
   role: AppRole;
   membershipId: string;
   companyId: string;
@@ -80,7 +82,7 @@ async function fetchSession(): Promise<GesttoSession | null> {
   if (!membership) return null;
 
   const [{ data: profile }, { data: sub }, { data: pay }] = await Promise.all([
-    supabase.from("profiles").select("full_name").eq("id", user.id).maybeSingle(),
+    supabase.from("profiles").select("full_name, avatar_url, phone").eq("id", user.id).maybeSingle(),
     supabase
       .from("subscriptions")
       .select("status, trial_ends_at")
@@ -104,6 +106,8 @@ async function fetchSession(): Promise<GesttoSession | null> {
     userId: user.id,
     email: user.email ?? "",
     fullName: profile?.full_name || user.email || "Usuário",
+    avatarUrl: profile?.avatar_url ?? null,
+    phone: profile?.phone ?? null,
     role: membership.role as AppRole,
     membershipId: membership.id,
     companyId: membership.company_id,

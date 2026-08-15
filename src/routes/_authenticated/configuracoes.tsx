@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useGestto, roleLabels } from "@/hooks/use-gestto";
 import { usePaywall, LockedArea } from "@/components/paywall";
+import { ProfileSection } from "@/components/profile-section";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -99,6 +100,8 @@ function SettingsPage() {
           </Badge>
         </div>
       </div>
+
+      <ProfileSection />
 
       <LockedArea className="space-y-4">
       <div className="surface space-y-4 p-5">
