@@ -100,6 +100,8 @@ function SettingsPage() {
         </div>
       </div>
 
+      <ProfileSection />
+
       <LockedArea className="space-y-4">
       <div className="surface space-y-4 p-5">
 
