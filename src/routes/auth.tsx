@@ -56,7 +56,15 @@ function AuthPage() {
     });
     setLoading(false);
     if (error) return toast.error("Não foi possível entrar", { description: error.message });
-    navigate({ to: "/dashboard", replace: true });
+
+    const { data: userData } = await supabase.auth.getUser();
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("is_admin")
+      .eq("id", userData.user?.id ?? "")
+      .maybeSingle();
+
+    navigate({ to: profile?.is_admin ? "/painel-interno" : "/dashboard", replace: true });
   }
 
   async function signUp(e: React.FormEvent) {
