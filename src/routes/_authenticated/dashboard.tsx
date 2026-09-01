@@ -44,12 +44,15 @@ function Stat({
   value,
   hint,
   tone = "default",
+  teaser = false,
   icon: Icon,
 }: {
   label: string;
   value: string;
   hint?: string;
   tone?: "default" | "success" | "warning";
+  /** Valor premium: fica borrado mesmo durante o teste grátis. */
+  teaser?: boolean;
   icon: typeof TrendingUp;
 }) {
   const toneClass =
@@ -63,17 +66,18 @@ function Stat({
         </span>
       </div>
       <p className="num mt-2 text-2xl font-semibold">
-        <BlurredValue>{value}</BlurredValue>
+        <BlurredValue teaser={teaser}>{value}</BlurredValue>
       </p>
       {hint && (
         <p className="mt-0.5 text-xs text-muted-foreground">
-          <BlurredValue>{hint}</BlurredValue>
+          <BlurredValue teaser={teaser}>{hint}</BlurredValue>
         </p>
       )}
 
     </div>
   );
 }
+
 
 function DashboardPage() {
   const { session, isLoading } = useGestto();
