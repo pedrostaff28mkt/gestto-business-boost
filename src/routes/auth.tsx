@@ -30,9 +30,18 @@ function AuthPage() {
   const [form, setForm] = useState({ email: "", password: "", fullName: "", companyName: "" });
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session) navigate({ to: "/dashboard", replace: true });
-    });
+    (async () => {
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (!sessionData.session) return;
+
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("is_admin")
+        .eq("id", sessionData.session.user.id)
+        .maybeSingle();
+
+      navigate({ to: profile?.is_admin ? "/painel-interno" : "/dashboard", replace: true });
+    })();
   }, [navigate]);
 
   const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) =>
@@ -47,7 +56,15 @@ function AuthPage() {
     });
     setLoading(false);
     if (error) return toast.error("Não foi possível entrar", { description: error.message });
-    navigate({ to: "/dashboard", replace: true });
+
+    const { data: userData } = await supabase.auth.getUser();
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("is_admin")
+      .eq("id", userData.user?.id ?? "")
+      .maybeSingle();
+
+    navigate({ to: profile?.is_admin ? "/painel-interno" : "/dashboard", replace: true });
   }
 
   async function signUp(e: React.FormEvent) {
