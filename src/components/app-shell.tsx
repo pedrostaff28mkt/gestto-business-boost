@@ -181,7 +181,7 @@ function Shell({ children }: { children: ReactNode }) {
 }
 
 export function AppShell({ children }: { children: ReactNode }) {
-  const { isPaywalled, trialDaysLeft, isLoading } = useGestto();
+  const { trialActive, subscriptionRequired, trialDaysLeft, isLoading } = useGestto();
 
   if (isLoading) {
     return (
@@ -192,8 +192,9 @@ export function AppShell({ children }: { children: ReactNode }) {
   }
 
   return (
-    <PaywallProvider locked={isPaywalled} trialDaysLeft={trialDaysLeft}>
+    <PaywallProvider locked={subscriptionRequired} trialActive={trialActive} trialDaysLeft={trialDaysLeft}>
       <Shell>{children}</Shell>
     </PaywallProvider>
   );
 }
+

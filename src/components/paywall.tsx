@@ -4,13 +4,17 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from "@/components/ui/button";
 
 type PaywallContextValue = {
+  /** Bloqueio real: trial expirado e sem assinatura. */
   locked: boolean;
+  /** Teste grátis rodando: ações liberadas, apenas teasers borrados. */
+  trialActive: boolean;
   guard: (action: () => void) => void;
   open: () => void;
 };
 
 const PaywallContext = createContext<PaywallContextValue>({
   locked: false,
+  trialActive: false,
   guard: (a) => a(),
   open: () => {},
 });
@@ -19,10 +23,12 @@ export const usePaywall = () => useContext(PaywallContext);
 
 export function PaywallProvider({
   locked,
+  trialActive = false,
   trialDaysLeft,
   children,
 }: {
   locked: boolean;
+  trialActive?: boolean;
   trialDaysLeft: number;
   children: ReactNode;
 }) {
@@ -40,9 +46,10 @@ export function PaywallProvider({
   );
 
   const value = useMemo(
-    () => ({ locked, guard, open: () => setIsOpen(true) }),
-    [locked, guard],
+    () => ({ locked, trialActive, guard, open: () => setIsOpen(true) }),
+    [locked, trialActive, guard],
   );
+
 
   return (
     <PaywallContext.Provider value={value}>
@@ -119,18 +126,24 @@ export function LockedArea({ children, className }: { children: ReactNode; class
   );
 }
 
-/** Valor numérico desfocado quando não há assinatura ativa. Clique abre o modal de pagamento. */
+/**
+ * Valor numérico desfocado quando o trial expirou.
+ * Com `teaser`, também fica desfocado durante o teste grátis (ex.: Lucro Líquido e Margem).
+ */
 export function BlurredValue({
   children,
   className,
+  teaser = false,
   label = "Ative sua assinatura para ver",
 }: {
   children: ReactNode;
   className?: string;
+  teaser?: boolean;
   label?: string;
 }) {
-  const { locked, open } = usePaywall();
-  if (!locked) return <span className={className}>{children}</span>;
+  const { locked, trialActive, open } = usePaywall();
+  const blurred = locked || (teaser && trialActive);
+  if (!blurred) return <span className={className}>{children}</span>;
 
   return (
     <button
@@ -152,8 +165,9 @@ export function BlurredValue({
 
 /** Texto/link discreto que abre o modal de assinatura. */
 export function UnlockHint({ className }: { className?: string }) {
-  const { locked, open } = usePaywall();
-  if (!locked) return null;
+  const { locked, trialActive, open } = usePaywall();
+  if (!locked && !trialActive) return null;
+
   return (
     <button
       type="button"

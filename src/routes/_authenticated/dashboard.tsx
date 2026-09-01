@@ -44,12 +44,15 @@ function Stat({
   value,
   hint,
   tone = "default",
+  teaser = false,
   icon: Icon,
 }: {
   label: string;
   value: string;
   hint?: string;
   tone?: "default" | "success" | "warning";
+  /** Valor premium: fica borrado mesmo durante o teste grátis. */
+  teaser?: boolean;
   icon: typeof TrendingUp;
 }) {
   const toneClass =
@@ -63,17 +66,18 @@ function Stat({
         </span>
       </div>
       <p className="num mt-2 text-2xl font-semibold">
-        <BlurredValue>{value}</BlurredValue>
+        <BlurredValue teaser={teaser}>{value}</BlurredValue>
       </p>
       {hint && (
         <p className="mt-0.5 text-xs text-muted-foreground">
-          <BlurredValue>{hint}</BlurredValue>
+          <BlurredValue teaser={teaser}>{hint}</BlurredValue>
         </p>
       )}
 
     </div>
   );
 }
+
 
 function DashboardPage() {
   const { session, isLoading } = useGestto();
@@ -162,7 +166,7 @@ function DashboardPage() {
         <p className="text-sm text-muted-foreground">Resumo de {session?.companyName}</p>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
         <Stat label="Vendas hoje" value={brl(sum(today, "gross_amount"))} hint={`${today.length} venda(s)`} icon={TrendingUp} />
         <Stat label="Últimos 7 dias" value={brl(sum(week, "gross_amount"))} hint={`${week.length} venda(s)`} icon={TrendingUp} />
         <Stat
@@ -170,6 +174,15 @@ function DashboardPage() {
           value={brl(netProfit)}
           hint={`taxas ${brl(sum(month, "fee_amount") + terminalFee)}`}
           tone="success"
+          teaser
+          icon={TrendingUp}
+        />
+        <Stat
+          label="Margem de lucro (30d)"
+          value={`${num(monthGross > 0 ? (netProfit / monthGross) * 100 : 0, 1)}%`}
+          hint="sobre o faturamento"
+          tone="success"
+          teaser
           icon={TrendingUp}
         />
         <Stat
@@ -180,6 +193,7 @@ function DashboardPage() {
           icon={variation >= 0 ? TrendingUp : TrendingDown}
         />
       </div>
+
 
       <UnlockHint />
 
@@ -293,7 +307,7 @@ function DashboardPage() {
                     <BlurredValue>{brl(Number(s.gross_amount))}</BlurredValue>
                   </p>
                   <p className="num text-xs text-muted-foreground">
-                    <BlurredValue>{`líq. ${brl(Number(s.net_amount))}`}</BlurredValue>
+                    <BlurredValue teaser>{`líq. ${brl(Number(s.net_amount))}`}</BlurredValue>
                   </p>
                 </div>
 
