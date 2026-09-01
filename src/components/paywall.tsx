@@ -126,18 +126,24 @@ export function LockedArea({ children, className }: { children: ReactNode; class
   );
 }
 
-/** Valor numérico desfocado quando não há assinatura ativa. Clique abre o modal de pagamento. */
+/**
+ * Valor numérico desfocado quando o trial expirou.
+ * Com `teaser`, também fica desfocado durante o teste grátis (ex.: Lucro Líquido e Margem).
+ */
 export function BlurredValue({
   children,
   className,
+  teaser = false,
   label = "Ative sua assinatura para ver",
 }: {
   children: ReactNode;
   className?: string;
+  teaser?: boolean;
   label?: string;
 }) {
-  const { locked, open } = usePaywall();
-  if (!locked) return <span className={className}>{children}</span>;
+  const { locked, trialActive, open } = usePaywall();
+  const blurred = locked || (teaser && trialActive);
+  if (!blurred) return <span className={className}>{children}</span>;
 
   return (
     <button
@@ -159,8 +165,9 @@ export function BlurredValue({
 
 /** Texto/link discreto que abre o modal de assinatura. */
 export function UnlockHint({ className }: { className?: string }) {
-  const { locked, open } = usePaywall();
-  if (!locked) return null;
+  const { locked, trialActive, open } = usePaywall();
+  if (!locked && !trialActive) return null;
+
   return (
     <button
       type="button"
