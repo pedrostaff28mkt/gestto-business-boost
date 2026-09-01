@@ -166,7 +166,7 @@ function DashboardPage() {
         <p className="text-sm text-muted-foreground">Resumo de {session?.companyName}</p>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
         <Stat label="Vendas hoje" value={brl(sum(today, "gross_amount"))} hint={`${today.length} venda(s)`} icon={TrendingUp} />
         <Stat label="Últimos 7 dias" value={brl(sum(week, "gross_amount"))} hint={`${week.length} venda(s)`} icon={TrendingUp} />
         <Stat
@@ -174,6 +174,15 @@ function DashboardPage() {
           value={brl(netProfit)}
           hint={`taxas ${brl(sum(month, "fee_amount") + terminalFee)}`}
           tone="success"
+          teaser
+          icon={TrendingUp}
+        />
+        <Stat
+          label="Margem de lucro (30d)"
+          value={`${num(monthGross > 0 ? (netProfit / monthGross) * 100 : 0, 1)}%`}
+          hint="sobre o faturamento"
+          tone="success"
+          teaser
           icon={TrendingUp}
         />
         <Stat
@@ -184,6 +193,7 @@ function DashboardPage() {
           icon={variation >= 0 ? TrendingUp : TrendingDown}
         />
       </div>
+
 
       <UnlockHint />
 
