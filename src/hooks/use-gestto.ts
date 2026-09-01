@@ -150,6 +150,11 @@ export function useGestto() {
       )
     : 0;
 
+  /** Teste grátis rodando: o lead usa tudo de verdade, só o "gostinho" fica borrado. */
+  const trialActive = isPaywalled && trialDaysLeft > 0;
+  /** Trial acabou e não há assinatura: bloqueio total (LockedArea + blur em tudo). */
+  const subscriptionRequired = isPaywalled && trialDaysLeft <= 0;
+
   const can = (module: AppModule, action: "view" | "create" | "edit" | "delete" = "view") => {
     if (!session) return false;
     const perm = session.permissions.find((p) => p.module === module);
@@ -157,5 +162,14 @@ export function useGestto() {
     return perm[`can_${action}` as keyof Permission] === true;
   };
 
-  return { ...query, session, isPaywalled, trialDaysLeft, can };
+  return {
+    ...query,
+    session,
+    isPaywalled,
+    trialDaysLeft,
+    trialActive,
+    subscriptionRequired,
+    can,
+  };
+
 }
