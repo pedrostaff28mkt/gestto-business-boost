@@ -307,7 +307,7 @@ function DashboardPage() {
                     <BlurredValue>{brl(Number(s.gross_amount))}</BlurredValue>
                   </p>
                   <p className="num text-xs text-muted-foreground">
-                    <BlurredValue>{`líq. ${brl(Number(s.net_amount))}`}</BlurredValue>
+                    <BlurredValue teaser>{`líq. ${brl(Number(s.net_amount))}`}</BlurredValue>
                   </p>
                 </div>
 
