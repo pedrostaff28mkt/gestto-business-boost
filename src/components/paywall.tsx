@@ -4,13 +4,17 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from "@/components/ui/button";
 
 type PaywallContextValue = {
+  /** Bloqueio real: trial expirado e sem assinatura. */
   locked: boolean;
+  /** Teste grátis rodando: ações liberadas, apenas teasers borrados. */
+  trialActive: boolean;
   guard: (action: () => void) => void;
   open: () => void;
 };
 
 const PaywallContext = createContext<PaywallContextValue>({
   locked: false,
+  trialActive: false,
   guard: (a) => a(),
   open: () => {},
 });
@@ -19,10 +23,12 @@ export const usePaywall = () => useContext(PaywallContext);
 
 export function PaywallProvider({
   locked,
+  trialActive = false,
   trialDaysLeft,
   children,
 }: {
   locked: boolean;
+  trialActive?: boolean;
   trialDaysLeft: number;
   children: ReactNode;
 }) {
@@ -40,9 +46,10 @@ export function PaywallProvider({
   );
 
   const value = useMemo(
-    () => ({ locked, guard, open: () => setIsOpen(true) }),
-    [locked, guard],
+    () => ({ locked, trialActive, guard, open: () => setIsOpen(true) }),
+    [locked, trialActive, guard],
   );
+
 
   return (
     <PaywallContext.Provider value={value}>
