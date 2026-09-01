@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 export type AdminStats = {
   totalCompanies: number;
@@ -10,8 +11,19 @@ export type AdminStats = {
   perDay: { date: string; total: number }[];
 };
 
-export const getAdminStats = createServerFn({ method: "GET" }).handler(
-  async (): Promise<AdminStats> => {
+export const getAdminStats = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<AdminStats> => {
+    const { data: profile, error: profileError } = await context.supabase
+      .from("profiles")
+      .select("is_admin")
+      .eq("id", context.userId)
+      .maybeSingle();
+
+    if (profileError || !profile?.is_admin) {
+      throw new Error("Acesso restrito");
+    }
+
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     const [companiesRes, subsRes, membershipsRes] = await Promise.all([
@@ -68,5 +80,4 @@ export const getAdminStats = createServerFn({ method: "GET" }).handler(
       bySize,
       perDay,
     };
-  },
-);
+  });

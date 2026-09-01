@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Building2, Users, Clock, CheckCircle2, XCircle } from "lucide-react";
@@ -15,6 +15,7 @@ import {
 } from "recharts";
 import { getAdminStats } from "@/lib/admin-stats.functions";
 import { num, shortDate } from "@/lib/format";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/painel-interno")({
   ssr: false,
@@ -27,6 +28,20 @@ export const Route = createFileRoute("/painel-interno")({
       { property: "og:description", content: "Métricas internas da plataforma Gestto." },
     ],
   }),
+  beforeLoad: async () => {
+    const { data, error } = await supabase.auth.getUser();
+    if (error || !data.user) {
+      throw redirect({ to: "/auth" });
+    }
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("is_admin")
+      .eq("id", data.user.id)
+      .maybeSingle();
+
+    return { isAdmin: profile?.is_admin === true };
+  },
   component: AdminPanel,
 });
 
@@ -54,13 +69,40 @@ function Metric({
   );
 }
 
+function AccessDenied() {
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-background px-4">
+      <div className="surface max-w-md p-8 text-center">
+        <h1 className="text-2xl font-bold text-foreground">Acesso restrito</h1>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Você não tem permissão para acessar o painel interno.
+        </p>
+        <div className="mt-6">
+          <Link
+            to="/dashboard"
+            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+          >
+            Voltar ao dashboard
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function AdminPanel() {
+  const { isAdmin } = Route.useRouteContext();
   const fetchStats = useServerFn(getAdminStats);
   const { data, isLoading, error } = useQuery({
     queryKey: ["admin-stats"],
     queryFn: () => fetchStats(),
     refetchInterval: 60_000,
+    enabled: isAdmin,
   });
+
+  if (!isAdmin) {
+    return <AccessDenied />;
+  }
 
   return (
     <div className="min-h-screen bg-background">
