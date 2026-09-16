@@ -2,7 +2,17 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import QRCode from "qrcode";
-import { QrCode, CreditCard, Copy, Loader2, CheckCircle2, AlertTriangle } from "lucide-react";
+import {
+  QrCode,
+  CreditCard,
+  Copy,
+  Loader2,
+  CheckCircle2,
+  AlertTriangle,
+  Clock,
+  Calculator,
+  Receipt,
+} from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useGestto } from "@/hooks/use-gestto";
@@ -14,6 +24,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { MethodIcon } from "@/components/payment-method-badge";
 
 export const Route = createFileRoute("/_authenticated/vendas")({
   head: () => ({
@@ -27,6 +38,43 @@ export const Route = createFileRoute("/_authenticated/vendas")({
   component: SalesPage,
 });
 
+/** Campo de valor com prefixo "R$" fixo e destaque ao digitar. */
+function AmountField({
+  id,
+  value,
+  onChange,
+}: {
+  id: string;
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  const [focused, setFocused] = useState(false);
+  return (
+    <div className="space-y-1.5">
+      <Label htmlFor={id}>Valor da venda</Label>
+      <div
+        className={`flex items-center gap-2 rounded-xl border bg-card px-4 py-2 transition-all duration-200 ${
+          focused
+            ? "border-primary shadow-[0_0_0_4px_var(--primary-soft)] scale-[1.01]"
+            : "border-input"
+        }`}
+      >
+        <span className="num text-xl font-semibold text-muted-foreground select-none">R$</span>
+        <Input
+          id={id}
+          inputMode="decimal"
+          placeholder="0,00"
+          className="num h-auto border-0 bg-transparent p-0 text-3xl font-bold tracking-tight shadow-none focus-visible:ring-0"
+          value={value}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
+          onChange={(e) => onChange(e.target.value)}
+        />
+      </div>
+    </div>
+  );
+}
+
 function SalesPage() {
   const { session, can } = useGestto();
   const { guard, locked } = usePaywall();
@@ -34,6 +82,7 @@ function SalesPage() {
 
   const [pixAmount, setPixAmount] = useState("");
   const [pixData, setPixData] = useState<{ payload: string; image: string; amount: number } | null>(null);
+  const [pixConfirmed, setPixConfirmed] = useState(false);
   const [cardAmount, setCardAmount] = useState("");
   const [cardType, setCardType] = useState<"card_credit" | "card_debit">("card_credit");
   const [installments, setInstallments] = useState("1");
@@ -105,6 +154,7 @@ function SalesPage() {
       txid: `GESTTO${Date.now().toString().slice(-8)}`,
     });
     const image = await QRCode.toDataURL(payload, { width: 512, margin: 1 });
+    setPixConfirmed(false);
     setPixData({ payload, image, amount });
   }
 
@@ -125,48 +175,50 @@ function SalesPage() {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-2xl font-bold">Vendas</h1>
+        <h1 className="font-display text-2xl font-bold tracking-tight">Vendas</h1>
         <p className="text-sm text-muted-foreground">Receba no PIX ou lance no cartão em segundos.</p>
       </div>
 
       {!hasPaymentSetup && (
-        <div className="surface flex items-start gap-3 border-warning/40 p-4">
-          <AlertTriangle className="mt-0.5 size-4 shrink-0 text-warning-foreground" />
-          <div className="text-sm">
-            <p className="font-medium">Cadastre a chave PIX e as taxas da maquininha</p>
-            <p className="text-muted-foreground">
-              É pré-requisito para liberar o recebimento e o cálculo de lucro líquido.
-            </p>
-            <Link to="/configuracoes" className="mt-1 inline-block font-medium text-primary">
-              Ir para Ajustes →
-            </Link>
+        <div className="surface border-warning/40 bg-warning-soft/40 p-5">
+          <div className="flex items-start gap-3">
+            <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-warning-soft text-warning-foreground">
+              <AlertTriangle className="size-5" />
+            </span>
+            <div className="text-sm">
+              <p className="font-display text-base font-semibold">
+                Cadastre a chave PIX e as taxas da maquininha
+              </p>
+              <p className="text-muted-foreground">
+                É pré-requisito para liberar o recebimento e o cálculo de lucro líquido.
+              </p>
+              <Button asChild size="sm" variant="outline" className="mt-3">
+                <Link to="/configuracoes">Ir para Ajustes</Link>
+              </Button>
+            </div>
           </div>
         </div>
       )}
 
       <Tabs defaultValue="pix">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="pix" className="gap-2">
+        <TabsList className="grid h-auto w-full grid-cols-2 gap-1 rounded-xl bg-secondary p-1">
+          <TabsTrigger
+            value="pix"
+            className="gap-2 rounded-lg py-2.5 text-sm font-semibold data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:shadow-sm"
+          >
             <QrCode className="size-4" /> PIX
           </TabsTrigger>
-          <TabsTrigger value="card" className="gap-2">
+          <TabsTrigger
+            value="card"
+            className="gap-2 rounded-lg py-2.5 text-sm font-semibold data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:shadow-sm"
+          >
             <CreditCard className="size-4" /> Cartão
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="pix">
           <div className="surface mt-3 space-y-4 p-5">
-            <div className="space-y-1.5">
-              <Label htmlFor="pixAmount">Valor da venda</Label>
-              <Input
-                id="pixAmount"
-                inputMode="decimal"
-                placeholder="0,00"
-                className="num text-2xl"
-                value={pixAmount}
-                onChange={(e) => setPixAmount(e.target.value)}
-              />
-            </div>
+            <AmountField id="pixAmount" value={pixAmount} onChange={setPixAmount} />
             <Button
               size="lg"
               className="w-full gap-2"
@@ -177,10 +229,31 @@ function SalesPage() {
             </Button>
 
             {pixData && (
-              <div className="rounded-xl border border-border p-4 text-center">
-                <img src={pixData.image} alt="QR Code PIX da venda" className="mx-auto size-52 rounded-lg" />
-                <p className="num mt-3 text-2xl font-semibold">{brl(pixData.amount)}</p>
-                <div className="mt-3 flex gap-2">
+              <div className="rounded-3xl border border-border bg-card p-6 text-center shadow-lg">
+                <span
+                  className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${
+                    pixConfirmed
+                      ? "bg-success-soft text-success"
+                      : "bg-warning-soft text-warning-foreground"
+                  }`}
+                >
+                  {pixConfirmed ? (
+                    <>
+                      <CheckCircle2 className="size-3.5" /> Confirmado
+                    </>
+                  ) : (
+                    <>
+                      <Clock className="size-3.5 animate-pulse" /> Aguardando pagamento
+                    </>
+                  )}
+                </span>
+                <div className="mx-auto mt-4 w-fit rounded-2xl border border-border bg-background p-3 shadow-sm">
+                  <img src={pixData.image} alt="QR Code PIX da venda" className="size-52 rounded-xl" />
+                </div>
+                <p className="num mt-4 bg-gradient-to-r from-primary to-chart-4 bg-clip-text text-3xl font-bold tracking-tight text-transparent">
+                  {brl(pixData.amount)}
+                </p>
+                <div className="mt-4 flex gap-2">
                   <Button
                     variant="outline"
                     className="flex-1 gap-2"
@@ -196,13 +269,16 @@ function SalesPage() {
                     disabled={registerSale.isPending}
                     onClick={() =>
                       guard(() =>
-                        registerSale.mutate({
-                          method: "pix",
-                          gross: pixData.amount,
-                          fee: 0,
-                          installments: 1,
-                          pixPayload: pixData.payload,
-                        }),
+                        registerSale.mutate(
+                          {
+                            method: "pix",
+                            gross: pixData.amount,
+                            fee: 0,
+                            installments: 1,
+                            pixPayload: pixData.payload,
+                          },
+                          { onSuccess: () => setPixConfirmed(true) },
+                        ),
                       )
                     }
                   >
@@ -221,17 +297,7 @@ function SalesPage() {
 
         <TabsContent value="card">
           <div className="surface mt-3 space-y-4 p-5">
-            <div className="space-y-1.5">
-              <Label htmlFor="cardAmount">Valor da venda</Label>
-              <Input
-                id="cardAmount"
-                inputMode="decimal"
-                placeholder="0,00"
-                className="num text-2xl"
-                value={cardAmount}
-                onChange={(e) => setCardAmount(e.target.value)}
-              />
-            </div>
+            <AmountField id="cardAmount" value={cardAmount} onChange={setCardAmount} />
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label>Tipo</Label>
@@ -266,18 +332,24 @@ function SalesPage() {
               </div>
             </div>
 
-            <div className="rounded-xl bg-secondary p-4 text-sm">
-              <div className="flex justify-between">
+            <div className="rounded-2xl border border-border bg-secondary/60 p-4 text-sm shadow-sm">
+              <div className="flex items-center gap-2">
+                <span className="flex size-9 items-center justify-center rounded-full bg-primary/10 text-primary">
+                  <Calculator className="size-4" />
+                </span>
+                <p className="font-display text-sm font-semibold">Resumo das taxas</p>
+              </div>
+              <div className="mt-3 flex justify-between">
                 <span className="text-muted-foreground">Taxa aplicada</span>
                 <span className="num">{num(fees.rate, 2)}%</span>
               </div>
-              <div className="flex justify-between">
+              <div className="mt-1 flex justify-between">
                 <span className="text-muted-foreground">Desconto da maquininha</span>
                 <span className="num text-warning-foreground">- {brl(fees.fee)}</span>
               </div>
-              <div className="mt-1 flex justify-between border-t border-border pt-2 font-medium">
-                <span>Você recebe</span>
-                <span className="num">{brl(fees.net)}</span>
+              <div className="mt-3 flex items-center justify-between rounded-xl bg-success-soft px-3 py-2.5">
+                <span className="font-semibold">Você recebe</span>
+                <span className="num text-xl font-bold text-success">{brl(fees.net)}</span>
               </div>
               {Number(installments) > 1 && cardType === "card_credit" && (
                 <p className="num mt-2 text-xs text-muted-foreground">
@@ -312,12 +384,21 @@ function SalesPage() {
       <div className="surface p-5">
         <h2 className="font-display text-lg font-semibold">Histórico</h2>
         {!sales?.length ? (
-          <p className="mt-3 text-sm text-muted-foreground">Nenhuma venda registrada.</p>
+          <div className="mt-4 flex flex-col items-center gap-2 rounded-xl border border-dashed border-border py-10 text-center">
+            <span className="flex size-14 items-center justify-center rounded-full bg-secondary text-muted-foreground">
+              <Receipt className="size-7" />
+            </span>
+            <p className="text-sm font-medium">Nenhuma venda registrada</p>
+            <p className="max-w-xs text-xs text-muted-foreground">
+              Gere um QR Code PIX ou lance uma venda no cartão para começar seu histórico.
+            </p>
+          </div>
         ) : (
           <ul className="mt-3 divide-y divide-border">
             {sales.map((s) => (
-              <li key={s.id} className="flex items-center justify-between py-2.5">
-                <div>
+              <li key={s.id} className="flex items-center gap-3 py-2.5">
+                <MethodIcon method={s.method} />
+                <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium">
                     {s.method === "pix"
                       ? "PIX"
@@ -330,7 +411,7 @@ function SalesPage() {
                   <p className="text-xs text-muted-foreground">{dateTime(s.created_at)}</p>
                 </div>
                 <div className="text-right">
-                  <p className="num text-sm font-medium">{brl(Number(s.gross_amount))}</p>
+                  <p className="num text-sm font-semibold">{brl(Number(s.gross_amount))}</p>
                   <p className="num text-xs text-muted-foreground">líq. {brl(Number(s.net_amount))}</p>
                 </div>
               </li>
