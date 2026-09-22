@@ -143,7 +143,7 @@ function InventoryPage() {
                 {cost > 0 && (
                   <div className="flex items-center justify-between rounded-lg bg-primary-soft px-3 py-2 text-sm">
                     <span className="flex items-center gap-1.5 text-primary">
-                      <Sparkles className="size-3.5" /> Preço sugerido (40% margem)
+                      <Sparkles className="size-3.5" /> Preço sugerido (40% sobre o custo)
                     </span>
                     <button
                       className="num font-semibold text-primary"
