@@ -85,7 +85,7 @@ function InventoryPage() {
       });
     },
     onSuccess: () => {
-      toast.success("Produto cadastrado");
+      toast.success("Produto/serviço cadastrado");
       setForm(emptyForm);
       setOpen(false);
       queryClient.invalidateQueries({ queryKey: ["products", companyId] });
@@ -112,7 +112,7 @@ function InventoryPage() {
       <div className="flex items-end justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold">Estoque</h1>
-          <p className="text-sm text-muted-foreground">{products?.length ?? 0} produto(s) cadastrado(s)</p>
+          <p className="text-sm text-muted-foreground">{products?.length ?? 0} produto(s)/serviço(s) cadastrado(s)</p>
         </div>
         {canWrite && (
           <Dialog open={open} onOpenChange={(v) => guard(() => setOpen(v))}>
@@ -123,12 +123,12 @@ function InventoryPage() {
             </DialogTrigger>
             <DialogContent className="max-h-[90vh] overflow-y-auto rounded-2xl">
               <DialogHeader>
-                <DialogTitle>Novo produto</DialogTitle>
+                <DialogTitle>Novo produto/serviço</DialogTitle>
               </DialogHeader>
               <div className="space-y-3">
                 <div className="space-y-1.5">
                   <Label htmlFor="name">Nome</Label>
-                  <Input id="name" value={form.name} onChange={set("name")} placeholder="Pão francês" />
+                  <Input id="name" value={form.name} onChange={set("name")} placeholder="Ex: Corte de cabelo, Bolo de chocolate, Consultoria..." />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1.5">
@@ -192,9 +192,9 @@ function InventoryPage() {
       {!products?.length ? (
         <div className="surface flex flex-col items-center gap-2 p-10 text-center">
           <Package className="size-8 text-muted-foreground" />
-          <p className="font-medium">Nenhum produto ainda</p>
+          <p className="font-medium">Nenhum produto/serviço ainda</p>
           <p className="text-sm text-muted-foreground">
-            Cadastre seus produtos para controlar custo, margem e estoque mínimo.
+            Cadastre seus produtos/serviços para controlar custo, margem e estoque mínimo.
           </p>
         </div>
       ) : (
@@ -202,8 +202,8 @@ function InventoryPage() {
           {products.map((p) => {
             const low = Number(p.stock_qty) <= Number(p.min_stock) && Number(p.min_stock) > 0;
             const marginP =
-              Number(p.sale_price) > 0
-                ? ((Number(p.sale_price) - Number(p.cost_price)) / Number(p.sale_price)) * 100
+              Number(p.cost_price) > 0
+                ? ((Number(p.sale_price) - Number(p.cost_price)) / Number(p.cost_price)) * 100
                 : 0;
             return (
               <div key={p.id} className="surface flex items-center justify-between gap-3 p-4">
