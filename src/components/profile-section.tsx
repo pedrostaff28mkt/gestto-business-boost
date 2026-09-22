@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Loader2, Camera, User, Mail, Phone, KeyRound } from "lucide-react";
+import { Loader2, Camera, User, Mail, Phone, KeyRound, Sun, Moon, Monitor } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,6 +9,7 @@ import { UserAvatar } from "@/components/user-avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useTheme, type ThemePreference } from "@/components/theme-provider";
 
 const MAX_AVATAR_BYTES = 2 * 1024 * 1024;
 
@@ -22,6 +23,7 @@ const phoneSchema = z
 
 export function ProfileSection() {
   const { session } = useGestto();
+  const { theme, setTheme, mounted } = useTheme();
   const queryClient = useQueryClient();
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -178,6 +180,41 @@ export function ProfileSection() {
       <Button onClick={() => saveProfile.mutate()} disabled={saveProfile.isPending}>
         {saveProfile.isPending && <Loader2 className="size-4 animate-spin" />} Salvar dados pessoais
       </Button>
+
+      <div className="space-y-3 border-t border-border pt-4">
+        <Label>Tema da interface</Label>
+        <div
+          className="grid grid-cols-3 gap-1 rounded-lg border border-border bg-muted p-1"
+          role="radiogroup"
+          aria-label="Tema da interface"
+        >
+          {([
+            { value: "light", label: "Claro", icon: Sun },
+            { value: "dark", label: "Escuro", icon: Moon },
+            { value: "system", label: "Automático", icon: Monitor },
+          ] as const).map(({ value, label, icon: Icon }) => {
+            const selected = mounted && theme === value;
+            return (
+              <Button
+                key={value}
+                type="button"
+                variant="ghost"
+                role="radio"
+                aria-checked={selected}
+                onClick={() => setTheme(value as ThemePreference)}
+                className={`h-10 min-w-0 gap-1.5 px-2 text-xs sm:text-sm ${
+                  selected
+                    ? "bg-card text-foreground shadow-sm hover:bg-card"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <Icon className="size-4 shrink-0" />
+                <span className="truncate">{label}</span>
+              </Button>
+            );
+          })}
+        </div>
+      </div>
 
       <div className="space-y-2 border-t border-border pt-4">
         <Label className="flex items-center gap-1.5">

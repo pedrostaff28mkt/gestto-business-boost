@@ -13,7 +13,18 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { supabase } from "@/integrations/supabase/client";
 import { Toaster } from "@/components/ui/sonner";
+import { ThemeProvider } from "@/components/theme-provider";
 
+const themeInitializer = `(() => {
+  try {
+    const stored = localStorage.getItem('gestto-theme');
+    const theme = stored === 'light' || stored === 'dark' || stored === 'system' ? stored : 'system';
+    const dark = theme === 'dark' || (theme === 'system' && matchMedia('(prefers-color-scheme: dark)').matches);
+    document.documentElement.classList.toggle('dark', dark);
+    document.documentElement.dataset.theme = theme;
+    document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
+  } catch (_) {}
+})();`;
 
 function NotFoundComponent() {
   return (
@@ -115,8 +126,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="pt-BR">
+    <html lang="pt-BR" suppressHydrationWarning>
       <head>
+        <script dangerouslySetInnerHTML={{ __html: themeInitializer }} />
         <HeadContent />
       </head>
       <body>
@@ -142,11 +154,13 @@ function RootComponent() {
   }, [queryClient, router]);
 
   return (
-    <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <Outlet />
-      <Toaster position="top-center" richColors />
-    </QueryClientProvider>
+    <ThemeProvider>
+      <QueryClientProvider client={queryClient}>
+        {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+        <Outlet />
+        <Toaster position="top-center" richColors />
+      </QueryClientProvider>
+    </ThemeProvider>
   );
 }
 
