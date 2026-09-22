@@ -23,9 +23,9 @@ export const Route = createFileRoute("/_authenticated/estoque")({
   head: () => ({
     meta: [
       { title: "Estoque — Gestto" },
-      { name: "description", content: "Produtos com custo, preço, margem, mínimo e alerta de validade." },
+      { name: "description", content: "Produtos/serviços com custo, preço, margem, mínimo e alerta de validade." },
       { property: "og:title", content: "Estoque — Gestto" },
-      { property: "og:description", content: "Controle produtos, margem e alertas de estoque mínimo." },
+      { property: "og:description", content: "Controle produtos/serviços, margem e alertas de estoque mínimo." },
     ],
   }),
   component: InventoryPage,
@@ -85,7 +85,7 @@ function InventoryPage() {
       });
     },
     onSuccess: () => {
-      toast.success("Produto cadastrado");
+      toast.success("Produto/serviço cadastrado");
       setForm(emptyForm);
       setOpen(false);
       queryClient.invalidateQueries({ queryKey: ["products", companyId] });
@@ -95,8 +95,8 @@ function InventoryPage() {
 
   const cost = Number(form.cost_price.replace(",", ".")) || 0;
   const price = Number(form.sale_price.replace(",", ".")) || 0;
-  const margin = price > 0 ? ((price - cost) / price) * 100 : 0;
-  const suggested = cost > 0 ? cost / 0.6 : 0;
+  const margin = cost > 0 ? ((price - cost) / cost) * 100 : 0;
+  const suggested = cost > 0 ? cost * 1.4 : 0;
 
   const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setForm((f) => ({ ...f, [k]: e.target.value }));
@@ -112,7 +112,7 @@ function InventoryPage() {
       <div className="flex items-end justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold">Estoque</h1>
-          <p className="text-sm text-muted-foreground">{products?.length ?? 0} produto(s) cadastrado(s)</p>
+          <p className="text-sm text-muted-foreground">{products?.length ?? 0} produto(s)/serviço(s) cadastrado(s)</p>
         </div>
         {canWrite && (
           <Dialog open={open} onOpenChange={(v) => guard(() => setOpen(v))}>
@@ -123,12 +123,12 @@ function InventoryPage() {
             </DialogTrigger>
             <DialogContent className="max-h-[90vh] overflow-y-auto rounded-2xl">
               <DialogHeader>
-                <DialogTitle>Novo produto</DialogTitle>
+                <DialogTitle>Novo produto/serviço</DialogTitle>
               </DialogHeader>
               <div className="space-y-3">
                 <div className="space-y-1.5">
                   <Label htmlFor="name">Nome</Label>
-                  <Input id="name" value={form.name} onChange={set("name")} placeholder="Pão francês" />
+                  <Input id="name" value={form.name} onChange={set("name")} placeholder="Ex: Corte de cabelo, Bolo de chocolate, Consultoria..." />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1.5">
@@ -143,7 +143,7 @@ function InventoryPage() {
                 {cost > 0 && (
                   <div className="flex items-center justify-between rounded-lg bg-primary-soft px-3 py-2 text-sm">
                     <span className="flex items-center gap-1.5 text-primary">
-                      <Sparkles className="size-3.5" /> Preço sugerido (40% margem)
+                      <Sparkles className="size-3.5" /> Preço sugerido (40% sobre o custo)
                     </span>
                     <button
                       className="num font-semibold text-primary"
@@ -192,9 +192,9 @@ function InventoryPage() {
       {!products?.length ? (
         <div className="surface flex flex-col items-center gap-2 p-10 text-center">
           <Package className="size-8 text-muted-foreground" />
-          <p className="font-medium">Nenhum produto ainda</p>
+          <p className="font-medium">Nenhum produto/serviço ainda</p>
           <p className="text-sm text-muted-foreground">
-            Cadastre seus produtos para controlar custo, margem e estoque mínimo.
+            Cadastre seus produtos/serviços para controlar custo, margem e estoque mínimo.
           </p>
         </div>
       ) : (
@@ -202,8 +202,8 @@ function InventoryPage() {
           {products.map((p) => {
             const low = Number(p.stock_qty) <= Number(p.min_stock) && Number(p.min_stock) > 0;
             const marginP =
-              Number(p.sale_price) > 0
-                ? ((Number(p.sale_price) - Number(p.cost_price)) / Number(p.sale_price)) * 100
+              Number(p.cost_price) > 0
+                ? ((Number(p.sale_price) - Number(p.cost_price)) / Number(p.cost_price)) * 100
                 : 0;
             return (
               <div key={p.id} className="surface flex items-center justify-between gap-3 p-4">
