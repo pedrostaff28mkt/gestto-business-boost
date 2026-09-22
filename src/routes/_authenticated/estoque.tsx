@@ -23,9 +23,9 @@ export const Route = createFileRoute("/_authenticated/estoque")({
   head: () => ({
     meta: [
       { title: "Estoque — Gestto" },
-      { name: "description", content: "Produtos com custo, preço, margem, mínimo e alerta de validade." },
+      { name: "description", content: "Produtos/serviços com custo, preço, margem, mínimo e alerta de validade." },
       { property: "og:title", content: "Estoque — Gestto" },
-      { property: "og:description", content: "Controle produtos, margem e alertas de estoque mínimo." },
+      { property: "og:description", content: "Controle produtos/serviços, margem e alertas de estoque mínimo." },
     ],
   }),
   component: InventoryPage,
@@ -95,8 +95,8 @@ function InventoryPage() {
 
   const cost = Number(form.cost_price.replace(",", ".")) || 0;
   const price = Number(form.sale_price.replace(",", ".")) || 0;
-  const margin = price > 0 ? ((price - cost) / price) * 100 : 0;
-  const suggested = cost > 0 ? cost / 0.6 : 0;
+  const margin = cost > 0 ? ((price - cost) / cost) * 100 : 0;
+  const suggested = cost > 0 ? cost * 1.4 : 0;
 
   const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setForm((f) => ({ ...f, [k]: e.target.value }));
