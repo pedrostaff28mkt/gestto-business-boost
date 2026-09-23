@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useGestto, roleLabels } from "@/hooks/use-gestto";
 import { usePaywall, LockedArea } from "@/components/paywall";
 import { ProfileSection } from "@/components/profile-section";
+import { openTictoCheckout } from "@/lib/ticto";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -99,6 +100,14 @@ function SettingsPage() {
             {isPaywalled ? `${trialDaysLeft} dia(s)` : "R$ 99,99/mês"}
           </Badge>
         </div>
+        {isPaywalled && (
+          <Button
+            className="mt-4 w-full"
+            onClick={() => session && openTictoCheckout(session.fullName, session.email)}
+          >
+            Ativar assinatura
+          </Button>
+        )}
       </div>
 
       <ProfileSection />
