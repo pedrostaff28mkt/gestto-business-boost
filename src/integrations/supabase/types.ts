@@ -135,6 +135,24 @@ export type Database = {
         }
         Relationships: []
       }
+      integration_secrets: {
+        Row: {
+          key: string
+          updated_at: string
+          value: string
+        }
+        Insert: {
+          key: string
+          updated_at?: string
+          value: string
+        }
+        Update: {
+          key?: string
+          updated_at?: string
+          value?: string
+        }
+        Relationships: []
+      }
       invites: {
         Row: {
           branch_id: string | null
@@ -624,6 +642,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      webhook_events_log: {
+        Row: {
+          id: string
+          matched_company_id: string | null
+          note: string | null
+          provider: string
+          raw_payload: Json
+          received_at: string
+        }
+        Insert: {
+          id?: string
+          matched_company_id?: string | null
+          note?: string | null
+          provider: string
+          raw_payload: Json
+          received_at?: string
+        }
+        Update: {
+          id?: string
+          matched_company_id?: string | null
+          note?: string | null
+          provider?: string
+          raw_payload?: Json
+          received_at?: string
+        }
+        Relationships: []
       }
     }
     Views: {

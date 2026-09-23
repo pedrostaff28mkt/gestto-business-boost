@@ -24,6 +24,7 @@ import { Route as AuthenticatedEstoqueRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedEquipeRouteImport } from './routes/_authenticated/equipe'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedConfiguracoesRouteImport } from './routes/_authenticated/configuracoes'
+import { Route as ApiPublicTictoWebhookRouteImport } from './routes/api/public/ticto-webhook'
 
 const TermosRoute = TermosRouteImport.update({
   id: '/termos',
@@ -100,6 +101,11 @@ const AuthenticatedConfiguracoesRoute =
     path: '/configuracoes',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const ApiPublicTictoWebhookRoute = ApiPublicTictoWebhookRouteImport.update({
+  id: '/api/public/ticto-webhook',
+  path: '/api/public/ticto-webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -116,6 +122,7 @@ export interface FileRoutesByFullPath {
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/vendas': typeof AuthenticatedVendasRoute
   '/convite/$codigo': typeof ConviteCodigoRoute
+  '/api/public/ticto-webhook': typeof ApiPublicTictoWebhookRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -132,6 +139,7 @@ export interface FileRoutesByTo {
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/vendas': typeof AuthenticatedVendasRoute
   '/convite/$codigo': typeof ConviteCodigoRoute
+  '/api/public/ticto-webhook': typeof ApiPublicTictoWebhookRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -150,6 +158,7 @@ export interface FileRoutesById {
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
   '/_authenticated/vendas': typeof AuthenticatedVendasRoute
   '/convite/$codigo': typeof ConviteCodigoRoute
+  '/api/public/ticto-webhook': typeof ApiPublicTictoWebhookRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -168,6 +177,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/vendas'
     | '/convite/$codigo'
+    | '/api/public/ticto-webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -184,6 +194,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/vendas'
     | '/convite/$codigo'
+    | '/api/public/ticto-webhook'
   id:
     | '__root__'
     | '/'
@@ -201,6 +212,7 @@ export interface FileRouteTypes {
     | '/_authenticated/onboarding'
     | '/_authenticated/vendas'
     | '/convite/$codigo'
+    | '/api/public/ticto-webhook'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -211,6 +223,7 @@ export interface RootRouteChildren {
   PrivacidadeRoute: typeof PrivacidadeRoute
   TermosRoute: typeof TermosRoute
   ConviteCodigoRoute: typeof ConviteCodigoRoute
+  ApiPublicTictoWebhookRoute: typeof ApiPublicTictoWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -320,6 +333,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedConfiguracoesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/public/ticto-webhook': {
+      id: '/api/public/ticto-webhook'
+      path: '/api/public/ticto-webhook'
+      fullPath: '/api/public/ticto-webhook'
+      preLoaderRoute: typeof ApiPublicTictoWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -356,6 +376,7 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacidadeRoute: PrivacidadeRoute,
   TermosRoute: TermosRoute,
   ConviteCodigoRoute: ConviteCodigoRoute,
+  ApiPublicTictoWebhookRoute: ApiPublicTictoWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

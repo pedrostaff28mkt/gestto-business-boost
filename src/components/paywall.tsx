@@ -2,6 +2,8 @@ import { createContext, useCallback, useContext, useMemo, useState, type ReactNo
 import { Lock, Sparkles, Check } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { useGestto } from "@/hooks/use-gestto";
+import { openTictoCheckout } from "@/lib/ticto";
 
 type PaywallContextValue = {
   /** Bloqueio real: trial expirado e sem assinatura. */
@@ -33,6 +35,11 @@ export function PaywallProvider({
   children: ReactNode;
 }) {
   const [isOpen, setIsOpen] = useState(false);
+  const { session } = useGestto();
+
+  const openCheckout = () => {
+    if (session) openTictoCheckout(session.fullName, session.email);
+  };
 
   const guard = useCallback(
     (action: () => void) => {
@@ -88,7 +95,7 @@ export function PaywallProvider({
             </ul>
           </div>
 
-          <Button size="lg" className="w-full gap-2" onClick={() => setIsOpen(false)}>
+          <Button size="lg" className="w-full gap-2" onClick={openCheckout}>
             <Sparkles className="size-4" />
             Ativar assinatura
           </Button>
