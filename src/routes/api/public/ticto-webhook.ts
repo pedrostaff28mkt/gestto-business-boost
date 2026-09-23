@@ -36,11 +36,17 @@ function extractStatusText(payload: any): string {
 }
 
 function mapStatus(statusText: string): "active" | "past_due" | "canceled" | null {
-  if (/aprovad|approved|authorized|realizada|retomad|resumed|ativa|active/.test(statusText))
-    return "active";
-  if (/atras|delayed|late|past_due/.test(statusText)) return "past_due";
-  if (/cancel|reembols|refund|chargeback|recusad|refused|encerrad/.test(statusText))
-    return "canceled";
+  const ACTIVE = new Set(["authorized", "paid"]);
+  const PAST_DUE = new Set(["retrying", "in_protest", "acquirer_error"]);
+  const CANCELED = new Set([
+    "refused", "blocked", "chargedback", "prechargeback",
+    "canceled", "refund_requested", "in_settlement", "refunded",
+  ]);
+  // processing e waiting_payment são estados transitórios — não atualizam nada, ainda.
+
+  if (ACTIVE.has(statusText)) return "active";
+  if (PAST_DUE.has(statusText)) return "past_due";
+  if (CANCELED.has(statusText)) return "canceled";
   return null;
 }
 
