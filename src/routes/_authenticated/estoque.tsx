@@ -44,7 +44,7 @@ const emptyForm = {
 
 function InventoryPage() {
   const { session, can } = useGestto();
-  const { writeBranchId } = useActiveBranch();
+  const { writeBranchId, filterBranchId } = useActiveBranch();
   const { guard } = usePaywall();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
@@ -52,14 +52,15 @@ function InventoryPage() {
   const companyId = session?.companyId;
 
   const { data: products } = useQuery({
-    queryKey: ["products", companyId],
+    queryKey: ["products", companyId, filterBranchId],
     enabled: !!companyId,
     queryFn: async () => {
-      const { data } = await supabase
+      let q = supabase
         .from("products")
         .select("id, name, sku, cost_price, sale_price, stock_qty, min_stock, expires_at, active")
-        .eq("company_id", companyId!)
-        .order("name");
+        .eq("company_id", companyId!);
+      if (filterBranchId) q = q.eq("branch_id", filterBranchId);
+      const { data } = await q.order("name");
       return data ?? [];
     },
   });
@@ -128,6 +129,12 @@ function InventoryPage() {
               <DialogHeader>
                 <DialogTitle>Novo produto/serviço</DialogTitle>
               </DialogHeader>
+              {!writeBranchId && (
+                <p className="flex items-center gap-2 rounded-lg border border-warning/40 bg-warning-soft/40 px-3 py-2 text-sm font-medium">
+                  <AlertTriangle className="size-4 shrink-0 text-warning-foreground" />
+                  Selecione uma filial no topo da tela para continuar
+                </p>
+              )}
               <div className="space-y-3">
                 <div className="space-y-1.5">
                   <Label htmlFor="name">Nome</Label>
@@ -181,7 +188,7 @@ function InventoryPage() {
                 </p>
                 <Button
                   className="w-full"
-                  disabled={createProduct.isPending || !form.name.trim()}
+                  disabled={createProduct.isPending || !form.name.trim() || !writeBranchId}
                   onClick={() => guard(() => createProduct.mutate())}
                 >
                   {createProduct.isPending && <Loader2 className="size-4 animate-spin" />} Salvar produto
@@ -191,6 +198,17 @@ function InventoryPage() {
           </Dialog>
         )}
       </div>
+
+      {!writeBranchId && (
+        <div className="surface flex items-center gap-3 border-warning/40 bg-warning-soft/40 p-4">
+          <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-warning-soft text-warning-foreground">
+            <AlertTriangle className="size-4" />
+          </span>
+          <p className="text-sm font-medium">
+            Selecione uma filial no topo da tela para lançar vendas ou cadastrar produtos.
+          </p>
+        </div>
+      )}
 
       {!products?.length ? (
         <div className="surface flex flex-col items-center gap-2 p-10 text-center">
