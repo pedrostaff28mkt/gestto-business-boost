@@ -20,6 +20,8 @@ import { Logo } from "@/components/logo";
 import { UserAvatar } from "@/components/user-avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { BranchSwitcher } from "@/components/branch-switcher";
+import { ActiveBranchProvider } from "@/hooks/use-active-branch";
 
 
 type NavItem = { to: string; label: string; icon: LucideIcon; module: AppModule };
@@ -142,6 +144,7 @@ function Shell({ children }: { children: ReactNode }) {
               <p className="font-display text-base font-semibold">{session?.companyName}</p>
             </div>
             <div className="flex items-center gap-2">
+              <BranchSwitcher />
               <Badge variant="secondary" className="hidden sm:inline-flex">
                 {session ? roleLabels[session.role] : ""}
               </Badge>
@@ -193,7 +196,9 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <PaywallProvider locked={subscriptionRequired} trialActive={trialActive} trialDaysLeft={trialDaysLeft}>
-      <Shell>{children}</Shell>
+      <ActiveBranchProvider>
+        <Shell>{children}</Shell>
+      </ActiveBranchProvider>
     </PaywallProvider>
   );
 }
