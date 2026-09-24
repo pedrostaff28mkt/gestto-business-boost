@@ -5,6 +5,7 @@ import { Package, Plus, AlertTriangle, Loader2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useGestto } from "@/hooks/use-gestto";
+import { useActiveBranch, BRANCH_REQUIRED_MSG } from "@/hooks/use-active-branch";
 import { usePaywall } from "@/components/paywall";
 import { brl, num } from "@/lib/format";
 import { Button } from "@/components/ui/button";
@@ -43,6 +44,7 @@ const emptyForm = {
 
 function InventoryPage() {
   const { session, can } = useGestto();
+  const { writeBranchId } = useActiveBranch();
   const { guard } = usePaywall();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
@@ -64,9 +66,10 @@ function InventoryPage() {
 
   const createProduct = useMutation({
     mutationFn: async () => {
+      if (!writeBranchId) throw new Error(BRANCH_REQUIRED_MSG);
       const { error } = await supabase.from("products").insert({
         company_id: companyId!,
-        branch_id: session!.branchId,
+        branch_id: writeBranchId,
         name: form.name.trim(),
         sku: form.sku.trim() || null,
         cost_price: Number(form.cost_price.replace(",", ".")) || 0,
