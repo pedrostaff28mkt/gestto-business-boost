@@ -16,6 +16,7 @@ import {
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useGestto } from "@/hooks/use-gestto";
+import { useActiveBranch, BRANCH_REQUIRED_MSG } from "@/hooks/use-active-branch";
 import { usePaywall } from "@/components/paywall";
 import { buildPixPayload, cardFees } from "@/lib/pix";
 import { brl, dateTime, num } from "@/lib/format";
@@ -77,6 +78,7 @@ function AmountField({
 
 function SalesPage() {
   const { session, can } = useGestto();
+  const { writeBranchId } = useActiveBranch();
   const { guard, locked } = usePaywall();
   const queryClient = useQueryClient();
 
@@ -112,9 +114,10 @@ function SalesPage() {
       installments: number;
       pixPayload?: string;
     }) => {
+      if (!writeBranchId) throw new Error(BRANCH_REQUIRED_MSG);
       const { error } = await supabase.from("sales").insert({
         company_id: companyId!,
-        branch_id: session!.branchId,
+        branch_id: writeBranchId,
         seller_id: session!.userId,
         method: payload.method,
         installments: payload.installments,

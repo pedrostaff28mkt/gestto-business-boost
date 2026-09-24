@@ -5,6 +5,9 @@ import { useGestto } from "@/hooks/use-gestto";
 
 export type Branch = { id: string; name: string; is_main: boolean };
 
+export const BRANCH_REQUIRED_MSG =
+  "Selecione uma filial no topo da tela para lançar vendas ou cadastrar produtos.";
+
 type ActiveBranchContextValue = {
   /** "all" = visão geral (todas as filiais) ou o id de uma filial. */
   activeBranch: string;

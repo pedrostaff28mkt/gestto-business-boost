@@ -31,6 +31,7 @@ import {
 } from "recharts";
 import { supabase } from "@/integrations/supabase/client";
 import { useGestto } from "@/hooks/use-gestto";
+import { useActiveBranch } from "@/hooks/use-active-branch";
 import { brl, num, shortDate } from "@/lib/format";
 import { LockedArea, BlurredValue, UnlockHint } from "@/components/paywall";
 import { Progress } from "@/components/ui/progress";
@@ -126,6 +127,7 @@ function Stat({
 
 function DashboardPage() {
   const { session, isLoading } = useGestto();
+  const { filterBranchId } = useActiveBranch();
   const navigate = useNavigate();
   const companyId = session?.companyId;
   const [mounted, setMounted] = useState(false);
@@ -140,23 +142,28 @@ function DashboardPage() {
   }, [isLoading, session, navigate]);
 
   const { data } = useQuery({
-    queryKey: ["dashboard", companyId],
+    queryKey: ["dashboard", companyId, filterBranchId],
     enabled: !!companyId,
     queryFn: async () => {
       const since = new Date();
       since.setDate(since.getDate() - 60);
+      let salesQ = supabase
+        .from("sales")
+        .select("id, created_at, method, gross_amount, fee_amount, net_amount, seller_id")
+        .eq("company_id", companyId!)
+        .gte("created_at", since.toISOString());
+      let productsQ = supabase
+        .from("products")
+        .select("id, name, stock_qty, min_stock")
+        .eq("company_id", companyId!)
+        .eq("active", true);
+      if (filterBranchId) {
+        salesQ = salesQ.eq("branch_id", filterBranchId);
+        productsQ = productsQ.eq("branch_id", filterBranchId);
+      }
       const [{ data: sales }, { data: products }] = await Promise.all([
-        supabase
-          .from("sales")
-          .select("id, created_at, method, gross_amount, fee_amount, net_amount, seller_id")
-          .eq("company_id", companyId!)
-          .gte("created_at", since.toISOString())
-          .order("created_at", { ascending: false }),
-        supabase
-          .from("products")
-          .select("id, name, stock_qty, min_stock")
-          .eq("company_id", companyId!)
-          .eq("active", true),
+        salesQ.order("created_at", { ascending: false }),
+        productsQ,
       ]);
       return { sales: (sales ?? []) as SaleRow[], products: products ?? [] };
     },
