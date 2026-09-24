@@ -44,7 +44,7 @@ const emptyForm = {
 
 function InventoryPage() {
   const { session, can } = useGestto();
-  const { writeBranchId } = useActiveBranch();
+  const { writeBranchId, filterBranchId } = useActiveBranch();
   const { guard } = usePaywall();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
@@ -52,14 +52,15 @@ function InventoryPage() {
   const companyId = session?.companyId;
 
   const { data: products } = useQuery({
-    queryKey: ["products", companyId],
+    queryKey: ["products", companyId, filterBranchId],
     enabled: !!companyId,
     queryFn: async () => {
-      const { data } = await supabase
+      let q = supabase
         .from("products")
         .select("id, name, sku, cost_price, sale_price, stock_qty, min_stock, expires_at, active")
-        .eq("company_id", companyId!)
-        .order("name");
+        .eq("company_id", companyId!);
+      if (filterBranchId) q = q.eq("branch_id", filterBranchId);
+      const { data } = await q.order("name");
       return data ?? [];
     },
   });

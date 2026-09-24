@@ -78,7 +78,7 @@ function AmountField({
 
 function SalesPage() {
   const { session, can } = useGestto();
-  const { writeBranchId } = useActiveBranch();
+  const { writeBranchId, filterBranchId } = useActiveBranch();
   const { guard, locked } = usePaywall();
   const queryClient = useQueryClient();
 
@@ -93,15 +93,15 @@ function SalesPage() {
   const hasPaymentSetup = !!session?.payment.pixKey;
 
   const { data: sales } = useQuery({
-    queryKey: ["sales", companyId],
+    queryKey: ["sales", companyId, filterBranchId],
     enabled: !!companyId,
     queryFn: async () => {
-      const { data } = await supabase
+      let q = supabase
         .from("sales")
         .select("id, created_at, method, installments, gross_amount, fee_amount, net_amount, status")
-        .eq("company_id", companyId!)
-        .order("created_at", { ascending: false })
-        .limit(20);
+        .eq("company_id", companyId!);
+      if (filterBranchId) q = q.eq("branch_id", filterBranchId);
+      const { data } = await q.order("created_at", { ascending: false }).limit(20);
       return data ?? [];
     },
   });
@@ -182,6 +182,19 @@ function SalesPage() {
         <p className="text-sm text-muted-foreground">Receba no PIX ou lance no cartão em segundos.</p>
       </div>
 
+      {!writeBranchId && (
+        <div className="surface border-warning/40 bg-warning-soft/40 p-4">
+          <div className="flex items-center gap-3">
+            <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-warning-soft text-warning-foreground">
+              <AlertTriangle className="size-4" />
+            </span>
+            <p className="text-sm font-medium">
+              Selecione uma filial no topo da tela para lançar vendas ou cadastrar produtos.
+            </p>
+          </div>
+        </div>
+      )}
+
       {!hasPaymentSetup && (
         <div className="surface border-warning/40 bg-warning-soft/40 p-5">
           <div className="flex items-start gap-3">
@@ -226,7 +239,7 @@ function SalesPage() {
               size="lg"
               className="w-full gap-2"
               onClick={() => guard(generatePix)}
-              disabled={!hasPaymentSetup && !locked}
+              disabled={(!hasPaymentSetup && !locked) || !writeBranchId}
             >
               <QrCode className="size-4" /> Gerar QR Code PIX
             </Button>
@@ -269,7 +282,7 @@ function SalesPage() {
                   </Button>
                   <Button
                     className="flex-1 gap-2"
-                    disabled={registerSale.isPending}
+                    disabled={registerSale.isPending || !writeBranchId}
                     onClick={() =>
                       guard(() =>
                         registerSale.mutate(
@@ -364,7 +377,7 @@ function SalesPage() {
             <Button
               size="lg"
               className="w-full gap-2"
-              disabled={registerSale.isPending}
+              disabled={registerSale.isPending || !writeBranchId}
               onClick={() =>
                 guard(() => {
                   if (cardValue <= 0) return toast.error("Informe um valor válido");
