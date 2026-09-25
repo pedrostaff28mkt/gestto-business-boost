@@ -10,6 +10,7 @@ import {
   Settings,
   LogOut,
   Lock,
+  Contact,
   type LucideIcon,
 } from "lucide-react";
 import type { ReactNode } from "react";
@@ -30,6 +31,7 @@ const NAV: NavItem[] = [
   { to: "/dashboard", label: "Início", icon: LayoutDashboard, module: "dashboard" },
   { to: "/vendas", label: "Vendas", icon: ShoppingCart, module: "sales" },
   { to: "/estoque", label: "Estoque", icon: Package, module: "inventory" },
+  { to: "/crm", label: "CRM", icon: Contact, module: "crm" },
   { to: "/financeiro", label: "Financeiro", icon: Wallet, module: "finance" },
   { to: "/equipe", label: "Equipe", icon: Users, module: "team" },
   { to: "/ia", label: "IA", icon: Sparkles, module: "ai" },

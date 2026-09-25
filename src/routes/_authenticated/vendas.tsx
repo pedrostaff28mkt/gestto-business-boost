@@ -26,6 +26,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MethodIcon } from "@/components/payment-method-badge";
+import { CustomerPicker } from "@/components/customer-picker";
 
 export const Route = createFileRoute("/_authenticated/vendas")({
   head: () => ({
@@ -88,6 +89,7 @@ function SalesPage() {
   const [cardAmount, setCardAmount] = useState("");
   const [cardType, setCardType] = useState<"card_credit" | "card_debit">("card_credit");
   const [installments, setInstallments] = useState("1");
+  const [customerId, setCustomerId] = useState<string | null>(null);
 
   const companyId = session?.companyId;
   const hasPaymentSetup = !!session?.payment.pixKey;
@@ -119,6 +121,7 @@ function SalesPage() {
         company_id: companyId!,
         branch_id: writeBranchId,
         seller_id: session!.userId,
+        customer_id: customerId,
         method: payload.method,
         installments: payload.installments,
         gross_amount: payload.gross,
@@ -140,6 +143,9 @@ function SalesPage() {
       toast.success("Venda registrada");
       queryClient.invalidateQueries({ queryKey: ["sales", companyId] });
       queryClient.invalidateQueries({ queryKey: ["dashboard", companyId] });
+      queryClient.invalidateQueries({ queryKey: ["customers", companyId] });
+      if (customerId) queryClient.invalidateQueries({ queryKey: ["customer-sales", customerId] });
+      setCustomerId(null);
     },
     onError: (e: Error) => toast.error("Erro ao registrar venda", { description: e.message }),
   });
@@ -194,6 +200,10 @@ function SalesPage() {
           </div>
         </div>
       )}
+
+      <div className="surface p-4">
+        <CustomerPicker value={customerId} onChange={setCustomerId} disabled={!writeBranchId} />
+      </div>
 
       {!hasPaymentSetup && (
         <div className="surface border-warning/40 bg-warning-soft/40 p-5">
