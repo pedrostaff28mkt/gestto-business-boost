@@ -135,6 +135,123 @@ export type Database = {
         }
         Relationships: []
       }
+      customers: {
+        Row: {
+          company_id: string
+          created_at: string
+          email: string | null
+          id: string
+          loyalty_points: number
+          name: string
+          notes: string | null
+          phone: string | null
+          tags: string[]
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          email?: string | null
+          id?: string
+          loyalty_points?: number
+          name: string
+          notes?: string | null
+          phone?: string | null
+          tags?: string[]
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          email?: string | null
+          id?: string
+          loyalty_points?: number
+          name?: string
+          notes?: string | null
+          phone?: string | null
+          tags?: string[]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customers_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      financial_entries: {
+        Row: {
+          amount: number
+          branch_id: string | null
+          category: string
+          company_id: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          due_date: string
+          id: string
+          paid_date: string | null
+          status: Database["public"]["Enums"]["financial_entry_status"]
+          type: Database["public"]["Enums"]["financial_entry_type"]
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          branch_id?: string | null
+          category: string
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          due_date: string
+          id?: string
+          paid_date?: string | null
+          status?: Database["public"]["Enums"]["financial_entry_status"]
+          type: Database["public"]["Enums"]["financial_entry_type"]
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          branch_id?: string | null
+          category?: string
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          due_date?: string
+          id?: string
+          paid_date?: string | null
+          status?: Database["public"]["Enums"]["financial_entry_status"]
+          type?: Database["public"]["Enums"]["financial_entry_type"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financial_entries_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_entries_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_entries_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       integration_secrets: {
         Row: {
           key: string
@@ -538,6 +655,7 @@ export type Database = {
           branch_id: string | null
           company_id: string
           created_at: string
+          customer_id: string | null
           fee_amount: number
           gross_amount: number
           id: string
@@ -554,6 +672,7 @@ export type Database = {
           branch_id?: string | null
           company_id: string
           created_at?: string
+          customer_id?: string | null
           fee_amount?: number
           gross_amount?: number
           id?: string
@@ -570,6 +689,7 @@ export type Database = {
           branch_id?: string | null
           company_id?: string
           created_at?: string
+          customer_id?: string | null
           fee_amount?: number
           gross_amount?: number
           id?: string
@@ -595,6 +715,13 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sales_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
             referencedColumns: ["id"]
           },
         ]
@@ -709,6 +836,8 @@ export type Database = {
         | "integrations"
         | "settings"
       app_role: "owner" | "manager" | "seller" | "production"
+      financial_entry_status: "pending" | "paid" | "overdue"
+      financial_entry_type: "income" | "expense"
       payment_method: "pix" | "card_credit" | "card_debit" | "cash"
       sale_status: "pending" | "paid" | "canceled"
       subscription_status: "trialing" | "active" | "past_due" | "canceled"
@@ -851,6 +980,8 @@ export const Constants = {
         "settings",
       ],
       app_role: ["owner", "manager", "seller", "production"],
+      financial_entry_status: ["pending", "paid", "overdue"],
+      financial_entry_type: ["income", "expense"],
       payment_method: ["pix", "card_credit", "card_debit", "cash"],
       sale_status: ["pending", "paid", "canceled"],
       subscription_status: ["trialing", "active", "past_due", "canceled"],
