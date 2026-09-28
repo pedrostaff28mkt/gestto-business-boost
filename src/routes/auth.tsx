@@ -144,7 +144,7 @@ function AuthPage() {
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="companyName">Nome da empresa</Label>
-                <Input id="companyName" required value={form.companyName} onChange={set("companyName")} placeholder="Padaria Bom Dia" />
+                <Input id="companyName" required value={form.companyName} onChange={set("companyName")} placeholder="Nome da sua empresa" />
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="email2">E-mail</Label>

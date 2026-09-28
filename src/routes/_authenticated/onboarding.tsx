@@ -7,10 +7,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { useGestto } from "@/hooks/use-gestto";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import {
   EMPLOYEE_RANGES,
   REVENUE_RANGES,
-  SEGMENTS,
   classifyCompanySize,
   type EmployeeRange,
   type RevenueRange,
@@ -127,7 +127,12 @@ function OnboardingPage() {
           <Store className="size-4 text-primary" />
           <Label>Segmento do negócio</Label>
         </div>
-        <OptionGroup options={SEGMENTS} value={segment} onSelect={setSegment} />
+        <Input
+          value={segment}
+          onChange={(e) => setSegment(e.target.value)}
+          placeholder="Como você descreveria o seu negócio?"
+          maxLength={120}
+        />
       </div>
 
       <Button size="lg" className="w-full" disabled={save.isPending} onClick={() => save.mutate()}>
