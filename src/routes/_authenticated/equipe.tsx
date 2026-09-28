@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
+import { brl, num } from "@/lib/format";
 import {
   Dialog,
   DialogContent,
@@ -46,6 +47,16 @@ const MODULES: { key: AppModule; label: string }[] = [
 const INVITE_ROLES: AppRole[] = ["manager", "seller", "production"];
 
 type PermMap = Record<AppModule, { can_view: boolean; can_create: boolean; can_edit: boolean; can_delete: boolean }>;
+
+type MemberRow = {
+  id: string;
+  role: AppRole;
+  job_title: string | null;
+  active: boolean;
+  monthly_goal: number | string | null;
+  commission_percent: number | string | null;
+  profiles: { full_name: string } | null;
+};
 
 function defaultsFor(role: AppRole): PermMap {
   const map = {} as PermMap;
