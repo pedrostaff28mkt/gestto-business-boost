@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Loader2, Camera, User, Mail, Phone, KeyRound, Sun, Moon, Monitor } from "lucide-react";
+import { Loader2, Camera, User, Mail, Phone, KeyRound, Sun, Moon, Monitor, Target } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
@@ -35,6 +35,14 @@ export function ProfileSection() {
   const [currentPassword, setCurrentPassword] = useState("");
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
+  const [goal, setGoal] = useState("");
+  const [commission, setCommission] = useState("");
+
+  useEffect(() => {
+    if (!session) return;
+    setGoal(String(session.monthlyGoal ?? 0).replace(".", ","));
+    setCommission(String(session.commissionPercent ?? 0).replace(".", ","));
+  }, [session?.monthlyGoal, session?.commissionPercent]);
 
   useEffect(() => {
     if (!session) return;
@@ -136,6 +144,28 @@ export function ProfileSection() {
       setPasswordConfirm("");
     },
     onError: (e: Error) => toast.error("Erro ao trocar senha", { description: e.message }),
+  });
+
+  const saveGoal = useMutation({
+    mutationFn: async () => {
+      if (!session) throw new Error("Sessão não encontrada.");
+      const g = Number(goal.replace(/\./g, "").replace(",", ".") || "0");
+      const c = Number(commission.replace(",", ".") || "0");
+      if (!Number.isFinite(g) || g < 0) throw new Error("Meta deve ser um valor maior ou igual a zero.");
+      if (!Number.isFinite(c) || c < 0 || c > 100) throw new Error("Comissão deve estar entre 0 e 100.");
+      const { data, error } = await supabase
+        .from("memberships")
+        .update({ monthly_goal: g, commission_percent: c })
+        .eq("id", session.membershipId)
+        .select("id");
+      if (error) throw error;
+      if (!data || data.length === 0) throw new Error("Você não tem permissão para alterar sua meta. Peça ao dono ou gerente.");
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["gestto-session"] });
+      toast.success("Meta atualizada!");
+    },
+    onError: (e: Error) => toast.error("Erro ao salvar meta", { description: e.message }),
   });
 
   return (
@@ -344,6 +374,26 @@ export function ProfileSection() {
           disabled={changePassword.isPending || !password || !currentPassword}
         >
           {changePassword.isPending && <Loader2 className="size-4 animate-spin" />} Atualizar senha
+        </Button>
+      </div>
+
+      <div className="space-y-3 border-t border-border pt-5">
+        <div className="flex items-center gap-2">
+          <Target className="size-4 text-primary" />
+          <h3 className="font-display font-semibold">Minha meta de vendas</h3>
+        </div>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div className="space-y-1.5">
+            <Label htmlFor="my-goal">Meta mensal (R$)</Label>
+            <Input id="my-goal" inputMode="decimal" value={goal} onChange={(e) => setGoal(e.target.value)} />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="my-commission">Comissão (%)</Label>
+            <Input id="my-commission" inputMode="decimal" value={commission} onChange={(e) => setCommission(e.target.value)} />
+          </div>
+        </div>
+        <Button variant="outline" onClick={() => saveGoal.mutate()} disabled={saveGoal.isPending}>
+          {saveGoal.isPending && <Loader2 className="size-4 animate-spin" />} Salvar meta
         </Button>
       </div>
     </div>
