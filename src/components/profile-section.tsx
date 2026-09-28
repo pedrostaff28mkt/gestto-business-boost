@@ -258,11 +258,27 @@ export function ProfileSection() {
               maxLength={255}
               onChange={(e) => setNewEmail(e.target.value)}
             />
+            <div className="space-y-1.5">
+              <Label htmlFor="email-current-pass" className="text-xs text-muted-foreground">
+                Senha atual
+              </Label>
+              <Input
+                id="email-current-pass"
+                type="password"
+                required
+                autoComplete="current-password"
+                value={emailCurrentPassword}
+                onChange={(e) => setEmailCurrentPassword(e.target.value)}
+              />
+            </div>
             <p className="text-xs text-muted-foreground">
               Você receberá um link de confirmação no novo e-mail antes da troca ser efetivada.
             </p>
             <div className="flex gap-2">
-              <Button onClick={() => changeEmail.mutate()} disabled={changeEmail.isPending}>
+              <Button
+                onClick={() => changeEmail.mutate()}
+                disabled={changeEmail.isPending || !emailCurrentPassword}
+              >
                 {changeEmail.isPending && <Loader2 className="size-4 animate-spin" />} Enviar confirmação
               </Button>
               <Button
@@ -270,6 +286,7 @@ export function ProfileSection() {
                 onClick={() => {
                   setEmailOpen(false);
                   setNewEmail("");
+                  setEmailCurrentPassword("");
                 }}
               >
                 Cancelar
