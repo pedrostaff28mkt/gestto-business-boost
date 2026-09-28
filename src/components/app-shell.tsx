@@ -11,9 +11,11 @@ import {
   LogOut,
   Lock,
   Contact,
+  MoreHorizontal,
   type LucideIcon,
 } from "lucide-react";
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { supabase } from "@/integrations/supabase/client";
 import { useGestto, roleLabels, type AppModule } from "@/hooks/use-gestto";
 import { PaywallProvider, usePaywall } from "@/components/paywall";
@@ -41,7 +43,7 @@ const NAV: NavItem[] = [
 function LogoMark({ tone = "light" }: { tone?: "light" | "dark" }) {
   return (
     <div className="flex items-center gap-2">
-      <Logo size={32} />
+      <Logo size={32} forceTone={tone === "dark" ? "dark" : undefined} />
       <span
         className={`font-display text-lg font-bold tracking-tight ${tone === "dark" ? "text-background" : "text-foreground"}`}
       >
@@ -87,7 +89,11 @@ function Shell({ children }: { children: ReactNode }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   const items = NAV.filter((item) => can(item.module));
-  const mobileItems = items.slice(0, 5);
+  const hasMore = items.length > 5;
+  const mobileItems = hasMore ? items.slice(0, 4) : items;
+  const moreItems = hasMore ? items.slice(4) : [];
+  const [moreOpen, setMoreOpen] = useState(false);
+  const moreActive = moreItems.some((i) => pathname.startsWith(i.to));
 
   async function signOut() {
     await queryClient.cancelQueries();
@@ -179,6 +185,44 @@ function Shell({ children }: { children: ReactNode }) {
               </Link>
             );
           })}
+          {hasMore && (
+            <Sheet open={moreOpen} onOpenChange={setMoreOpen}>
+              <SheetTrigger asChild>
+                <button
+                  type="button"
+                  className={`flex flex-1 flex-col items-center gap-1 rounded-lg px-1 py-1.5 text-[11px] ${
+                    moreActive ? "text-primary" : "text-muted-foreground"
+                  }`}
+                >
+                  <MoreHorizontal className="size-5" />
+                  Mais
+                </button>
+              </SheetTrigger>
+              <SheetContent side="bottom" className="rounded-t-2xl pb-8">
+                <SheetHeader>
+                  <SheetTitle>Mais opções</SheetTitle>
+                </SheetHeader>
+                <div className="mt-2 flex flex-col gap-1 px-2">
+                  {moreItems.map((item) => {
+                    const active = pathname.startsWith(item.to);
+                    return (
+                      <Link
+                        key={item.to}
+                        to={item.to}
+                        onClick={() => setMoreOpen(false)}
+                        className={`flex items-center gap-3 rounded-lg px-3 py-3 text-sm ${
+                          active ? "bg-primary-soft text-primary" : "text-foreground hover:bg-secondary"
+                        }`}
+                      >
+                        <item.icon className="size-5" />
+                        {item.label}
+                      </Link>
+                    );
+                  })}
+                </div>
+              </SheetContent>
+            </Sheet>
+          )}
         </div>
       </nav>
     </div>
