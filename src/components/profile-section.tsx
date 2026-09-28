@@ -313,7 +313,7 @@ export function ProfileSection() {
         <Button
           variant="outline"
           onClick={() => changePassword.mutate()}
-          disabled={changePassword.isPending || !password}
+          disabled={changePassword.isPending || !password || !currentPassword}
         >
           {changePassword.isPending && <Loader2 className="size-4 animate-spin" />} Atualizar senha
         </Button>
