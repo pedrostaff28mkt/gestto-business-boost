@@ -4,6 +4,7 @@ import { Check, ChevronsUpDown, UserPlus, UserRound } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useGestto } from "@/hooks/use-gestto";
+import { useActiveBranch } from "@/hooks/use-active-branch";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -26,15 +27,16 @@ import {
 
 export type CustomerLite = { id: string; name: string; phone: string | null };
 
-export function useCustomersLite(companyId?: string) {
+export function useCustomersLite(companyId?: string, branchId?: string | null) {
   return useQuery({
-    queryKey: ["customers", companyId, "lite"],
-    enabled: !!companyId,
+    queryKey: ["customers", companyId, "lite", branchId ?? "none"],
+    enabled: !!companyId && !!branchId,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("customers")
         .select("id, name, phone")
         .eq("company_id", companyId!)
+        .eq("branch_id", branchId!)
         .order("name");
       if (error) throw error;
       return (data ?? []) as CustomerLite[];
@@ -55,7 +57,8 @@ export function CustomerPicker({
   const { session, can } = useGestto();
   const companyId = session?.companyId;
   const queryClient = useQueryClient();
-  const { data: customers = [] } = useCustomersLite(companyId);
+  const { writeBranchId } = useActiveBranch();
+  const { data: customers = [] } = useCustomersLite(companyId, writeBranchId);
   const [open, setOpen] = useState(false);
   const [quickOpen, setQuickOpen] = useState(false);
   const [name, setName] = useState("");
@@ -66,9 +69,10 @@ export function CustomerPicker({
   const quickCreate = useMutation({
     mutationFn: async () => {
       if (!name.trim()) throw new Error("Informe o nome");
+      if (!writeBranchId) throw new Error("Selecione uma filial no topo da tela para continuar");
       const { data, error } = await supabase
         .from("customers")
-        .insert({ company_id: companyId!, name: name.trim(), phone: phone.trim() || null, tags: ["Novo"] })
+        .insert({ company_id: companyId!, branch_id: writeBranchId, name: name.trim(), phone: phone.trim() || null, tags: ["Novo"] })
         .select("id")
         .single();
       if (error) throw error;
@@ -139,7 +143,12 @@ export function CustomerPicker({
           <DialogHeader>
             <DialogTitle>Novo cliente rápido</DialogTitle>
           </DialogHeader>
-          <div className="space-y-3">
+          {!writeBranchId && (
+            <p className="rounded-lg border border-warning/40 bg-warning-soft p-3 text-sm font-medium">
+              Selecione uma filial no topo da tela para continuar
+            </p>
+          )}
+          <fieldset disabled={!writeBranchId} className="space-y-3 disabled:opacity-60">
             <div className="space-y-1.5">
               <Label>Nome *</Label>
               <Input value={name} onChange={(e) => setName(e.target.value)} />
@@ -148,9 +157,9 @@ export function CustomerPicker({
               <Label>Telefone</Label>
               <Input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="(11) 99999-9999" />
             </div>
-          </div>
+          </fieldset>
           <DialogFooter>
-            <Button onClick={() => quickCreate.mutate()} disabled={quickCreate.isPending}>
+            <Button onClick={() => quickCreate.mutate()} disabled={quickCreate.isPending || !writeBranchId}>
               Salvar e selecionar
             </Button>
           </DialogFooter>
