@@ -31,6 +31,7 @@ export function ProfileSection() {
   const [phone, setPhone] = useState("");
   const [emailOpen, setEmailOpen] = useState(false);
   const [newEmail, setNewEmail] = useState("");
+  const [currentPassword, setCurrentPassword] = useState("");
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
 
@@ -105,13 +106,21 @@ export function ProfileSection() {
 
   const changePassword = useMutation({
     mutationFn: async () => {
+      if (!session?.email) throw new Error("Sessão não encontrada");
+      if (!currentPassword) throw new Error("Informe sua senha atual");
       if (password.length < 8) throw new Error("A senha deve ter pelo menos 8 caracteres");
       if (password !== passwordConfirm) throw new Error("As senhas não conferem");
+      const { error: authErr } = await supabase.auth.signInWithPassword({
+        email: session.email,
+        password: currentPassword,
+      });
+      if (authErr) throw new Error("Senha atual incorreta");
       const { error } = await supabase.auth.updateUser({ password });
       if (error) throw error;
     },
     onSuccess: () => {
       toast.success("Senha alterada com sucesso");
+      setCurrentPassword("");
       setPassword("");
       setPasswordConfirm("");
     },
@@ -263,6 +272,19 @@ export function ProfileSection() {
         <Label className="flex items-center gap-1.5">
           <KeyRound className="size-3.5" /> Trocar senha
         </Label>
+        <div className="space-y-1.5">
+          <Label htmlFor="current-pass" className="text-xs text-muted-foreground">
+            Senha atual
+          </Label>
+          <Input
+            id="current-pass"
+            type="password"
+            required
+            autoComplete="current-password"
+            value={currentPassword}
+            onChange={(e) => setCurrentPassword(e.target.value)}
+          />
+        </div>
         <div className="grid gap-3 sm:grid-cols-2">
           <div className="space-y-1.5">
             <Label htmlFor="new-pass" className="text-xs text-muted-foreground">
@@ -291,7 +313,7 @@ export function ProfileSection() {
         <Button
           variant="outline"
           onClick={() => changePassword.mutate()}
-          disabled={changePassword.isPending || !password}
+          disabled={changePassword.isPending || !password || !currentPassword}
         >
           {changePassword.isPending && <Loader2 className="size-4 animate-spin" />} Atualizar senha
         </Button>

@@ -2,8 +2,25 @@ import darkLogoAsset from "@/assets/logo-dark.png.asset.json";
 import lightLogoAsset from "@/assets/logo-light.png.asset.json";
 import { useTheme } from "@/components/theme-provider";
 
-export function Logo({ size = 32, className = "" }: { size?: number; className?: string }) {
+export function Logo({
+  size = 32,
+  className = "",
+  forceTone,
+}: {
+  size?: number;
+  className?: string;
+  forceTone?: "light" | "dark";
+}) {
   const { resolvedTheme } = useTheme();
+
+  if (forceTone) {
+    const asset = forceTone === "dark" ? darkLogoAsset : lightLogoAsset;
+    return (
+      <span className="inline-flex shrink-0">
+        <img src={asset.url} alt="Gestto" width={size} height={size} className={`inline-block object-contain ${className}`} />
+      </span>
+    );
+  }
 
   return (
     <span className="inline-flex shrink-0" data-theme={resolvedTheme}>

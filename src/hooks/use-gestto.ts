@@ -36,6 +36,7 @@ export type GesttoSession = {
   phone: string | null;
   role: AppRole;
   membershipId: string;
+  jobTitle: string | null;
   companyId: string;
   companyName: string;
   companySize: string | null;
@@ -69,7 +70,7 @@ async function fetchSession(): Promise<GesttoSession | null> {
   const { data: membership, error } = await supabase
     .from("memberships")
     .select(
-      "id, role, company_id, branch_id, commission_percent, monthly_goal, companies(name, company_size, quiz_completed_at), module_permissions(module, can_view, can_create, can_edit, can_delete)",
+      "id, role, job_title, company_id, branch_id, commission_percent, monthly_goal, companies(name, company_size, quiz_completed_at), module_permissions(module, can_view, can_create, can_edit, can_delete)",
     )
 
     .eq("user_id", user.id)
@@ -110,6 +111,7 @@ async function fetchSession(): Promise<GesttoSession | null> {
     phone: profile?.phone ?? null,
     role: membership.role as AppRole,
     membershipId: membership.id,
+    jobTitle: (membership as { job_title?: string | null }).job_title ?? null,
     companyId: membership.company_id,
     companyName: company?.name ?? "Minha empresa",
     companySize: company?.company_size ?? null,

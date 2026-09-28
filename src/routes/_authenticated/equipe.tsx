@@ -70,7 +70,7 @@ function InviteForm({ companyId }: { companyId: string }) {
   const { guard, locked } = usePaywall();
   const [role, setRole] = useState<AppRole>("seller");
   const [perms, setPerms] = useState<PermMap>(() => defaultsFor("seller"));
-  const [form, setForm] = useState({ fullName: "", email: "" });
+  const [form, setForm] = useState({ fullName: "", email: "", jobTitle: "" });
 
   function pickRole(r: AppRole) {
     setRole(r);
@@ -87,6 +87,7 @@ function InviteForm({ companyId }: { companyId: string }) {
           role,
           full_name: form.fullName.trim() || null,
           email: form.email.trim() || null,
+          job_title: form.jobTitle.trim() || null,
           module_permissions,
         })
         .select("code")
@@ -95,7 +96,7 @@ function InviteForm({ companyId }: { companyId: string }) {
       return data.code as string;
     },
     onSuccess: () => {
-      setForm({ fullName: "", email: "" });
+      setForm({ fullName: "", email: "", jobTitle: "" });
       queryClient.invalidateQueries({ queryKey: ["invites"] });
       toast.success("Convite criado! Copie o link e envie pelo WhatsApp.");
     },
@@ -122,6 +123,17 @@ function InviteForm({ companyId }: { companyId: string }) {
             {roleLabels[r]}
           </button>
         ))}
+      </div>
+
+      <div className="mt-3 space-y-1.5">
+        <Label htmlFor="inviteJob">Cargo/função (opcional)</Label>
+        <Input
+          id="inviteJob"
+          value={form.jobTitle}
+          maxLength={60}
+          onChange={(e) => setForm((f) => ({ ...f, jobTitle: e.target.value }))}
+          placeholder="Ex: Motorista, Caixa, Estoquista..."
+        />
       </div>
 
       <div className="mt-4 grid gap-3 sm:grid-cols-2">
@@ -209,7 +221,7 @@ function InviteList({ companyId }: { companyId: string }) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("invites")
-        .select("id, code, role, full_name, email, expires_at, used_at, created_at")
+        .select("id, code, role, job_title, full_name, email, expires_at, used_at, created_at")
         .eq("company_id", companyId)
         .order("created_at", { ascending: false });
       if (error) throw error;
@@ -262,7 +274,7 @@ function InviteList({ companyId }: { companyId: string }) {
                       {i.full_name || i.email || "Convite sem nome"}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {roleLabels[i.role as AppRole]}
+                      {i.job_title || roleLabels[i.role as AppRole]}
                       {i.email ? ` · ${i.email}` : ""}
                     </p>
                   </div>
@@ -307,13 +319,14 @@ function MemberList({ companyId }: { companyId: string }) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("memberships")
-        .select("id, role, active, user_id, profiles:user_id(full_name)")
+        .select("id, role, job_title, active, user_id, profiles:user_id(full_name)")
         .eq("company_id", companyId)
         .order("created_at", { ascending: true });
       if (error) throw error;
       return data as unknown as {
         id: string;
         role: AppRole;
+        job_title: string | null;
         active: boolean;
         profiles: { full_name: string } | null;
       }[];
@@ -327,7 +340,7 @@ function MemberList({ companyId }: { companyId: string }) {
         {members.map((m) => (
           <li key={m.id} className="flex items-center justify-between gap-3 py-2.5">
             <span className="truncate text-sm">{m.profiles?.full_name || "Sem nome"}</span>
-            <Badge variant="secondary">{roleLabels[m.role]}</Badge>
+            <Badge variant="secondary">{m.job_title || roleLabels[m.role]}</Badge>
           </li>
         ))}
       </ul>

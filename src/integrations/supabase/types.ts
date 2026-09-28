@@ -137,6 +137,7 @@ export type Database = {
       }
       customers: {
         Row: {
+          branch_id: string | null
           company_id: string
           created_at: string
           email: string | null
@@ -149,6 +150,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          branch_id?: string | null
           company_id: string
           created_at?: string
           email?: string | null
@@ -161,6 +163,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          branch_id?: string | null
           company_id?: string
           created_at?: string
           email?: string | null
@@ -173,6 +176,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "customers_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "customers_company_id_fkey"
             columns: ["company_id"]
@@ -281,6 +291,7 @@ export type Database = {
           expires_at: string
           full_name: string | null
           id: string
+          job_title: string | null
           module_permissions: Json
           role: Database["public"]["Enums"]["app_role"]
           updated_at: string
@@ -297,6 +308,7 @@ export type Database = {
           expires_at?: string
           full_name?: string | null
           id?: string
+          job_title?: string | null
           module_permissions?: Json
           role: Database["public"]["Enums"]["app_role"]
           updated_at?: string
@@ -313,6 +325,7 @@ export type Database = {
           expires_at?: string
           full_name?: string | null
           id?: string
+          job_title?: string | null
           module_permissions?: Json
           role?: Database["public"]["Enums"]["app_role"]
           updated_at?: string
@@ -344,6 +357,7 @@ export type Database = {
           company_id: string
           created_at: string
           id: string
+          job_title: string | null
           monthly_goal: number
           role: Database["public"]["Enums"]["app_role"]
           updated_at: string
@@ -356,6 +370,7 @@ export type Database = {
           company_id: string
           created_at?: string
           id?: string
+          job_title?: string | null
           monthly_goal?: number
           role?: Database["public"]["Enums"]["app_role"]
           updated_at?: string
@@ -368,6 +383,7 @@ export type Database = {
           company_id?: string
           created_at?: string
           id?: string
+          job_title?: string | null
           monthly_goal?: number
           role?: Database["public"]["Enums"]["app_role"]
           updated_at?: string
@@ -802,6 +818,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_additional_company: {
+        Args: { _company_name: string }
+        Returns: string
+      }
       get_invite_preview: {
         Args: { _code: string }
         Returns: {
