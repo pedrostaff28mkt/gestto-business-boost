@@ -321,24 +321,59 @@ function InviteList({ companyId }: { companyId: string }) {
 }
 
 function MemberList({ companyId }: { companyId: string }) {
+  const { can } = useGestto();
+  const queryClient = useQueryClient();
+  const canEdit = useMemo(() => can("team", "edit"), [can]);
+  const [editing, setEditing] = useState<MemberRow | null>(null);
+  const [goal, setGoal] = useState("");
+  const [commission, setCommission] = useState("");
+  const [saving, setSaving] = useState(false);
+
   const { data: members = [] } = useQuery({
     queryKey: ["members", companyId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("memberships")
-        .select("id, role, job_title, active, user_id, profiles:user_id(full_name)")
+        .select("id, role, job_title, active, user_id, monthly_goal, commission_percent, profiles:user_id(full_name)")
         .eq("company_id", companyId)
         .order("created_at", { ascending: true });
       if (error) throw error;
-      return data as unknown as {
-        id: string;
-        role: AppRole;
-        job_title: string | null;
-        active: boolean;
-        profiles: { full_name: string } | null;
-      }[];
+      return data as unknown as MemberRow[];
     },
   });
+
+  function openEdit(m: MemberRow) {
+    setEditing(m);
+    setGoal(String(m.monthly_goal ?? 0));
+    setCommission(String(m.commission_percent ?? 0));
+  }
+
+  async function saveEdit() {
+    if (!editing) return;
+    const goalNum = Number(goal.replace(/\./g, "").replace(",", "."));
+    const commissionNum = Number(commission.replace(",", "."));
+    if (!Number.isFinite(goalNum) || goalNum < 0) {
+      toast.error("Meta mensal inválida", { description: "Use um valor maior ou igual a zero." });
+      return;
+    }
+    if (!Number.isFinite(commissionNum) || commissionNum < 0 || commissionNum > 100) {
+      toast.error("Comissão inválida", { description: "Informe um valor entre 0 e 100." });
+      return;
+    }
+    setSaving(true);
+    const { error } = await supabase
+      .from("memberships")
+      .update({ monthly_goal: goalNum, commission_percent: commissionNum })
+      .eq("id", editing.id);
+    setSaving(false);
+    if (error) {
+      toast.error("Não foi possível salvar", { description: error.message });
+      return;
+    }
+    setEditing(null);
+    queryClient.invalidateQueries({ queryKey: ["members"] });
+    toast.success("Meta e comissão atualizadas");
+  }
 
   return (
     <section className="surface p-5">
@@ -346,11 +381,74 @@ function MemberList({ companyId }: { companyId: string }) {
       <ul className="mt-3 divide-y divide-border">
         {members.map((m) => (
           <li key={m.id} className="flex items-center justify-between gap-3 py-2.5">
-            <span className="truncate text-sm">{m.profiles?.full_name || "Sem nome"}</span>
-            <Badge variant="secondary">{m.job_title || roleLabels[m.role]}</Badge>
+            <div className="min-w-0">
+              <span className="block truncate text-sm">{m.profiles?.full_name || "Sem nome"}</span>
+              <span className="num block text-xs text-muted-foreground">
+                Meta {brl(Number(m.monthly_goal ?? 0))} · Comissão {num(Number(m.commission_percent ?? 0), 1)}%
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Badge variant="secondary">{m.job_title || roleLabels[m.role]}</Badge>
+              {canEdit && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="text-muted-foreground"
+                  aria-label={`Editar meta e comissão de ${m.profiles?.full_name || "membro"}`}
+                  onClick={() => openEdit(m)}
+                >
+                  <Pencil className="size-4" />
+                </Button>
+              )}
+            </div>
           </li>
         ))}
       </ul>
+
+      <Dialog open={!!editing} onOpenChange={(o) => !o && setEditing(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Meta e comissão de {editing?.profiles?.full_name || "membro"}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div className="space-y-1.5">
+              <Label htmlFor="memberGoal">Meta mensal (R$)</Label>
+              <Input
+                id="memberGoal"
+                type="number"
+                min={0}
+                step="0.01"
+                inputMode="decimal"
+                value={goal}
+                onChange={(e) => setGoal(e.target.value)}
+                placeholder="0,00"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="memberCommission">Comissão (%)</Label>
+              <Input
+                id="memberCommission"
+                type="number"
+                min={0}
+                max={100}
+                step="0.1"
+                inputMode="decimal"
+                value={commission}
+                onChange={(e) => setCommission(e.target.value)}
+                placeholder="0"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setEditing(null)} disabled={saving}>
+              Cancelar
+            </Button>
+            <Button onClick={saveEdit} disabled={saving}>
+              {saving && <Loader2 className="size-4 animate-spin" />} Salvar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </section>
   );
 }
