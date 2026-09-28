@@ -60,14 +60,22 @@ export type GesttoSession = {
     terminalMonthlyFee: number;
   };
   permissions: Permission[];
+  companies: { id: string; name: string; role: AppRole }[];
 };
+
+const activeCompanyKey = (userId: string) => `gestto-active-company-${userId}`;
+
+export function setActiveCompany(userId: string, companyId: string) {
+  window.localStorage.setItem(activeCompanyKey(userId), companyId);
+  window.location.assign("/dashboard");
+}
 
 async function fetchSession(): Promise<GesttoSession | null> {
   const { data: userData } = await supabase.auth.getUser();
   const user = userData.user;
   if (!user) return null;
 
-  const { data: membership, error } = await supabase
+  const { data: memberships, error } = await supabase
     .from("memberships")
     .select(
       "id, role, job_title, company_id, branch_id, commission_percent, monthly_goal, companies(name, company_size, quiz_completed_at), module_permissions(module, can_view, can_create, can_edit, can_delete)",
@@ -75,12 +83,23 @@ async function fetchSession(): Promise<GesttoSession | null> {
 
     .eq("user_id", user.id)
     .eq("active", true)
-    .order("created_at", { ascending: true })
-    .limit(1)
-    .maybeSingle();
+    .order("created_at", { ascending: true });
 
   if (error) throw error;
-  if (!membership) return null;
+  if (!memberships || memberships.length === 0) return null;
+
+  let storedCompany: string | null = null;
+  try {
+    storedCompany = typeof window !== "undefined" ? window.localStorage.getItem(activeCompanyKey(user.id)) : null;
+  } catch {
+    storedCompany = null;
+  }
+  const membership = memberships.find((m) => m.company_id === storedCompany) ?? memberships[0];
+  const companies = memberships.map((m) => ({
+    id: m.company_id,
+    name: (m.companies as { name: string } | null)?.name ?? "Minha empresa",
+    role: m.role as AppRole,
+  }));
 
   const [{ data: profile }, { data: sub }, { data: pay }] = await Promise.all([
     supabase.from("profiles").select("full_name, avatar_url, phone").eq("id", user.id).maybeSingle(),
@@ -135,6 +154,7 @@ async function fetchSession(): Promise<GesttoSession | null> {
       terminalMonthlyFee: Number(pay?.terminal_monthly_fee ?? 0),
     },
     permissions: (membership.module_permissions ?? []) as Permission[],
+    companies,
   };
 }
 
