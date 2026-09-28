@@ -82,6 +82,14 @@ function AuthPage() {
     if (error) return toast.error("Não foi possível criar a conta", { description: error.message });
 
     if (!data.session) {
+      // Supabase retorna sucesso "camuflado" quando o e-mail já existe:
+      // user presente, mas identities vazio e sem sessão.
+      if (data.user && (data.user.identities?.length ?? 0) === 0) {
+        toast.error("Esse e-mail já tem uma conta no Gestto", {
+          description: "Tente entrar ou use 'Esqueci minha senha'.",
+        });
+        return;
+      }
       toast.success("Conta criada!", {
         description: "Confirme o e-mail que enviamos para ativar seu teste grátis de 2 dias.",
       });
