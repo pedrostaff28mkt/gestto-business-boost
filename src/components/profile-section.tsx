@@ -31,6 +31,7 @@ export function ProfileSection() {
   const [phone, setPhone] = useState("");
   const [emailOpen, setEmailOpen] = useState(false);
   const [newEmail, setNewEmail] = useState("");
+  const [emailCurrentPassword, setEmailCurrentPassword] = useState("");
   const [currentPassword, setCurrentPassword] = useState("");
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
@@ -87,7 +88,14 @@ export function ProfileSection() {
 
   const changeEmail = useMutation({
     mutationFn: async () => {
+      if (!session?.email) throw new Error("Sessão não encontrada");
+      if (!emailCurrentPassword) throw new Error("Informe sua senha atual");
       const email = emailSchema.parse(newEmail);
+      const { error: authErr } = await supabase.auth.signInWithPassword({
+        email: session.email,
+        password: emailCurrentPassword,
+      });
+      if (authErr) throw new Error("Senha atual incorreta");
       const { error } = await supabase.auth.updateUser({ email });
       if (error) throw error;
     },
@@ -96,12 +104,15 @@ export function ProfileSection() {
         description: "Você receberá um link de confirmação no novo e-mail antes da troca ser efetivada.",
       });
       setNewEmail("");
+      setEmailCurrentPassword("");
       setEmailOpen(false);
     },
-    onError: (e: Error) =>
+    onError: (e: Error) => {
+      setEmailCurrentPassword("");
       toast.error("Erro ao alterar e-mail", {
         description: e instanceof z.ZodError ? e.issues[0].message : e.message,
-      }),
+      });
+    },
   });
 
   const changePassword = useMutation({
@@ -247,11 +258,27 @@ export function ProfileSection() {
               maxLength={255}
               onChange={(e) => setNewEmail(e.target.value)}
             />
+            <div className="space-y-1.5">
+              <Label htmlFor="email-current-pass" className="text-xs text-muted-foreground">
+                Senha atual
+              </Label>
+              <Input
+                id="email-current-pass"
+                type="password"
+                required
+                autoComplete="current-password"
+                value={emailCurrentPassword}
+                onChange={(e) => setEmailCurrentPassword(e.target.value)}
+              />
+            </div>
             <p className="text-xs text-muted-foreground">
               Você receberá um link de confirmação no novo e-mail antes da troca ser efetivada.
             </p>
             <div className="flex gap-2">
-              <Button onClick={() => changeEmail.mutate()} disabled={changeEmail.isPending}>
+              <Button
+                onClick={() => changeEmail.mutate()}
+                disabled={changeEmail.isPending || !emailCurrentPassword}
+              >
                 {changeEmail.isPending && <Loader2 className="size-4 animate-spin" />} Enviar confirmação
               </Button>
               <Button
@@ -259,6 +286,7 @@ export function ProfileSection() {
                 onClick={() => {
                   setEmailOpen(false);
                   setNewEmail("");
+                  setEmailCurrentPassword("");
                 }}
               >
                 Cancelar
