@@ -126,14 +126,16 @@ export const Route = createFileRoute("/api/public/ticto-webhook")({
           return json({ ok: true, note: "user_not_found" });
         }
 
-        const { data: membership } = await admin
+        const { data: ownerships } = await admin
           .from("memberships")
           .select("company_id")
           .eq("user_id", matchedUser.id)
           .eq("role", "owner")
-          .maybeSingle();
+          .eq("active", true);
 
-        if (!membership) {
+        const companyIds = (ownerships ?? []).map((m) => m.company_id);
+
+        if (companyIds.length === 0) {
           if (logId) {
             await admin
               .from("webhook_events_log")
@@ -146,14 +148,14 @@ export const Route = createFileRoute("/api/public/ticto-webhook")({
         await admin
           .from("subscriptions")
           .update({ status: mappedStatus, updated_at: new Date().toISOString() })
-          .eq("company_id", membership.company_id);
+          .in("company_id", companyIds);
 
         if (logId) {
           await admin
             .from("webhook_events_log")
             .update({
-              matched_company_id: membership.company_id,
-              note: `assinatura atualizada para "${mappedStatus}"`,
+              matched_company_id: companyIds[0],
+              note: `assinatura atualizada para "${mappedStatus}" em ${companyIds.length} empresa(s)`,
             })
             .eq("id", logId);
         }

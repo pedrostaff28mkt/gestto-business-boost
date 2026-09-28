@@ -28,8 +28,8 @@ export const getAdminStats = createServerFn({ method: "GET" })
 
     const [companiesRes, subsRes, membershipsRes] = await Promise.all([
       supabaseAdmin.from("companies").select("id, created_at, company_size"),
-      supabaseAdmin.from("subscriptions").select("status, trial_ends_at"),
-      supabaseAdmin.from("memberships").select("user_id"),
+      supabaseAdmin.from("subscriptions").select("company_id, status, trial_ends_at"),
+      supabaseAdmin.from("memberships").select("user_id, company_id, role"),
     ]);
 
     const companies = companiesRes.data ?? [];
@@ -40,9 +40,19 @@ export const getAdminStats = createServerFn({ method: "GET" })
     let trialing = 0;
     let trialExpired = 0;
     let active = 0;
-    for (const s of subs) {
-      if (s.status === "active") active += 1;
-      else if (new Date(s.trial_ends_at).getTime() > now) trialing += 1;
+    // Conta por dono distinto: cada dono recebe o status mais favorável entre suas empresas.
+    const subByCompany = new Map(subs.map((s) => [s.company_id, s]));
+    const ownerRank = new Map<string, number>(); // 3 active, 2 trialing, 1 expired
+    for (const m of memberships) {
+      if (m.role !== "owner") continue;
+      const s = subByCompany.get(m.company_id);
+      if (!s) continue;
+      const rank = s.status === "active" ? 3 : new Date(s.trial_ends_at).getTime() > now ? 2 : 1;
+      ownerRank.set(m.user_id, Math.max(ownerRank.get(m.user_id) ?? 0, rank));
+    }
+    for (const r of ownerRank.values()) {
+      if (r === 3) active += 1;
+      else if (r === 2) trialing += 1;
       else trialExpired += 1;
     }
 

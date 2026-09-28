@@ -89,7 +89,7 @@ function Landing() {
       <div className="hero-dark">
         <header className="mx-auto flex max-w-6xl items-center justify-between px-5 py-5">
           <div className="flex items-center gap-2">
-            <Logo size={32} />
+            <Logo size={32} forceTone="dark" />
             <span className="font-display text-xl font-bold text-hero-foreground">Gestto</span>
           </div>
 

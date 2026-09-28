@@ -24,6 +24,7 @@ import { UserAvatar } from "@/components/user-avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { BranchSwitcher } from "@/components/branch-switcher";
+import { CompanySwitcher } from "@/components/company-switcher";
 import { ActiveBranchProvider } from "@/hooks/use-active-branch";
 
 
@@ -152,6 +153,7 @@ function Shell({ children }: { children: ReactNode }) {
               <p className="font-display text-base font-semibold">{session?.companyName}</p>
             </div>
             <div className="flex items-center gap-2">
+              <CompanySwitcher />
               <BranchSwitcher />
               <Badge variant="secondary" className="hidden sm:inline-flex">
                 {session ? session.jobTitle || roleLabels[session.role] : ""}
