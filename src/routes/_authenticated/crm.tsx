@@ -5,6 +5,9 @@ import { Minus, MessageCircle, Plus, Search, Star, Trash2, UserPlus, Users, X } 
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useGestto } from "@/hooks/use-gestto";
+import { useActiveBranch } from "@/hooks/use-active-branch";
+
+const BRANCH_MSG = "Selecione uma filial no topo da tela para continuar";
 import { brl, dateTime } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -37,6 +40,7 @@ type Customer = {
   loyalty_points: number;
   notes: string | null;
   created_at: string;
+  branch_id: string | null;
 };
 
 const PRESET_TAGS = ["VIP", "Atacado", "Novo"];
@@ -113,17 +117,21 @@ function CrmPage() {
   const [search, setSearch] = useState("");
   const [createOpen, setCreateOpen] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const { filterBranchId, writeBranchId, branches, canSwitch } = useActiveBranch();
+  const isOwner = session?.role === "owner";
 
   const { data, isLoading } = useQuery({
-    queryKey: ["customers", companyId, "crm"],
+    queryKey: ["customers", companyId, "crm", filterBranchId ?? "all"],
     enabled: !!companyId,
     queryFn: async () => {
+      let cq = supabase
+        .from("customers")
+        .select("id, name, phone, email, tags, loyalty_points, notes, created_at, branch_id")
+        .eq("company_id", companyId!)
+        .order("name");
+      if (filterBranchId) cq = cq.eq("branch_id", filterBranchId);
       const [{ data: cs, error }, { data: sales, error: e2 }] = await Promise.all([
-        supabase
-          .from("customers")
-          .select("id, name, phone, email, tags, loyalty_points, notes, created_at")
-          .eq("company_id", companyId!)
-          .order("name"),
+        cq,
         supabase
           .from("sales")
           .select("customer_id, created_at")
@@ -218,6 +226,11 @@ function CrmPage() {
                     {missing && (
                       <Badge className="border-0 bg-warning-soft text-warning-foreground hover:bg-warning-soft">Sumido</Badge>
                     )}
+                    {isOwner && canSwitch && !filterBranchId && (
+                      <span className="rounded-full border border-border px-2 py-0.5 text-[11px] text-muted-foreground">
+                        {branches.find((b) => b.id === c.branch_id)?.name ?? "Sem filial"}
+                      </span>
+                    )}
                     {c.tags.map((t) => (
                       <span key={t} className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${tagClass(t)}`}>
                         {t}
@@ -242,12 +255,13 @@ function CrmPage() {
         )}
       </div>
 
-      <CreateCustomerDialog open={createOpen} onOpenChange={setCreateOpen} companyId={companyId} onDone={invalidate} />
+      <CreateCustomerDialog open={createOpen} onOpenChange={setCreateOpen} companyId={companyId} branchId={writeBranchId} onDone={invalidate} />
       {selected && (
         <CustomerDetail
           customer={selected}
           onClose={() => setSelectedId(null)}
           onChanged={invalidate}
+          branches={isOwner ? branches : null}
         />
       )}
     </div>
@@ -258,11 +272,13 @@ function CreateCustomerDialog({
   open,
   onOpenChange,
   companyId,
+  branchId,
   onDone,
 }: {
   open: boolean;
   onOpenChange: (o: boolean) => void;
   companyId?: string;
+  branchId: string | null;
   onDone: () => void;
 }) {
   const [name, setName] = useState("");
@@ -273,8 +289,10 @@ function CreateCustomerDialog({
   const create = useMutation({
     mutationFn: async () => {
       if (!name.trim()) throw new Error("O nome é obrigatório");
+      if (!branchId) throw new Error(BRANCH_MSG);
       const { error } = await supabase.from("customers").insert({
         company_id: companyId!,
+        branch_id: branchId,
         name: name.trim(),
         phone: phone.trim() || null,
         email: email.trim() || null,
@@ -297,7 +315,10 @@ function CreateCustomerDialog({
         <DialogHeader>
           <DialogTitle>Novo cliente</DialogTitle>
         </DialogHeader>
-        <div className="space-y-3">
+        {!branchId && (
+          <p className="rounded-lg border border-warning/40 bg-warning-soft p-3 text-sm font-medium">{BRANCH_MSG}</p>
+        )}
+        <fieldset disabled={!branchId} className="space-y-3 disabled:opacity-60">
           <div className="space-y-1.5">
             <Label>Nome *</Label>
             <Input value={name} onChange={(e) => setName(e.target.value)} />
@@ -316,9 +337,9 @@ function CreateCustomerDialog({
             <Label>Tags</Label>
             <TagEditor value={tags} onChange={setTags} />
           </div>
-        </div>
+        </fieldset>
         <DialogFooter>
-          <Button onClick={() => create.mutate()} disabled={create.isPending}>Cadastrar</Button>
+          <Button onClick={() => create.mutate()} disabled={create.isPending || !branchId}>Cadastrar</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -329,10 +350,13 @@ function CustomerDetail({
   customer,
   onClose,
   onChanged,
+  branches,
 }: {
   customer: Customer;
   onClose: () => void;
   onChanged: () => void;
+  /** Só o dono recebe a lista (pode vincular/trocar filial). */
+  branches: { id: string; name: string }[] | null;
 }) {
   const { can } = useGestto();
   const canEdit = can("crm", "edit");
@@ -365,6 +389,7 @@ function CustomerDetail({
           tags: form.tags,
           loyalty_points: Math.max(0, Math.round(Number(form.loyalty_points) || 0)),
           notes: form.notes || null,
+          ...(branches && canEdit && form.branch_id ? { branch_id: form.branch_id } : {}),
         })
         .eq("id", customer.id);
       if (error) throw error;
@@ -409,6 +434,28 @@ function CustomerDetail({
               </div>
             </div>
           </div>
+
+          {branches && canEdit ? (
+            <div className="space-y-1.5">
+              <Label htmlFor="crm-branch">Filial</Label>
+              <select
+                id="crm-branch"
+                value={form.branch_id ?? ""}
+                onChange={(e) => setForm({ ...form, branch_id: e.target.value || null })}
+                className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+              >
+                {!form.branch_id && <option value="">Selecione uma filial</option>}
+                {branches.map((b) => (
+                  <option key={b.id} value={b.id}>{b.name}</option>
+                ))}
+              </select>
+              {!customer.branch_id && (
+                <p className="text-xs text-muted-foreground">
+                  Este cliente ainda não pertence a nenhuma filial — vincule para usá-lo em vendas.
+                </p>
+              )}
+            </div>
+          ) : null}
 
           <div className="space-y-1.5">
             <Label>Tags</Label>
