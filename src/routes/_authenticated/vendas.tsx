@@ -12,6 +12,7 @@ import {
   Clock,
   Calculator,
   Receipt,
+  Banknote,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -27,6 +28,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MethodIcon } from "@/components/payment-method-badge";
 import { CustomerPicker } from "@/components/customer-picker";
+import { SaleItemsPicker, saleItemsTotal, type SaleItem } from "@/components/sale-items-picker";
 
 export const Route = createFileRoute("/_authenticated/vendas")({
   head: () => ({
@@ -45,11 +47,14 @@ function AmountField({
   id,
   value,
   onChange,
+  computed,
 }: {
   id: string;
   value: string;
   onChange: (v: string) => void;
+  computed?: number | null;
 }) {
+  const isComputed = computed != null;
   const [focused, setFocused] = useState(false);
   return (
     <div className="space-y-1.5">
@@ -67,12 +72,15 @@ function AmountField({
           inputMode="decimal"
           placeholder="0,00"
           className="num h-auto border-0 bg-transparent p-0 text-3xl font-bold tracking-tight shadow-none focus-visible:ring-0"
-          value={value}
+          value={isComputed ? computed.toFixed(2).replace(".", ",") : value}
+          readOnly={isComputed}
+          disabled={isComputed}
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
           onChange={(e) => onChange(e.target.value)}
         />
       </div>
+      {isComputed && <p className="text-xs text-muted-foreground">Valor calculado pelos itens abaixo</p>}
     </div>
   );
 }
@@ -90,6 +98,12 @@ function SalesPage() {
   const [cardType, setCardType] = useState<"card_credit" | "card_debit">("card_credit");
   const [installments, setInstallments] = useState("1");
   const [customerId, setCustomerId] = useState<string | null>(null);
+  const [cashAmount, setCashAmount] = useState("");
+  const [cashNote, setCashNote] = useState("");
+  const [items, setItems] = useState<SaleItem[]>([]);
+  const itemsTotal = saleItemsTotal(items);
+  const computed = items.length > 0 ? itemsTotal : null;
+  const parseAmount = (v: string) => Number(v.replace(/\./g, "").replace(",", ".")) || 0;
 
   const companyId = session?.companyId;
   const hasPaymentSetup = !!session?.payment.pixKey;
@@ -104,40 +118,49 @@ function SalesPage() {
         .eq("company_id", companyId!);
       if (filterBranchId) q = q.eq("branch_id", filterBranchId);
       const { data } = await q.order("created_at", { ascending: false }).limit(20);
-      return data ?? [];
+      const list = data ?? [];
+      const ids = list.map((s) => s.id);
+      const itemsBySale: Record<string, string> = {};
+      if (ids.length) {
+        const { data: si } = await supabase
+          .from("sale_items")
+          .select("sale_id, description, quantity")
+          .in("sale_id", ids);
+        for (const it of si ?? []) {
+          const label = `${it.description} x${Number(it.quantity)}`;
+          itemsBySale[it.sale_id] = itemsBySale[it.sale_id] ? `${itemsBySale[it.sale_id]}, ${label}` : label;
+        }
+      }
+      return list.map((s) => ({ ...s, itemsSummary: itemsBySale[s.id] ?? null }));
     },
   });
 
   const registerSale = useMutation({
     mutationFn: async (payload: {
-      method: "pix" | "card_credit" | "card_debit";
+      method: "pix" | "card_credit" | "card_debit" | "cash";
       gross: number;
       fee: number;
       installments: number;
       pixPayload?: string;
+      note?: string;
     }) => {
       if (!writeBranchId) throw new Error(BRANCH_REQUIRED_MSG);
-      const { error } = await supabase.from("sales").insert({
-        company_id: companyId!,
-        branch_id: writeBranchId,
-        seller_id: session!.userId,
-        customer_id: customerId,
-        method: payload.method,
-        installments: payload.installments,
-        gross_amount: payload.gross,
-        fee_amount: payload.fee,
-        net_amount: payload.gross - payload.fee,
-        pix_payload: payload.pixPayload ?? null,
-        status: "paid",
+      const payloadItems = items
+        .filter((i) => i.quantity > 0)
+        .map((i) => ({ product_id: i.productId, quantity: i.quantity }));
+      const { error } = await supabase.rpc("register_sale", {
+        _company_id: companyId!,
+        _branch_id: writeBranchId,
+        _customer_id: customerId as unknown as string,
+        _method: payload.method,
+        _installments: payload.installments,
+        _fee_amount: payload.fee,
+        _pix_payload: (payload.pixPayload ?? null) as unknown as string,
+        _note: (payload.note?.trim() || null) as unknown as string,
+        _items: payloadItems,
+        _manual_gross: payload.gross,
       });
-      if (error) throw error;
-      await supabase.from("audit_logs").insert({
-        company_id: companyId!,
-        user_id: session!.userId,
-        action: "sale.create",
-        entity: "sales",
-        details: { method: payload.method, gross: payload.gross },
-      });
+      if (error) throw new Error(error.message);
     },
     onSuccess: () => {
       toast.success("Venda registrada");
@@ -145,13 +168,15 @@ function SalesPage() {
       queryClient.invalidateQueries({ queryKey: ["dashboard", companyId] });
       queryClient.invalidateQueries({ queryKey: ["customers", companyId] });
       if (customerId) queryClient.invalidateQueries({ queryKey: ["customer-sales", customerId] });
+      queryClient.invalidateQueries({ queryKey: ["products", companyId] });
       setCustomerId(null);
+      setItems([]);
     },
     onError: (e: Error) => toast.error("Erro ao registrar venda", { description: e.message }),
   });
 
   async function generatePix() {
-    const amount = Number(pixAmount.replace(",", "."));
+    const amount = computed ?? parseAmount(pixAmount);
     if (!amount || amount <= 0) return toast.error("Informe um valor válido");
     if (!session?.payment.pixKey) return toast.error("Cadastre sua chave PIX em Ajustes");
 
@@ -167,7 +192,7 @@ function SalesPage() {
     setPixData({ payload, image, amount });
   }
 
-  const cardValue = Number(cardAmount.replace(",", ".")) || 0;
+  const cardValue = computed ?? parseAmount(cardAmount);
   const fees = cardFees({
     amount: cardValue,
     installments: Number(installments),
@@ -205,6 +230,16 @@ function SalesPage() {
         <CustomerPicker value={customerId} onChange={setCustomerId} disabled={!writeBranchId} />
       </div>
 
+      <div className="surface p-4">
+        <SaleItemsPicker
+          companyId={companyId}
+          branchId={writeBranchId}
+          items={items}
+          onChange={setItems}
+          disabled={!writeBranchId}
+        />
+      </div>
+
       {!hasPaymentSetup && (
         <div className="surface border-warning/40 bg-warning-soft/40 p-5">
           <div className="flex items-start gap-3">
@@ -227,7 +262,7 @@ function SalesPage() {
       )}
 
       <Tabs defaultValue="pix">
-        <TabsList className="grid h-auto w-full grid-cols-2 gap-1 rounded-xl bg-secondary p-1">
+        <TabsList className="grid h-auto w-full grid-cols-3 gap-1 rounded-xl bg-secondary p-1">
           <TabsTrigger
             value="pix"
             className="gap-2 rounded-lg py-2.5 text-sm font-semibold data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:shadow-sm"
@@ -240,11 +275,17 @@ function SalesPage() {
           >
             <CreditCard className="size-4" /> Cartão
           </TabsTrigger>
+          <TabsTrigger
+            value="cash"
+            className="gap-2 rounded-lg py-2.5 text-sm font-semibold data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:shadow-sm"
+          >
+            <Banknote className="size-4" /> Dinheiro
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="pix">
           <div className="surface mt-3 space-y-4 p-5">
-            <AmountField id="pixAmount" value={pixAmount} onChange={setPixAmount} />
+            <AmountField id="pixAmount" value={pixAmount} onChange={setPixAmount} computed={computed} />
             <Button
               size="lg"
               className="w-full gap-2"
@@ -323,7 +364,7 @@ function SalesPage() {
 
         <TabsContent value="card">
           <div className="surface mt-3 space-y-4 p-5">
-            <AmountField id="cardAmount" value={cardAmount} onChange={setCardAmount} />
+            <AmountField id="cardAmount" value={cardAmount} onChange={setCardAmount} computed={computed} />
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label>Tipo</Label>
@@ -405,6 +446,39 @@ function SalesPage() {
             </Button>
           </div>
         </TabsContent>
+
+        <TabsContent value="cash">
+          <div className="surface mt-3 space-y-4 p-5">
+            <AmountField id="cashAmount" value={cashAmount} onChange={setCashAmount} computed={computed} />
+            <div className="space-y-1.5">
+              <Label htmlFor="cashNote">Observação (opcional)</Label>
+              <Input id="cashNote" value={cashNote} maxLength={300} onChange={(e) => setCashNote(e.target.value)} />
+            </div>
+            <Button
+              size="lg"
+              className="w-full gap-2"
+              disabled={registerSale.isPending || !writeBranchId}
+              onClick={() =>
+                guard(() => {
+                  const value = computed ?? parseAmount(cashAmount);
+                  if (value <= 0) return toast.error("Informe um valor válido");
+                  registerSale.mutate(
+                    { method: "cash", gross: value, fee: 0, installments: 1, note: cashNote },
+                    {
+                      onSuccess: () => {
+                        setCashAmount("");
+                        setCashNote("");
+                      },
+                    },
+                  );
+                })
+              }
+            >
+              {registerSale.isPending ? <Loader2 className="size-4 animate-spin" /> : <Banknote className="size-4" />}
+              Registrar venda em dinheiro
+            </Button>
+          </div>
+        </TabsContent>
       </Tabs>
 
       <div className="surface p-5">
@@ -434,6 +508,7 @@ function SalesPage() {
                           ? "Dinheiro"
                           : `Crédito ${s.installments}x`}
                   </p>
+                  {s.itemsSummary && <p className="truncate text-xs text-muted-foreground">{s.itemsSummary}</p>}
                   <p className="text-xs text-muted-foreground">{dateTime(s.created_at)}</p>
                 </div>
                 <div className="text-right">

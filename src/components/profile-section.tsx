@@ -150,16 +150,11 @@ export function ProfileSection() {
     mutationFn: async () => {
       if (!session) throw new Error("Sessão não encontrada.");
       const g = Number(goal.replace(/\./g, "").replace(",", ".") || "0");
-      const c = Number(commission.replace(",", ".") || "0");
-      if (!Number.isFinite(g) || g < 0) throw new Error("Meta deve ser um valor maior ou igual a zero.");
-      if (!Number.isFinite(c) || c < 0 || c > 100) throw new Error("Comissão deve estar entre 0 e 100.");
-      const { data, error } = await supabase
-        .from("memberships")
-        .update({ monthly_goal: g, commission_percent: c })
-        .eq("id", session.membershipId)
-        .select("id");
-      if (error) throw error;
-      if (!data || data.length === 0) throw new Error("Você não tem permissão para alterar sua meta. Peça ao dono ou gerente.");
+      const { error } = await supabase.rpc("update_my_monthly_goal", {
+        _company_id: session.companyId,
+        _goal: g,
+      });
+      if (error) throw new Error(error.message);
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["gestto-session"] });
@@ -388,8 +383,9 @@ export function ProfileSection() {
             <Input id="my-goal" inputMode="decimal" value={goal} onChange={(e) => setGoal(e.target.value)} />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="my-commission">Comissão (%)</Label>
-            <Input id="my-commission" inputMode="decimal" value={commission} onChange={(e) => setCommission(e.target.value)} />
+            <Label>Comissão (%)</Label>
+            <p className="num flex h-10 items-center text-sm">{commission || "0"}%</p>
+            <p className="text-xs text-muted-foreground">A comissão é definida pelo dono ou gerente em Equipe.</p>
           </div>
         </div>
         <Button variant="outline" onClick={() => saveGoal.mutate()} disabled={saveGoal.isPending}>
