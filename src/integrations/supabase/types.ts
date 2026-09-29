@@ -843,6 +843,25 @@ export type Database = {
       is_company_member: { Args: { _company_id: string }; Returns: boolean }
       membership_company: { Args: { _membership_id: string }; Returns: string }
       owns_membership: { Args: { _membership_id: string }; Returns: boolean }
+      register_sale: {
+        Args: {
+          _branch_id: string
+          _company_id: string
+          _customer_id: string
+          _fee_amount: number
+          _installments: number
+          _items: Json
+          _manual_gross: number
+          _method: Database["public"]["Enums"]["payment_method"]
+          _note: string
+          _pix_payload: string
+        }
+        Returns: string
+      }
+      update_my_monthly_goal: {
+        Args: { _company_id: string; _goal: number }
+        Returns: undefined
+      }
     }
     Enums: {
       app_module:
