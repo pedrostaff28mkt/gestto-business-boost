@@ -1,12 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { Package, Plus, AlertTriangle, Loader2, Sparkles, ImagePlus } from "lucide-react";
+import { Layers, Package, Plus, AlertTriangle, Loader2, Sparkles, ImagePlus } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useGestto } from "@/hooks/use-gestto";
 import { useActiveBranch, BRANCH_REQUIRED_MSG } from "@/hooks/use-active-branch";
 import { usePaywall } from "@/components/paywall";
+import { RecipeDialog } from "@/components/recipe-dialog";
 import { brl, num } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -77,6 +78,15 @@ function InventoryPage() {
     },
   });
 
+  const { data: withRecipe } = useQuery({
+    queryKey: ["recipe-products", companyId],
+    enabled: !!companyId,
+    queryFn: async () => {
+      const { data } = await supabase.from("recipe_items").select("product_id").eq("company_id", companyId!);
+      return new Set((data ?? []).map((r) => r.product_id));
+    },
+  });
+
   const createProduct = useMutation({
     mutationFn: async () => {
       if (!writeBranchId) throw new Error(BRANCH_REQUIRED_MSG);
@@ -134,6 +144,7 @@ function InventoryPage() {
   }
 
   const canWrite = can("inventory", "create");
+  const canRecipe = can("inventory", "create") || can("inventory", "edit");
 
   return (
     <div className="space-y-4">
@@ -272,7 +283,12 @@ function InventoryPage() {
                     {p.image_url ? <img src={p.image_url} alt={p.name} className="size-full object-cover" loading="lazy" /> : <Package className="size-5" />}
                   </span>
                   <div className="min-w-0">
-                  <p className="truncate font-medium">{p.name}</p>
+                  <p className="flex items-center gap-1.5 font-medium">
+                    <span className="truncate">{p.name}</span>
+                    {withRecipe?.has(p.id) && (
+                      <span title="Tem ficha técnica" className="text-primary"><Layers className="size-3.5" /></span>
+                    )}
+                  </p>
                   {p.description && <p className="truncate text-xs text-muted-foreground">{p.description}</p>}
                   <p className="num text-xs text-muted-foreground">
                     custo {brl(Number(p.cost_price))} · margem {num(marginP, 0)}%
@@ -285,6 +301,9 @@ function InventoryPage() {
                     <Badge variant="outline" className="gap-1 border-warning text-warning-foreground">
                       <AlertTriangle className="size-3" /> baixo
                     </Badge>
+                  )}
+                  {canRecipe && (
+                    <RecipeDialog companyId={companyId!} product={{ id: p.id, name: p.name }} products={products.map((x) => ({ id: x.id, name: x.name }))} />
                   )}
                   <div className="text-right">
                     <p className="num font-semibold">{brl(Number(p.sale_price))}</p>
