@@ -514,8 +514,10 @@ export type Database = {
           company_id: string
           cost_price: number
           created_at: string
+          description: string | null
           expires_at: string | null
           id: string
+          image_url: string | null
           max_stock: number | null
           min_stock: number
           name: string
@@ -532,8 +534,10 @@ export type Database = {
           company_id: string
           cost_price?: number
           created_at?: string
+          description?: string | null
           expires_at?: string | null
           id?: string
+          image_url?: string | null
           max_stock?: number | null
           min_stock?: number
           name: string
@@ -550,8 +554,10 @@ export type Database = {
           company_id?: string
           cost_price?: number
           created_at?: string
+          description?: string | null
           expires_at?: string | null
           id?: string
+          image_url?: string | null
           max_stock?: number | null
           min_stock?: number
           name?: string
@@ -607,6 +613,58 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      recipe_items: {
+        Row: {
+          company_id: string
+          created_at: string
+          id: string
+          input_product_id: string
+          product_id: string
+          quantity: number
+          unit: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          id?: string
+          input_product_id: string
+          product_id: string
+          quantity: number
+          unit?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          id?: string
+          input_product_id?: string
+          product_id?: string
+          quantity?: number
+          unit?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recipe_items_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "recipe_items_input_product_id_fkey"
+            columns: ["input_product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "recipe_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       sale_items: {
         Row: {
@@ -822,6 +880,7 @@ export type Database = {
         Args: { _company_name: string }
         Returns: string
       }
+      delete_sale: { Args: { _sale_id: string }; Returns: undefined }
       get_invite_preview: {
         Args: { _code: string }
         Returns: {
