@@ -360,6 +360,7 @@ function CustomerDetail({
   branches: { id: string; name: string }[] | null;
 }) {
   const { can } = useGestto();
+  const { guard } = usePaywall();
   const canEdit = can("crm", "edit");
   const [form, setForm] = useState(customer);
   useEffect(() => setForm(customer), [customer]);
