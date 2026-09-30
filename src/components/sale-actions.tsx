@@ -170,8 +170,9 @@ export function SaleActions({
             >
               {del.isPending && <Loader2 className="size-4 animate-spin" />} Excluir
             </AlertDialogAction>
-          </AlertDialogContent>
-        </AlertDialog>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
