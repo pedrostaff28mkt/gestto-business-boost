@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useGestto } from "@/hooks/use-gestto";
 import { useActiveBranch } from "@/hooks/use-active-branch";
+import { usePaywall } from "@/components/paywall";
 
 const BRANCH_MSG = "Selecione uma filial no topo da tela para continuar";
 import { brl, dateTime } from "@/lib/format";
@@ -281,6 +282,7 @@ function CreateCustomerDialog({
   branchId: string | null;
   onDone: () => void;
 }) {
+  const { guard } = usePaywall();
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
@@ -339,7 +341,7 @@ function CreateCustomerDialog({
           </div>
         </fieldset>
         <DialogFooter>
-          <Button onClick={() => create.mutate()} disabled={create.isPending || !branchId}>Cadastrar</Button>
+          <Button onClick={() => guard(() => create.mutate())} disabled={create.isPending || !branchId}>Cadastrar</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -359,6 +361,7 @@ function CustomerDetail({
   branches: { id: string; name: string }[] | null;
 }) {
   const { can } = useGestto();
+  const { guard } = usePaywall();
   const canEdit = can("crm", "edit");
   const [form, setForm] = useState(customer);
   useEffect(() => setForm(customer), [customer]);
@@ -534,13 +537,13 @@ function CustomerDetail({
               variant="ghost"
               className="gap-2 text-destructive hover:text-destructive"
               disabled={remove.isPending}
-              onClick={() => { if (confirm("Excluir este cliente?")) remove.mutate(); }}
+              onClick={() => { guard(() => { if (confirm("Excluir este cliente?")) remove.mutate(); }); }}
             >
               <Trash2 className="size-4" /> Excluir
             </Button>
           ) : <span />}
           {canEdit && (
-            <Button onClick={() => save.mutate()} disabled={save.isPending}>Salvar alterações</Button>
+            <Button onClick={() => guard(() => save.mutate())} disabled={save.isPending}>Salvar alterações</Button>
           )}
         </DialogFooter>
       </DialogContent>
