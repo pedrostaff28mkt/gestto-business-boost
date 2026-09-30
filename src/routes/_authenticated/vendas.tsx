@@ -29,6 +29,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { MethodIcon } from "@/components/payment-method-badge";
 import { CustomerPicker } from "@/components/customer-picker";
 import { SaleItemsPicker, saleItemsTotal, type SaleItem } from "@/components/sale-items-picker";
+import { SaleActions } from "@/components/sale-actions";
 
 export const Route = createFileRoute("/_authenticated/vendas")({
   head: () => ({
@@ -114,7 +115,7 @@ function SalesPage() {
     queryFn: async () => {
       let q = supabase
         .from("sales")
-        .select("id, created_at, method, installments, gross_amount, fee_amount, net_amount, status")
+        .select("id, created_at, method, installments, gross_amount, fee_amount, net_amount, status, note")
         .eq("company_id", companyId!);
       if (filterBranchId) q = q.eq("branch_id", filterBranchId);
       const { data } = await q.order("created_at", { ascending: false }).limit(20);
@@ -515,6 +516,13 @@ function SalesPage() {
                   <p className="num text-sm font-semibold">{brl(Number(s.gross_amount))}</p>
                   <p className="num text-xs text-muted-foreground">líq. {brl(Number(s.net_amount))}</p>
                 </div>
+                <SaleActions
+                  sale={s}
+                  canEdit={can("sales", "edit")}
+                  canDelete={can("sales", "delete")}
+                  companyId={companyId!}
+                  guard={guard}
+                />
               </li>
             ))}
           </ul>
