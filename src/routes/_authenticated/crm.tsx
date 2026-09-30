@@ -282,6 +282,7 @@ function CreateCustomerDialog({
   branchId: string | null;
   onDone: () => void;
 }) {
+  const { guard } = usePaywall();
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
