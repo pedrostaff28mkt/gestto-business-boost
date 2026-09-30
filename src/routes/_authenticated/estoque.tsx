@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { Package, Plus, AlertTriangle, Loader2, Sparkles } from "lucide-react";
+import { Package, Plus, AlertTriangle, Loader2, Sparkles, ImagePlus } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useGestto } from "@/hooks/use-gestto";
@@ -11,6 +11,7 @@ import { brl, num } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
@@ -34,6 +35,7 @@ export const Route = createFileRoute("/_authenticated/estoque")({
 
 const emptyForm = {
   name: "",
+  description: "",
   sku: "",
   cost_price: "",
   sale_price: "",
@@ -49,6 +51,16 @@ function InventoryPage() {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState(emptyForm);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const pickImage = (f: File | undefined) => {
+    if (!f) return;
+    if (!f.type.startsWith("image/")) return toast.error("Escolha um arquivo de imagem.");
+    if (f.size > 3 * 1024 * 1024) return toast.error("A imagem deve ter até 3MB.");
+    if (imagePreview) URL.revokeObjectURL(imagePreview);
+    setImageFile(f);
+    setImagePreview(URL.createObjectURL(f));
+  };
   const companyId = session?.companyId;
 
   const { data: products } = useQuery({
@@ -57,7 +69,7 @@ function InventoryPage() {
     queryFn: async () => {
       let q = supabase
         .from("products")
-        .select("id, name, sku, cost_price, sale_price, stock_qty, min_stock, expires_at, active")
+        .select("id, name, description, image_url, sku, cost_price, sale_price, stock_qty, min_stock, expires_at, active")
         .eq("company_id", companyId!);
       if (filterBranchId) q = q.eq("branch_id", filterBranchId);
       const { data } = await q.order("name");
@@ -68,10 +80,20 @@ function InventoryPage() {
   const createProduct = useMutation({
     mutationFn: async () => {
       if (!writeBranchId) throw new Error(BRANCH_REQUIRED_MSG);
+      let image_url: string | null = null;
+      if (imageFile) {
+        const safe = imageFile.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+        const path = `${companyId}/${crypto.randomUUID()}-${safe}`;
+        const up = await supabase.storage.from("product-images").upload(path, imageFile, { contentType: imageFile.type });
+        if (up.error) throw new Error("Falha ao enviar a foto: " + up.error.message);
+        image_url = supabase.storage.from("product-images").getPublicUrl(path).data.publicUrl;
+      }
       const { error } = await supabase.from("products").insert({
         company_id: companyId!,
         branch_id: writeBranchId,
         name: form.name.trim(),
+        description: form.description.trim() || null,
+        image_url,
         sku: form.sku.trim() || null,
         cost_price: Number(form.cost_price.replace(",", ".")) || 0,
         sale_price: Number(form.sale_price.replace(",", ".")) || 0,
@@ -91,6 +113,8 @@ function InventoryPage() {
     onSuccess: () => {
       toast.success("Produto/serviço cadastrado");
       setForm(emptyForm);
+      setImageFile(null);
+      setImagePreview(null);
       setOpen(false);
       queryClient.invalidateQueries({ queryKey: ["products", companyId] });
     },
@@ -139,6 +163,21 @@ function InventoryPage() {
                 <div className="space-y-1.5">
                   <Label htmlFor="name">Nome</Label>
                   <Input id="name" value={form.name} onChange={set("name")} placeholder="Ex: Corte de cabelo, Bolo de chocolate, Consultoria..." />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="desc">Descrição (opcional)</Label>
+                  <Textarea id="desc" rows={2} value={form.description} onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))} placeholder="Detalhes do produto/serviço" />
+                </div>
+                <div className="flex items-center gap-3">
+                  <label className="flex size-20 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-xl border border-dashed border-border bg-secondary text-muted-foreground hover:bg-secondary/70">
+                    {imagePreview ? <img src={imagePreview} alt="Prévia" className="size-full object-cover" /> : <ImagePlus className="size-6" />}
+                    <input type="file" accept="image/*" className="hidden" aria-label="Foto do produto/serviço" onChange={(e) => { pickImage(e.target.files?.[0]); e.target.value = ""; }} />
+                  </label>
+                  <div className="text-sm">
+                    <p className="font-medium">Foto (opcional)</p>
+                    <p className="text-xs text-muted-foreground">Imagem até 3MB. Toque no quadrado para escolher.</p>
+                    {imageFile && <button type="button" className="text-xs text-destructive" onClick={() => { setImageFile(null); setImagePreview(null); }}>Remover foto</button>}
+                  </div>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1.5">
@@ -228,12 +267,18 @@ function InventoryPage() {
                 : 0;
             return (
               <div key={p.id} className="surface flex items-center justify-between gap-3 p-4">
-                <div className="min-w-0">
+                <div className="flex min-w-0 items-center gap-3">
+                  <span className="flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-secondary text-muted-foreground">
+                    {p.image_url ? <img src={p.image_url} alt={p.name} className="size-full object-cover" loading="lazy" /> : <Package className="size-5" />}
+                  </span>
+                  <div className="min-w-0">
                   <p className="truncate font-medium">{p.name}</p>
+                  {p.description && <p className="truncate text-xs text-muted-foreground">{p.description}</p>}
                   <p className="num text-xs text-muted-foreground">
                     custo {brl(Number(p.cost_price))} · margem {num(marginP, 0)}%
                     {p.expires_at ? ` · val. ${new Date(p.expires_at).toLocaleDateString("pt-BR")}` : ""}
                   </p>
+                  </div>
                 </div>
                 <div className="flex shrink-0 items-center gap-3">
                   {low && (
