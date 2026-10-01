@@ -27,6 +27,7 @@ export const Route = createFileRoute("/auth")({
 function AuthPage() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [recovering, setRecovering] = useState(false);
   const [form, setForm] = useState({ email: "", password: "", fullName: "", companyName: "" });
 
   useEffect(() => {
@@ -65,6 +66,19 @@ function AuthPage() {
       .maybeSingle();
 
     navigate({ to: profile?.is_admin ? "/painel-interno" : "/dashboard", replace: true });
+  }
+
+  async function sendReset(e: React.FormEvent) {
+    e.preventDefault();
+    setLoading(true);
+    await supabase.auth.resetPasswordForEmail(form.email.trim(), {
+      redirectTo: window.location.origin + "/redefinir-senha",
+    });
+    setLoading(false);
+    toast.success("Se esse e-mail existir no Gestto, enviamos um link de recuperação.", {
+      description: "Confira sua caixa de entrada.",
+    });
+    setRecovering(false);
   }
 
   async function signUp(e: React.FormEvent) {
@@ -121,19 +135,47 @@ function AuthPage() {
           </TabsList>
 
           <TabsContent value="signin">
-            <form onSubmit={signIn} className="surface mt-4 space-y-4 p-5">
-              <div className="space-y-1.5">
-                <Label htmlFor="email">E-mail</Label>
-                <Input id="email" type="email" required value={form.email} onChange={set("email")} placeholder="voce@empresa.com.br" />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="password">Senha</Label>
-                <Input id="password" type="password" required value={form.password} onChange={set("password")} placeholder="••••••••" />
-              </div>
-              <Button type="submit" size="lg" className="w-full" disabled={loading}>
-                {loading && <Loader2 className="size-4 animate-spin" />} Entrar
-              </Button>
-            </form>
+            {recovering ? (
+              <form onSubmit={sendReset} className="surface mt-4 space-y-4 p-5">
+                <div className="space-y-1.5">
+                  <Label htmlFor="resetEmail">E-mail</Label>
+                  <Input id="resetEmail" type="email" required value={form.email} onChange={set("email")} placeholder="voce@empresa.com.br" />
+                </div>
+                <Button type="submit" size="lg" className="w-full" disabled={loading}>
+                  {loading && <Loader2 className="size-4 animate-spin" />} Enviar link de recuperação
+                </Button>
+                <button
+                  type="button"
+                  onClick={() => setRecovering(false)}
+                  className="w-full text-center text-xs text-muted-foreground underline-offset-2 hover:underline"
+                >
+                  Voltar para o login
+                </button>
+              </form>
+            ) : (
+              <form onSubmit={signIn} className="surface mt-4 space-y-4 p-5">
+                <div className="space-y-1.5">
+                  <Label htmlFor="email">E-mail</Label>
+                  <Input id="email" type="email" required value={form.email} onChange={set("email")} placeholder="voce@empresa.com.br" />
+                </div>
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="password">Senha</Label>
+                    <button
+                      type="button"
+                      onClick={() => setRecovering(true)}
+                      className="text-xs text-muted-foreground underline-offset-2 hover:underline"
+                    >
+                      Esqueceu sua senha?
+                    </button>
+                  </div>
+                  <Input id="password" type="password" required value={form.password} onChange={set("password")} placeholder="••••••••" />
+                </div>
+                <Button type="submit" size="lg" className="w-full" disabled={loading}>
+                  {loading && <Loader2 className="size-4 animate-spin" />} Entrar
+                </Button>
+              </form>
+            )}
           </TabsContent>
 
           <TabsContent value="signup">
