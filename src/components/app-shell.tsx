@@ -46,7 +46,7 @@ function LogoMark({ tone = "light" }: { tone?: "light" | "dark" }) {
     <div className="flex items-center gap-2">
       <Logo size={32} forceTone={tone === "dark" ? "dark" : undefined} />
       <span
-        className={`font-display text-lg font-bold tracking-tight ${tone === "dark" ? "text-background" : "text-foreground"}`}
+        className={`font-display text-lg font-bold tracking-tight ${tone === "dark" ? "text-white" : "text-foreground"}`}
       >
         Gestto
       </span>
