@@ -8,7 +8,7 @@ export const methodMeta = (method: MethodKey) => {
     case "pix":
       return { label: "PIX", icon: QrCode, tint: "bg-primary/10 text-primary", chart: "var(--chart-1)" };
     case "card_credit":
-      return { label: "Crédito", icon: CreditCard, tint: "bg-chart-4/10 text-chart-4", chart: "var(--chart-4)" };
+      return { label: "Crédito", icon: CreditCard, tint: "bg-chart-3/10 text-chart-3", chart: "var(--chart-3)" };
     case "card_debit":
       return { label: "Débito", icon: Wallet, tint: "bg-chart-5/15 text-muted-foreground", chart: "var(--chart-5)" };
     case "cash":
