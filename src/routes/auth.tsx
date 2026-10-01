@@ -68,6 +68,19 @@ function AuthPage() {
     navigate({ to: profile?.is_admin ? "/painel-interno" : "/dashboard", replace: true });
   }
 
+  async function sendReset(e: React.FormEvent) {
+    e.preventDefault();
+    setLoading(true);
+    await supabase.auth.resetPasswordForEmail(form.email.trim(), {
+      redirectTo: window.location.origin + "/redefinir-senha",
+    });
+    setLoading(false);
+    toast.success("Se esse e-mail existir no Gestto, enviamos um link de recuperação.", {
+      description: "Confira sua caixa de entrada.",
+    });
+    setRecovering(false);
+  }
+
   async function signUp(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
