@@ -27,6 +27,7 @@ export const Route = createFileRoute("/auth")({
 function AuthPage() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [recovering, setRecovering] = useState(false);
   const [form, setForm] = useState({ email: "", password: "", fullName: "", companyName: "" });
 
   useEffect(() => {
