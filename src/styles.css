@@ -209,6 +209,14 @@
   box-shadow: 0 30px 70px -20px oklch(0 0 0 / 70%);
 }
 
+@utility hero-mascot {
+  pointer-events: none;
+  object-fit: contain;
+  filter: drop-shadow(0 30px 60px oklch(0 0 0 / 55%))
+    drop-shadow(0 8px 20px oklch(0 0 0 / 35%));
+  mask-image: linear-gradient(to bottom, #000 82%, transparent 99%);
+}
+
 @utility hero-fade-out {
   position: absolute;
   inset-inline: 0;

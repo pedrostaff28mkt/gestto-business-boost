@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { Area, AreaChart, Bar, BarChart, Cell, Pie, PieChart } from "recharts";
 import { Button } from "@/components/ui/button";
+import mascoteAsset from "@/assets/mascote.png.asset.json";
 
 /**
  * DADOS ILUSTRATIVOS (MOCK) — apenas para composição visual do hero.
@@ -114,6 +115,13 @@ export function LandingHero() {
 
         {/* Composição visual — todos os números abaixo são ilustrativos (mock) */}
         <div className="relative min-h-[520px] lg:min-h-[560px]">
+          {/* Mascote — elemento visual de apoio, atrás dos cards flutuantes */}
+          <img
+            src={mascoteAsset.url}
+            alt="Mascote da Gestto"
+            className="hero-mascot absolute bottom-0 left-0 z-0 hidden h-[380px] sm:block"
+            loading="eager"
+          />
           <GlassCard className="absolute top-0 left-[8%] w-[340px] max-w-full">
             <p className="text-xs text-hero-muted">Faturamento</p>
             <div className="mt-1 flex items-end gap-2">
