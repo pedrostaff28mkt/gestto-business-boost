@@ -1,7 +1,7 @@
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Building2, Users, Clock, CheckCircle2, XCircle } from "lucide-react";
+import { Building2, Users, Clock, CheckCircle2, XCircle, LifeBuoy } from "lucide-react";
 import {
   BarChart,
   Bar,
@@ -16,6 +16,7 @@ import {
 import { getAdminStats } from "@/lib/admin-stats.functions";
 import { num, shortDate } from "@/lib/format";
 import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/painel-interno")({
   ssr: false,
@@ -107,11 +108,18 @@ function AdminPanel() {
   return (
     <div className="min-h-screen bg-background">
       <div className="mx-auto max-w-5xl space-y-4 px-4 py-8">
-        <div>
-          <h1 className="text-2xl font-bold">Painel interno Gestto</h1>
-          <p className="text-sm text-muted-foreground">
-            Métricas da plataforma. Uso interno — não divulgue esta URL.
-          </p>
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h1 className="text-2xl font-bold">Painel interno Gestto</h1>
+            <p className="text-sm text-muted-foreground">
+              Métricas da plataforma. Uso interno — não divulgue esta URL.
+            </p>
+          </div>
+          <Button asChild variant="outline">
+            <Link to="/painel-interno/suporte">
+              <LifeBuoy className="size-4" /> Central de suporte
+            </Link>
+          </Button>
         </div>
 
         {isLoading && <p className="text-sm text-muted-foreground">Carregando métricas…</p>}

@@ -8,6 +8,7 @@ import { useGestto, roleLabels } from "@/hooks/use-gestto";
 import { usePaywall, LockedArea } from "@/components/paywall";
 import { ProfileSection } from "@/components/profile-section";
 import { BranchesSection } from "@/components/branches-section";
+import { SupportSection } from "@/components/support-section";
 import { openTictoCheckout } from "@/lib/ticto";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -112,6 +113,8 @@ function SettingsPage() {
       </div>
 
       <ProfileSection />
+
+      <SupportSection />
 
       {can("settings") && <BranchesSection />}
 
