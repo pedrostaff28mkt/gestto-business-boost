@@ -114,7 +114,7 @@ export function LandingHero() {
         </div>
 
         {/* Composição visual — todos os números abaixo são ilustrativos (mock) */}
-        <div className="relative min-h-[790px] sm:min-h-[560px]">
+        <div className="relative min-h-[790px] sm:min-h-[560px] lg:translate-x-20">
           {/* Mascote — elemento visual de apoio, atrás dos cards flutuantes */}
           <img
             src={mascoteAsset.url}
@@ -199,7 +199,7 @@ export function LandingHero() {
             </div>
           </GlassCard>
 
-          <GlassCard className="absolute top-[398px] right-0 z-20 w-[200px] sm:top-auto sm:right-auto sm:bottom-0 sm:left-[-2%] sm:w-[200px] lg:top-[-70px] lg:bottom-auto lg:left-0">
+          <GlassCard className="absolute top-[398px] left-1/2 z-20 w-[220px] -translate-x-1/2 sm:top-auto sm:bottom-0 sm:left-[-2%] sm:w-[200px] sm:translate-x-0 lg:top-[160px] lg:bottom-auto lg:left-[-30%]">
             <p className="text-xs text-hero-muted">Fluxo de caixa</p>
             <div className="mt-2 h-14">
               {mounted && (
@@ -212,7 +212,7 @@ export function LandingHero() {
 
           {/* Mockup de celular — ilustração de produto/roadmap, a IA em chat ainda não é uma
               funcionalidade ativa na aplicação. */}
-          <div className="hero-phone absolute right-0 bottom-0 z-40 w-[186px] p-3 sm:right-0 sm:bottom-0">
+          <div className="hero-phone absolute bottom-0 left-1/2 z-40 w-[196px] -translate-x-1/2 p-3 sm:right-0 sm:left-auto sm:w-[186px] sm:translate-x-0">
             <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-hero-glass-strong" />
             <div className="flex items-center gap-2">
               <span className="hero-glass flex size-7 items-center justify-center rounded-lg">
