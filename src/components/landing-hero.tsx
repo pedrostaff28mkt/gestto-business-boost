@@ -106,7 +106,7 @@ export function LandingHero() {
               variant="ghost"
               className="gap-2 text-hero-foreground hover:bg-hero-glass hover:text-hero-foreground"
             >
-              <a href="#modulos">
+              <a href="#como-funciona">
                 <Play className="size-4" /> Ver como funciona
               </a>
             </Button>
@@ -114,15 +114,15 @@ export function LandingHero() {
         </div>
 
         {/* Composição visual — todos os números abaixo são ilustrativos (mock) */}
-        <div className="relative min-h-[520px] lg:min-h-[560px]">
+        <div className="relative grid gap-3 sm:block sm:min-h-[560px]">
           {/* Mascote — elemento visual de apoio, atrás dos cards flutuantes */}
           <img
             src={mascoteAsset.url}
             alt="Mascote da Gestto"
-            className="hero-mascot absolute bottom-0 left-0 z-0 hidden h-[380px] sm:block"
+            className="hero-mascot absolute bottom-0 left-[-4%] z-0 hidden h-[430px] sm:block lg:left-[-10%]"
             loading="eager"
           />
-          <GlassCard className="absolute top-0 left-[8%] w-[340px] max-w-full">
+          <GlassCard className="col-span-2 sm:absolute sm:top-0 sm:right-0 sm:z-10 sm:w-[320px]">
             <p className="text-xs text-hero-muted">Faturamento</p>
             <div className="mt-1 flex items-end gap-2">
               <p className="num text-3xl font-semibold text-hero-foreground">R$ 128.400</p>
@@ -150,7 +150,7 @@ export function LandingHero() {
             </div>
           </GlassCard>
 
-          <GlassCard className="absolute top-[27%] right-0 w-[290px] max-w-full">
+          <GlassCard className="col-span-2 sm:absolute sm:top-[150px] sm:right-[4%] sm:z-10 sm:w-[270px]">
             <p className="text-xs text-hero-muted">Visão geral</p>
             <div className="mt-3 space-y-2">
               {mockOverview.map((row) => (
@@ -166,7 +166,7 @@ export function LandingHero() {
             </div>
           </GlassCard>
 
-          <GlassCard className="absolute bottom-[19%] left-[196px] w-[250px] max-w-full">
+          <GlassCard className="col-span-2 sm:absolute sm:right-[200px] sm:bottom-[120px] sm:z-20 sm:w-[240px] lg:right-[180px]">
             <p className="text-xs text-hero-muted">Vendas por canal</p>
             <div className="mt-2 flex items-center gap-3">
               <div className="size-[84px] shrink-0">
@@ -199,11 +199,11 @@ export function LandingHero() {
             </div>
           </GlassCard>
 
-          <GlassCard className="absolute right-0 bottom-0 w-[215px] max-w-full">
+          <GlassCard className="hidden sm:absolute sm:bottom-0 sm:left-[38%] sm:block sm:z-20 sm:w-[200px] lg:left-[30%]">
             <p className="text-xs text-hero-muted">Fluxo de caixa</p>
             <div className="mt-2 h-14">
               {mounted && (
-                <BarChart data={mockCashFlow} width={180} height={56}>
+                <BarChart data={mockCashFlow} width={150} height={56}>
                   <Bar dataKey="v" fill="var(--hero-accent)" radius={3} isAnimationActive={false} />
                 </BarChart>
               )}
@@ -212,7 +212,7 @@ export function LandingHero() {
 
           {/* Mockup de celular — ilustração de produto/roadmap, a IA em chat ainda não é uma
               funcionalidade ativa na aplicação. */}
-          <div className="hero-phone absolute bottom-0 left-0 z-10 w-[186px] p-3">
+          <div className="hero-phone w-full p-3 sm:absolute sm:right-0 sm:bottom-0 sm:z-30 sm:w-[186px]">
             <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-hero-glass-strong" />
             <div className="flex items-center gap-2">
               <span className="hero-glass flex size-7 items-center justify-center rounded-lg">
