@@ -114,7 +114,7 @@ export function LandingHero() {
         </div>
 
         {/* Composição visual — todos os números abaixo são ilustrativos (mock) */}
-        <div className="relative grid grid-cols-2 gap-3 sm:block sm:min-h-[560px]">
+        <div className="relative grid gap-3 sm:block sm:min-h-[560px]">
           {/* Mascote — elemento visual de apoio, atrás dos cards flutuantes */}
           <img
             src={mascoteAsset.url}
@@ -199,7 +199,7 @@ export function LandingHero() {
             </div>
           </GlassCard>
 
-          <GlassCard className="sm:absolute sm:bottom-0 sm:left-[38%] sm:z-20 sm:w-[200px] lg:left-[30%]">
+          <GlassCard className="hidden sm:absolute sm:bottom-0 sm:left-[38%] sm:block sm:z-20 sm:w-[200px] lg:left-[30%]">
             <p className="text-xs text-hero-muted">Fluxo de caixa</p>
             <div className="mt-2 h-14">
               {mounted && (
