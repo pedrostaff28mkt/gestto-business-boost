@@ -212,7 +212,7 @@ export function LandingHero() {
 
           {/* Mockup de celular — ilustração de produto/roadmap, a IA em chat ainda não é uma
               funcionalidade ativa na aplicação. */}
-          <div className="hero-phone p-3 sm:absolute sm:right-0 sm:bottom-0 sm:z-30 sm:w-[186px]">
+          <div className="hero-phone w-full p-3 sm:absolute sm:right-0 sm:bottom-0 sm:z-30 sm:w-[186px]">
             <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-hero-glass-strong" />
             <div className="flex items-center gap-2">
               <span className="hero-glass flex size-7 items-center justify-center rounded-lg">
