@@ -12,7 +12,6 @@ import {
 } from "lucide-react";
 import { Area, AreaChart, Bar, BarChart, Cell, Pie, PieChart } from "recharts";
 import { Button } from "@/components/ui/button";
-import mascoteAsset from "@/assets/mascote.png.asset.json";
 
 /**
  * DADOS ILUSTRATIVOS (MOCK) — apenas para composição visual do hero.
@@ -114,15 +113,8 @@ export function LandingHero() {
         </div>
 
         {/* Composição visual — todos os números abaixo são ilustrativos (mock) */}
-        <div className="relative min-h-[790px] sm:min-h-[560px] lg:translate-x-20">
-          {/* Mascote — elemento visual de apoio, atrás dos cards flutuantes */}
-          <img
-            src={mascoteAsset.url}
-            alt="Mascote da Gestto"
-            className="hero-mascot absolute bottom-0 left-[-4%] z-0 hidden h-[430px] sm:block lg:left-[-10%]"
-            loading="eager"
-          />
-          <GlassCard className="absolute top-0 left-0 z-10 w-[calc(100%-20px)] sm:right-0 sm:left-auto sm:w-[320px]">
+        <div className="relative min-h-[520px] lg:min-h-[560px]">
+          <GlassCard className="absolute top-0 left-[8%] w-[340px] max-w-full">
             <p className="text-xs text-hero-muted">Faturamento</p>
             <div className="mt-1 flex items-end gap-2">
               <p className="num text-3xl font-semibold text-hero-foreground">R$ 128.400</p>
@@ -150,7 +142,7 @@ export function LandingHero() {
             </div>
           </GlassCard>
 
-          <GlassCard className="absolute top-[148px] right-0 z-20 w-[calc(100%-28px)] sm:top-[150px] sm:right-[4%] sm:w-[270px]">
+          <GlassCard className="absolute top-[27%] right-0 w-[290px] max-w-full">
             <p className="text-xs text-hero-muted">Visão geral</p>
             <div className="mt-3 space-y-2">
               {mockOverview.map((row) => (
@@ -166,7 +158,7 @@ export function LandingHero() {
             </div>
           </GlassCard>
 
-          <GlassCard className="absolute top-[280px] left-0 z-30 w-[230px] sm:top-auto sm:right-[190px] sm:bottom-0 sm:left-auto sm:w-[240px] lg:right-[195px]">
+          <GlassCard className="absolute bottom-[19%] left-[196px] w-[250px] max-w-full">
             <p className="text-xs text-hero-muted">Vendas por canal</p>
             <div className="mt-2 flex items-center gap-3">
               <div className="size-[84px] shrink-0">
@@ -199,11 +191,11 @@ export function LandingHero() {
             </div>
           </GlassCard>
 
-          <GlassCard className="absolute top-[398px] left-[48px] z-20 w-[220px] sm:top-auto sm:bottom-0 sm:left-[-2%] sm:w-[200px] lg:top-[160px] lg:bottom-auto lg:left-[-30%]">
+          <GlassCard className="absolute right-0 bottom-0 w-[215px] max-w-full">
             <p className="text-xs text-hero-muted">Fluxo de caixa</p>
             <div className="mt-2 h-14">
               {mounted && (
-                <BarChart data={mockCashFlow} width={150} height={56}>
+                <BarChart data={mockCashFlow} width={180} height={56}>
                   <Bar dataKey="v" fill="var(--hero-accent)" radius={3} isAnimationActive={false} />
                 </BarChart>
               )}
@@ -212,7 +204,7 @@ export function LandingHero() {
 
           {/* Mockup de celular — ilustração de produto/roadmap, a IA em chat ainda não é uma
               funcionalidade ativa na aplicação. */}
-          <div className="hero-phone absolute bottom-0 left-[64px] z-40 w-[196px] p-3 sm:right-0 sm:left-auto sm:w-[186px]">
+          <div className="hero-phone absolute bottom-0 left-0 z-10 w-[186px] p-3">
             <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-hero-glass-strong" />
             <div className="flex items-center gap-2">
               <span className="hero-glass flex size-7 items-center justify-center rounded-lg">
