@@ -126,10 +126,10 @@ function AdminSupportPage() {
 
         <Tabs value={filter} onValueChange={(value) => setFilter(value as Filter)}>
           <TabsList className="grid h-auto w-full grid-cols-4 sm:w-auto">
-            <TabsTrigger value="open">Abertos</TabsTrigger>
-            <TabsTrigger value="in_progress">Em andamento</TabsTrigger>
-            <TabsTrigger value="resolved">Resolvidos</TabsTrigger>
-            <TabsTrigger value="all">Todos</TabsTrigger>
+            <TabsTrigger value="open" className="px-1 text-xs sm:px-3 sm:text-sm">Abertos</TabsTrigger>
+            <TabsTrigger value="in_progress" className="px-1 text-xs sm:px-3 sm:text-sm">Em andamento</TabsTrigger>
+            <TabsTrigger value="resolved" className="px-1 text-xs sm:px-3 sm:text-sm">Resolvidos</TabsTrigger>
+            <TabsTrigger value="all" className="px-1 text-xs sm:px-3 sm:text-sm">Todos</TabsTrigger>
           </TabsList>
         </Tabs>
 
