@@ -205,8 +205,8 @@ function Landing() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-6xl px-5 py-16">
-        <div className="surface p-7 text-center lg:p-10">
+      <section className="mx-auto max-w-6xl px-5 pt-4 pb-16 sm:py-16">
+        <div className="surface p-5 text-center sm:p-7 lg:p-10">
           <span className="inline-flex items-center rounded-full bg-primary-soft px-3 py-1 text-xs font-medium text-primary">
             Plano Gestto
           </span>
@@ -216,7 +216,7 @@ function Landing() {
           </p>
 
           <div className="mt-6">
-            <p className="num text-5xl font-bold text-primary">R$ 69,99</p>
+            <p className="num text-4xl font-bold text-primary sm:text-5xl">R$ 69,99</p>
             <p className="mt-1 text-sm text-muted-foreground">
               no primeiro mês, depois <span className="num">R$ 99,99</span>/mês
             </p>
@@ -252,8 +252,8 @@ function Landing() {
             <Link to="/auth">Criar minha conta</Link>
           </Button>
 
-          <p className="mt-4 flex items-center justify-center gap-2 text-xs text-muted-foreground">
-            <ShieldCheck className="size-3.5" />
+          <p className="mt-4 text-center text-xs text-balance text-muted-foreground">
+            <ShieldCheck className="mr-1.5 inline size-3.5 align-[-2px]" />
             2 dias grátis, sem cartão · cancele quando quiser, sem multa
           </p>
         </div>
