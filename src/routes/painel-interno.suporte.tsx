@@ -1,10 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { createFileRoute, Link, redirect } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { ArrowLeft, Loader2, MessageSquare, Send } from "lucide-react";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
 import {
   getAdminSupportConversation,
   getAdminSupportTickets,
@@ -34,12 +33,6 @@ export const Route = createFileRoute("/painel-interno/suporte")({
       { name: "twitter:card", content: "summary" },
     ],
   }),
-  beforeLoad: async () => {
-    const { data, error } = await supabase.auth.getUser();
-    if (error || !data.user) throw redirect({ to: "/auth" });
-    const { data: profile } = await supabase.from("profiles").select("is_admin").eq("id", data.user.id).maybeSingle();
-    return { isAdmin: profile?.is_admin === true };
-  },
   component: AdminSupportPage,
 });
 
@@ -72,7 +65,9 @@ function AdminSupportPage() {
 
   const visibleTickets = useMemo(() => {
     const tickets = ticketsQuery.data ?? [];
-    return filter === "all" ? tickets : tickets.filter((ticket) => ticket.status === filter);
+    return filter === "all"
+      ? tickets
+      : tickets.filter((ticket) => filter === "resolved" ? ticket.status === "resolved" || ticket.status === "closed" : ticket.status === filter);
   }, [filter, ticketsQuery.data]);
 
   useEffect(() => {
