@@ -39,7 +39,7 @@ export const Route = createFileRoute("/painel-interno/suporte")({
 type Filter = "open" | "in_progress" | "resolved" | "all";
 
 function AdminSupportPage() {
-  const { isAdmin } = Route.useRouteContext();
+  const { isAdmin } = Route.useRouteContext() as { isAdmin: boolean };
   const queryClient = useQueryClient();
   const fetchTickets = useServerFn(getAdminSupportTickets);
   const fetchConversation = useServerFn(getAdminSupportConversation);

@@ -77,7 +77,7 @@ function AccessDenied() {
 }
 
 function AdminPanel() {
-  const { isAdmin } = Route.useRouteContext();
+  const { isAdmin } = Route.useRouteContext() as { isAdmin: boolean };
   const fetchStats = useServerFn(getAdminStats);
   const { data, isLoading, error } = useQuery({
     queryKey: ["admin-stats"],
