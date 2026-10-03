@@ -199,7 +199,7 @@ export function LandingHero() {
             </div>
           </GlassCard>
 
-          <GlassCard className="absolute top-[398px] right-0 z-20 w-[200px] sm:top-auto sm:right-auto sm:bottom-0 sm:left-[-2%] sm:w-[200px]">
+          <GlassCard className="absolute top-[398px] right-0 z-20 w-[200px] sm:top-auto sm:right-auto sm:bottom-0 sm:left-[-2%] sm:w-[200px] lg:top-[-70px] lg:bottom-auto lg:left-0">
             <p className="text-xs text-hero-muted">Fluxo de caixa</p>
             <div className="mt-2 h-14">
               {mounted && (
