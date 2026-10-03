@@ -985,6 +985,14 @@ export type Database = {
           used: boolean
         }[]
       }
+      get_recent_activations: {
+        Args: never
+        Returns: {
+          activated_at: string
+          company_name: string
+          first_name: string
+        }[]
+      }
       has_company_role: {
         Args: {
           _company_id: string

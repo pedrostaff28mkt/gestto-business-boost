@@ -8,6 +8,13 @@
       "when": 1790589076557,
       "tag": "0000_invite_job_title_copy",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1791036190278,
+      "tag": "0001_get_recent_activations",
+      "breakpoints": true
     }
   ]
 }
