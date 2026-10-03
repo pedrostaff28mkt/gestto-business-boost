@@ -119,7 +119,7 @@ export function LandingHero() {
           <img
             src={mascoteAsset.url}
             alt="Mascote da Gestto"
-            className="hero-mascot absolute bottom-0 left-0 z-0 hidden h-[500px] sm:block lg:h-[540px]"
+            className="hero-mascot absolute bottom-0 left-0 z-0 hidden h-[380px] sm:block"
             loading="eager"
           />
           <GlassCard className="absolute top-0 left-[8%] w-[340px] max-w-full">
