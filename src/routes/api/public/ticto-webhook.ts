@@ -36,17 +36,36 @@ function extractStatusText(payload: any): string {
 }
 
 function mapStatus(statusText: string): "active" | "past_due" | "canceled" | null {
-  const ACTIVE = new Set(["authorized", "paid"]);
-  const PAST_DUE = new Set(["retrying", "in_protest", "acquirer_error"]);
-  const CANCELED = new Set([
-    "refused", "blocked", "chargedback", "prechargeback",
-    "canceled", "refund_requested", "in_settlement", "refunded",
-  ]);
-  // processing e waiting_payment são estados transitórios — não atualizam nada, ainda.
+  const s = statusText.toLowerCase();
 
-  if (ACTIVE.has(statusText)) return "active";
-  if (PAST_DUE.has(statusText)) return "past_due";
-  if (CANCELED.has(statusText)) return "canceled";
+  // transitório — não atualiza nada ainda
+  if (s === "processing" || s === "waiting_payment") return null;
+
+  // aprovado / ativo
+  if (
+    s === "authorized" || s === "paid" ||
+    /aprovad/.test(s) ||       // aprovada, aprovado
+    /renov/.test(s) ||         // subscription_renewed, renovada
+    /retomad|resumed/.test(s)  // subscription_resumed, retomada
+  ) return "active";
+
+  // atrasado / pendência que ainda pode se resolver
+  if (
+    s === "retrying" || s === "in_protest" || s === "acquirer_error" ||
+    /delay/.test(s) ||         // subscription_delayed
+    /atras/.test(s)            // atrasada
+  ) return "past_due";
+
+  // cancelado / recusado / estornado
+  if (
+    s === "refused" || s === "blocked" || s === "chargedback" || s === "prechargeback" ||
+    s === "canceled" || s === "refund_requested" || s === "in_settlement" || s === "refunded" ||
+    /cancel/.test(s) ||        // subscription_canceled, cancelada
+    /reembols|refund/.test(s) || // reembolso, reembolsada
+    /recusad/.test(s) ||       // recusada
+    /bloquead/.test(s)         // bloqueada
+  ) return "canceled";
+
   return null;
 }
 
