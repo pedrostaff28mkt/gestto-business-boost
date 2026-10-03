@@ -10,6 +10,9 @@ import {
   Check,
   ShieldCheck,
   Star,
+  Building2,
+  ClipboardList,
+  LayoutDashboard,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/logo";
@@ -22,6 +25,7 @@ import {
 
 import { testimonials } from "@/lib/testimonials";
 import { LandingHero } from "@/components/landing-hero";
+import { RecentActivationToast } from "@/components/recent-activation-toast";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -52,6 +56,12 @@ const modules = [
   { icon: LineChart, title: "Dashboard", text: "O lucro que sobra de verdade, já com a taxa da maquininha descontada." },
   { icon: Users, title: "Equipe", text: "Ponto pelo celular, tarefas do dia e cada pessoa vendo só o que precisa ver." },
   { icon: Sparkles, title: "IA embutida", text: "Respostas simples sobre o seu negócio e avisos do que merece atenção agora." },
+];
+
+const steps = [
+  { icon: Building2, title: "Cadastre sua empresa", text: "Crie sua conta, responda 3 perguntas rápidas e o sistema já fica pronto para usar — em menos de 2 minutos." },
+  { icon: ClipboardList, title: "Use no dia a dia", text: "Registre cada venda no PIX, cartão ou dinheiro. O estoque baixa sozinho e o financeiro se organiza junto." },
+  { icon: LayoutDashboard, title: "Veja tudo no painel", text: "Abra o celular e saiba quanto vendeu, quanto sobrou e o que precisa de atenção. Sem planilha." },
 ];
 
 const faqs = [
@@ -103,6 +113,7 @@ function Landing() {
         </header>
 
         <LandingHero />
+        <RecentActivationToast />
       </div>
 
       <section id="modulos" className="border-y border-border bg-card">
@@ -116,6 +127,32 @@ function Landing() {
             </div>
           ))}
         </div>
+      </section>
+
+      <section id="como-funciona" className="mx-auto max-w-6xl px-5 py-16">
+        <div className="text-center">
+          <span className="inline-flex items-center rounded-full bg-primary-soft px-3 py-1 text-xs font-medium text-primary">
+            Como funciona
+          </span>
+          <h2 className="mt-3 text-2xl font-bold lg:text-3xl">Do cadastro ao controle em 3 passos</h2>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Sem instalação, sem treinamento, sem planilha.
+          </p>
+        </div>
+        <ol className="mt-10 grid gap-4 md:grid-cols-3">
+          {steps.map((step, i) => (
+            <li key={step.title} className="surface relative rounded-2xl p-6">
+              <div className="flex items-center gap-3">
+                <span className="flex size-10 items-center justify-center rounded-xl bg-primary-soft text-primary">
+                  <step.icon className="size-5" />
+                </span>
+                <span className="num text-sm font-semibold text-muted-foreground">Passo {i + 1}</span>
+              </div>
+              <h3 className="mt-4 text-lg font-semibold">{step.title}</h3>
+              <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{step.text}</p>
+            </li>
+          ))}
+        </ol>
       </section>
 
       <section className="mx-auto max-w-6xl px-5 pt-4 pb-8">

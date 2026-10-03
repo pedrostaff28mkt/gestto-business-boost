@@ -106,7 +106,7 @@ export function LandingHero() {
               variant="ghost"
               className="gap-2 text-hero-foreground hover:bg-hero-glass hover:text-hero-foreground"
             >
-              <a href="#modulos">
+              <a href="#como-funciona">
                 <Play className="size-4" /> Ver como funciona
               </a>
             </Button>
@@ -203,7 +203,7 @@ export function LandingHero() {
             <p className="text-xs text-hero-muted">Fluxo de caixa</p>
             <div className="mt-2 h-14">
               {mounted && (
-                <BarChart data={mockCashFlow} width={180} height={56}>
+                <BarChart data={mockCashFlow} width={150} height={56}>
                   <Bar dataKey="v" fill="var(--hero-accent)" radius={3} isAnimationActive={false} />
                 </BarChart>
               )}
