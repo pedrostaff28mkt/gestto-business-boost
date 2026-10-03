@@ -16,6 +16,8 @@ import { Route as PainelInternoRouteImport } from './routes/painel-interno'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as PainelInternoIndexRouteImport } from './routes/painel-interno.index'
+import { Route as PainelInternoSuporteRouteImport } from './routes/painel-interno.suporte'
 import { Route as ConviteCodigoRouteImport } from './routes/convite.$codigo'
 import { Route as AuthenticatedVendasRouteImport } from './routes/_authenticated/vendas'
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
@@ -61,6 +63,16 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const PainelInternoIndexRoute = PainelInternoIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => PainelInternoRoute,
+} as any)
+const PainelInternoSuporteRoute = PainelInternoSuporteRouteImport.update({
+  id: '/suporte',
+  path: '/suporte',
+  getParentRoute: () => PainelInternoRoute,
 } as any)
 const ConviteCodigoRoute = ConviteCodigoRouteImport.update({
   id: '/convite/$codigo',
@@ -122,7 +134,7 @@ const ApiPublicTictoWebhookRoute = ApiPublicTictoWebhookRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
-  '/painel-interno': typeof PainelInternoRoute
+  '/painel-interno': typeof PainelInternoRouteWithChildren
   '/privacidade': typeof PrivacidadeRoute
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/termos': typeof TermosRoute
@@ -136,12 +148,13 @@ export interface FileRoutesByFullPath {
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/vendas': typeof AuthenticatedVendasRoute
   '/convite/$codigo': typeof ConviteCodigoRoute
+  '/painel-interno/suporte': typeof PainelInternoSuporteRoute
+  '/painel-interno/': typeof PainelInternoIndexRoute
   '/api/public/ticto-webhook': typeof ApiPublicTictoWebhookRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
-  '/painel-interno': typeof PainelInternoRoute
   '/privacidade': typeof PrivacidadeRoute
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/termos': typeof TermosRoute
@@ -155,6 +168,8 @@ export interface FileRoutesByTo {
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/vendas': typeof AuthenticatedVendasRoute
   '/convite/$codigo': typeof ConviteCodigoRoute
+  '/painel-interno/suporte': typeof PainelInternoSuporteRoute
+  '/painel-interno': typeof PainelInternoIndexRoute
   '/api/public/ticto-webhook': typeof ApiPublicTictoWebhookRoute
 }
 export interface FileRoutesById {
@@ -162,7 +177,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
-  '/painel-interno': typeof PainelInternoRoute
+  '/painel-interno': typeof PainelInternoRouteWithChildren
   '/privacidade': typeof PrivacidadeRoute
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/termos': typeof TermosRoute
@@ -176,6 +191,8 @@ export interface FileRoutesById {
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
   '/_authenticated/vendas': typeof AuthenticatedVendasRoute
   '/convite/$codigo': typeof ConviteCodigoRoute
+  '/painel-interno/suporte': typeof PainelInternoSuporteRoute
+  '/painel-interno/': typeof PainelInternoIndexRoute
   '/api/public/ticto-webhook': typeof ApiPublicTictoWebhookRoute
 }
 export interface FileRouteTypes {
@@ -197,12 +214,13 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/vendas'
     | '/convite/$codigo'
+    | '/painel-interno/suporte'
+    | '/painel-interno/'
     | '/api/public/ticto-webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
-    | '/painel-interno'
     | '/privacidade'
     | '/redefinir-senha'
     | '/termos'
@@ -216,6 +234,8 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/vendas'
     | '/convite/$codigo'
+    | '/painel-interno/suporte'
+    | '/painel-interno'
     | '/api/public/ticto-webhook'
   id:
     | '__root__'
@@ -236,6 +256,8 @@ export interface FileRouteTypes {
     | '/_authenticated/onboarding'
     | '/_authenticated/vendas'
     | '/convite/$codigo'
+    | '/painel-interno/suporte'
+    | '/painel-interno/'
     | '/api/public/ticto-webhook'
   fileRoutesById: FileRoutesById
 }
@@ -243,7 +265,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
-  PainelInternoRoute: typeof PainelInternoRoute
+  PainelInternoRoute: typeof PainelInternoRouteWithChildren
   PrivacidadeRoute: typeof PrivacidadeRoute
   RedefinirSenhaRoute: typeof RedefinirSenhaRoute
   TermosRoute: typeof TermosRoute
@@ -301,6 +323,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/painel-interno/': {
+      id: '/painel-interno/'
+      path: '/'
+      fullPath: '/painel-interno/'
+      preLoaderRoute: typeof PainelInternoIndexRouteImport
+      parentRoute: typeof PainelInternoRoute
+    }
+    '/painel-interno/suporte': {
+      id: '/painel-interno/suporte'
+      path: '/suporte'
+      fullPath: '/painel-interno/suporte'
+      preLoaderRoute: typeof PainelInternoSuporteRouteImport
+      parentRoute: typeof PainelInternoRoute
     }
     '/convite/$codigo': {
       id: '/convite/$codigo'
@@ -409,11 +445,25 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
+interface PainelInternoRouteChildren {
+  PainelInternoSuporteRoute: typeof PainelInternoSuporteRoute
+  PainelInternoIndexRoute: typeof PainelInternoIndexRoute
+}
+
+const PainelInternoRouteChildren: PainelInternoRouteChildren = {
+  PainelInternoSuporteRoute: PainelInternoSuporteRoute,
+  PainelInternoIndexRoute: PainelInternoIndexRoute,
+}
+
+const PainelInternoRouteWithChildren = PainelInternoRoute._addFileChildren(
+  PainelInternoRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
-  PainelInternoRoute: PainelInternoRoute,
+  PainelInternoRoute: PainelInternoRouteWithChildren,
   PrivacidadeRoute: PrivacidadeRoute,
   RedefinirSenhaRoute: RedefinirSenhaRoute,
   TermosRoute: TermosRoute,

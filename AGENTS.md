@@ -8,3 +8,5 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- Keep `/painel-interno` as the shared admin-guard layout; place internal admin screens in child routes so every screen inherits the same access check.
