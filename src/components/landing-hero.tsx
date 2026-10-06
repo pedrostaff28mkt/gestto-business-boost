@@ -213,7 +213,7 @@ export function LandingHero() {
               <p className="text-xs font-semibold text-hero-foreground">Gestto IA</p>
             </div>
             <div className="mt-3 rounded-xl bg-hero-glass-strong p-2.5 text-[11px] leading-snug text-hero-foreground">
-              Olá, Pedro! Aqui está o resumo do seu negócio hoje.
+              Olá, Luiz! Aqui está o resumo do seu negócio hoje.
             </div>
             <div className="mt-2 space-y-1.5">
               {[
