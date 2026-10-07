@@ -1,6 +1,7 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { AppShell } from "@/components/app-shell";
+import { ModuleGuard } from "@/components/module-guard";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -20,7 +21,9 @@ export const Route = createFileRoute("/_authenticated")({
   },
   component: () => (
     <AppShell>
-      <Outlet />
+      <ModuleGuard>
+        <Outlet />
+      </ModuleGuard>
     </AppShell>
   ),
 });
