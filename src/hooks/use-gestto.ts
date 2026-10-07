@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
-export type AppRole = "owner" | "manager" | "seller" | "production";
+export type AppRole = "owner" | "manager" | "seller" | "production" | "hr";
 export type AppModule =
   | "sales"
   | "inventory"
@@ -11,13 +11,16 @@ export type AppModule =
   | "ai"
   | "crm"
   | "integrations"
-  | "settings";
+  | "settings"
+  | "timesheet"
+  | "tasks";
 
 export const roleLabels: Record<AppRole, string> = {
   owner: "Dono / Admin",
   manager: "Gerente",
   seller: "Vendedor",
   production: "Produção",
+  hr: "RH",
 };
 
 export type Permission = {

@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Pencil, Users, Copy, Link2, Check, Loader2, Trash2, UserPlus } from "lucide-react";
+import { Pencil, Users, Copy, Link2, Check, Loader2, Trash2, UserPlus, Shield } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useGestto, roleLabels, type AppModule, type AppRole } from "@/hooks/use-gestto";
@@ -42,14 +42,17 @@ const MODULES: { key: AppModule; label: string }[] = [
   { key: "crm", label: "CRM" },
   { key: "integrations", label: "Integrações" },
   { key: "settings", label: "Ajustes" },
+  { key: "timesheet", label: "Ponto" },
+  { key: "tasks", label: "Atividades" },
 ];
 
-const INVITE_ROLES: AppRole[] = ["manager", "seller", "production"];
+const INVITE_ROLES: AppRole[] = ["manager", "seller", "production", "hr"];
 
 type PermMap = Record<AppModule, { can_view: boolean; can_create: boolean; can_edit: boolean; can_delete: boolean }>;
 
 type MemberRow = {
   id: string;
+  user_id: string;
   role: AppRole;
   job_title: string | null;
   active: boolean;
@@ -61,6 +64,16 @@ type MemberRow = {
 function defaultsFor(role: AppRole): PermMap {
   const map = {} as PermMap;
   for (const m of MODULES) {
+    if (role === "hr") {
+      const hrMod = ["team", "timesheet", "tasks"].includes(m.key);
+      map[m.key] = {
+        can_view: hrMod,
+        can_create: ["tasks", "timesheet"].includes(m.key),
+        can_edit: hrMod,
+        can_delete: false,
+      };
+      continue;
+    }
     const view =
       role === "manager"
         ? m.key !== "settings"
@@ -83,12 +96,55 @@ function defaultsFor(role: AppRole): PermMap {
   return map;
 }
 
+function PermissionsTable({
+  perms,
+  setPerms,
+}: {
+  perms: PermMap;
+  setPerms: (fn: (p: PermMap) => PermMap) => void;
+}) {
+  return (
+    <div className="overflow-x-auto rounded-xl border border-border">
+      <table className="w-full text-sm">
+        <thead className="bg-secondary/60 text-xs text-muted-foreground">
+          <tr>
+            <th className="px-3 py-2 text-left font-medium">Módulo</th>
+            {["Ver", "Criar", "Editar", "Excluir"].map((h) => (
+              <th key={h} className="px-3 py-2 font-medium">
+                {h}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {MODULES.map((m) => (
+            <tr key={m.key} className="border-t border-border">
+              <td className="px-3 py-2">{m.label}</td>
+              {(["can_view", "can_create", "can_edit", "can_delete"] as const).map((k) => (
+                <td key={k} className="px-3 py-2 text-center">
+                  <Checkbox
+                    checked={perms[m.key][k]}
+                    onCheckedChange={(v) =>
+                      setPerms((p) => ({ ...p, [m.key]: { ...p[m.key], [k]: v === true } }))
+                    }
+                    aria-label={`${m.label} ${k}`}
+                  />
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 function InviteForm({ companyId }: { companyId: string }) {
   const queryClient = useQueryClient();
   const { guard, locked } = usePaywall();
   const [role, setRole] = useState<AppRole>("seller");
   const [perms, setPerms] = useState<PermMap>(() => defaultsFor("seller"));
-  const [form, setForm] = useState({ fullName: "", email: "", jobTitle: "" });
+  const [form, setForm] = useState({ fullName: "", email: "", jobTitle: "", phone: "" });
 
   function pickRole(r: AppRole) {
     setRole(r);
@@ -105,6 +161,7 @@ function InviteForm({ companyId }: { companyId: string }) {
           role,
           full_name: form.fullName.trim() || null,
           email: form.email.trim() || null,
+          phone: form.phone.trim(),
           job_title: form.jobTitle.trim() || null,
           module_permissions,
         })
@@ -114,7 +171,7 @@ function InviteForm({ companyId }: { companyId: string }) {
       return data.code as string;
     },
     onSuccess: () => {
-      setForm({ fullName: "", email: "", jobTitle: "" });
+      setForm({ fullName: "", email: "", jobTitle: "", phone: "" });
       queryClient.invalidateQueries({ queryKey: ["invites"] });
       toast.success("Convite criado! Copie o link e envie pelo WhatsApp.");
     },
@@ -128,7 +185,7 @@ function InviteForm({ companyId }: { companyId: string }) {
         <h2 className="font-display text-lg font-semibold">Convidar pessoa</h2>
       </div>
 
-      <div className="mt-4 grid grid-cols-3 gap-2">
+      <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
         {INVITE_ROLES.map((r) => (
           <button
             key={r}
@@ -154,7 +211,7 @@ function InviteForm({ companyId }: { companyId: string }) {
         />
       </div>
 
-      <div className="mt-4 grid gap-3 sm:grid-cols-2">
+      <div className="mt-4 grid gap-3 sm:grid-cols-3">
         <div className="space-y-1.5">
           <Label htmlFor="inviteName">Nome</Label>
           <Input
@@ -162,6 +219,19 @@ function InviteForm({ companyId }: { companyId: string }) {
             value={form.fullName}
             onChange={(e) => setForm((f) => ({ ...f, fullName: e.target.value }))}
             placeholder="João Souza"
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="invitePhone">WhatsApp</Label>
+          <Input
+            id="invitePhone"
+            type="tel"
+            inputMode="tel"
+            required
+            maxLength={20}
+            value={form.phone}
+            onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
+            placeholder="(11) 91234-5678"
           />
         </div>
         <div className="space-y-1.5">
@@ -178,45 +248,20 @@ function InviteForm({ companyId }: { companyId: string }) {
 
       <div className="mt-5">
         <Label className="mb-2 block">Permissões por módulo</Label>
-        <div className="overflow-x-auto rounded-xl border border-border">
-          <table className="w-full text-sm">
-            <thead className="bg-secondary/60 text-xs text-muted-foreground">
-              <tr>
-                <th className="px-3 py-2 text-left font-medium">Módulo</th>
-                {["Ver", "Criar", "Editar", "Excluir"].map((h) => (
-                  <th key={h} className="px-3 py-2 font-medium">
-                    {h}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {MODULES.map((m) => (
-                <tr key={m.key} className="border-t border-border">
-                  <td className="px-3 py-2">{m.label}</td>
-                  {(["can_view", "can_create", "can_edit", "can_delete"] as const).map((k) => (
-                    <td key={k} className="px-3 py-2 text-center">
-                      <Checkbox
-                        checked={perms[m.key][k]}
-                        onCheckedChange={(v) =>
-                          setPerms((p) => ({ ...p, [m.key]: { ...p[m.key], [k]: v === true } }))
-                        }
-                        aria-label={`${m.label} ${k}`}
-                      />
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <PermissionsTable perms={perms} setPerms={setPerms} />
       </div>
 
       <Button
         className="mt-5 w-full"
         size="lg"
         disabled={create.isPending}
-        onClick={() => guard(() => create.mutate())}
+        onClick={() => {
+          if (form.phone.replace(/\D/g, "").length < 10) {
+            toast.error("Informe um WhatsApp válido", { description: "Use DDD + número, ex: (11) 91234-5678." });
+            return;
+          }
+          guard(() => create.mutate());
+        }}
       >
         {create.isPending && <Loader2 className="size-4 animate-spin" />}
         Gerar link de convite
@@ -331,11 +376,96 @@ function InviteList({ companyId }: { companyId: string }) {
   );
 }
 
+function MemberPermissionsDialog({
+  member,
+  onClose,
+  isSelf,
+}: {
+  member: MemberRow | null;
+  onClose: () => void;
+  isSelf: boolean;
+}) {
+  const queryClient = useQueryClient();
+  const [perms, setPerms] = useState<PermMap | null>(null);
+  const [saving, setSaving] = useState(false);
+
+  const { data, isLoading } = useQuery({
+    queryKey: ["member-perms", member?.id],
+    enabled: !!member,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("module_permissions")
+        .select("module, can_view, can_create, can_edit, can_delete")
+        .eq("membership_id", member!.id);
+      if (error) throw error;
+      const map = {} as PermMap;
+      for (const m of MODULES) {
+        const row = data.find((r) => r.module === m.key);
+        map[m.key] = {
+          can_view: !!row?.can_view,
+          can_create: !!row?.can_create,
+          can_edit: !!row?.can_edit,
+          can_delete: !!row?.can_delete,
+        };
+      }
+      return map;
+    },
+  });
+
+  useEffect(() => {
+    setPerms(data ?? null);
+  }, [data]);
+
+  async function save() {
+    if (!member || !perms) return;
+    setSaving(true);
+    const rows = MODULES.map((m) => ({ membership_id: member.id, module: m.key, ...perms[m.key] }));
+    const { error } = await supabase
+      .from("module_permissions")
+      .upsert(rows, { onConflict: "membership_id,module" });
+    setSaving(false);
+    if (error) {
+      toast.error("Não foi possível salvar as permissões", { description: error.message });
+      return;
+    }
+    queryClient.invalidateQueries({ queryKey: ["member-perms", member.id] });
+    if (isSelf) queryClient.invalidateQueries({ queryKey: ["gestto-session"] });
+    toast.success("Permissões atualizadas");
+    onClose();
+  }
+
+  return (
+    <Dialog open={!!member} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>Permissões de {member?.profiles?.full_name || "membro"}</DialogTitle>
+        </DialogHeader>
+        {isLoading || !perms ? (
+          <div className="flex justify-center py-8">
+            <Loader2 className="size-5 animate-spin text-muted-foreground" />
+          </div>
+        ) : (
+          <PermissionsTable perms={perms} setPerms={(fn) => setPerms((p) => (p ? fn(p) : p))} />
+        )}
+        <DialogFooter>
+          <Button variant="ghost" onClick={onClose} disabled={saving}>
+            Cancelar
+          </Button>
+          <Button onClick={save} disabled={saving || !perms}>
+            {saving && <Loader2 className="size-4 animate-spin" />} Salvar permissões
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 function MemberList({ companyId }: { companyId: string }) {
-  const { can } = useGestto();
+  const { can, session } = useGestto();
   const queryClient = useQueryClient();
   const canEdit = useMemo(() => can("team", "edit"), [can]);
   const [editing, setEditing] = useState<MemberRow | null>(null);
+  const [permMember, setPermMember] = useState<MemberRow | null>(null);
   const [goal, setGoal] = useState("");
   const [commission, setCommission] = useState("");
   const [saving, setSaving] = useState(false);
@@ -411,10 +541,27 @@ function MemberList({ companyId }: { companyId: string }) {
                   <Pencil className="size-4" />
                 </Button>
               )}
+              {canEdit && m.role !== "owner" && m.user_id !== session?.userId && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="text-muted-foreground"
+                  aria-label={`Permissões de ${m.profiles?.full_name || "membro"}`}
+                  onClick={() => setPermMember(m)}
+                >
+                  <Shield className="size-4" />
+                </Button>
+              )}
             </div>
           </li>
         ))}
       </ul>
+
+      <MemberPermissionsDialog
+        member={permMember}
+        onClose={() => setPermMember(null)}
+        isSelf={permMember?.user_id === session?.userId}
+      />
 
       <Dialog open={!!editing} onOpenChange={(o) => !o && setEditing(null)}>
         <DialogContent>

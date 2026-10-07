@@ -15,6 +15,13 @@
       "when": 1791036190278,
       "tag": "0001_get_recent_activations",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791412088797,
+      "tag": "0002_manager_manage_non_owner_permissions",
+      "breakpoints": true
     }
   ]
 }
