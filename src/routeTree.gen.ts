@@ -24,6 +24,7 @@ import { Route as AuthenticatedEstoqueRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedFinanceiroRouteImport } from './routes/_authenticated/financeiro'
 import { Route as AuthenticatedIaRouteImport } from './routes/_authenticated/ia'
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
+import { Route as AuthenticatedPontoRouteImport } from './routes/_authenticated/ponto'
 import { Route as AuthenticatedVendasRouteImport } from './routes/_authenticated/vendas'
 import { Route as ConviteCodigoRouteImport } from './routes/convite.$codigo'
 import { Route as PainelInternoIndexRouteImport } from './routes/painel-interno.index'
@@ -105,6 +106,11 @@ const AuthenticatedOnboardingRoute = AuthenticatedOnboardingRouteImport.update({
   path: '/onboarding',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedPontoRoute = AuthenticatedPontoRouteImport.update({
+  id: '/ponto',
+  path: '/ponto',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedVendasRoute = AuthenticatedVendasRouteImport.update({
   id: '/vendas',
   path: '/vendas',
@@ -146,6 +152,7 @@ export interface FileRoutesByFullPath {
   '/financeiro': typeof AuthenticatedFinanceiroRoute
   '/ia': typeof AuthenticatedIaRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
+  '/ponto': typeof AuthenticatedPontoRoute
   '/vendas': typeof AuthenticatedVendasRoute
   '/convite/$codigo': typeof ConviteCodigoRoute
   '/painel-interno/suporte': typeof PainelInternoSuporteRoute
@@ -166,6 +173,7 @@ export interface FileRoutesByTo {
   '/financeiro': typeof AuthenticatedFinanceiroRoute
   '/ia': typeof AuthenticatedIaRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
+  '/ponto': typeof AuthenticatedPontoRoute
   '/vendas': typeof AuthenticatedVendasRoute
   '/convite/$codigo': typeof ConviteCodigoRoute
   '/painel-interno/suporte': typeof PainelInternoSuporteRoute
@@ -189,6 +197,7 @@ export interface FileRoutesById {
   '/_authenticated/financeiro': typeof AuthenticatedFinanceiroRoute
   '/_authenticated/ia': typeof AuthenticatedIaRoute
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
+  '/_authenticated/ponto': typeof AuthenticatedPontoRoute
   '/_authenticated/vendas': typeof AuthenticatedVendasRoute
   '/convite/$codigo': typeof ConviteCodigoRoute
   '/painel-interno/suporte': typeof PainelInternoSuporteRoute
@@ -212,6 +221,7 @@ export interface FileRouteTypes {
     | '/financeiro'
     | '/ia'
     | '/onboarding'
+    | '/ponto'
     | '/vendas'
     | '/convite/$codigo'
     | '/painel-interno/suporte'
@@ -232,6 +242,7 @@ export interface FileRouteTypes {
     | '/financeiro'
     | '/ia'
     | '/onboarding'
+    | '/ponto'
     | '/vendas'
     | '/convite/$codigo'
     | '/painel-interno/suporte'
@@ -254,6 +265,7 @@ export interface FileRouteTypes {
     | '/_authenticated/financeiro'
     | '/_authenticated/ia'
     | '/_authenticated/onboarding'
+    | '/_authenticated/ponto'
     | '/_authenticated/vendas'
     | '/convite/$codigo'
     | '/painel-interno/suporte'
@@ -380,6 +392,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedOnboardingRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/ponto': {
+      id: '/_authenticated/ponto'
+      path: '/ponto'
+      fullPath: '/ponto'
+      preLoaderRoute: typeof AuthenticatedPontoRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/vendas': {
       id: '/_authenticated/vendas'
       path: '/vendas'
@@ -427,6 +446,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedFinanceiroRoute: typeof AuthenticatedFinanceiroRoute
   AuthenticatedIaRoute: typeof AuthenticatedIaRoute
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
+  AuthenticatedPontoRoute: typeof AuthenticatedPontoRoute
   AuthenticatedVendasRoute: typeof AuthenticatedVendasRoute
 }
 
@@ -439,6 +459,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedFinanceiroRoute: AuthenticatedFinanceiroRoute,
   AuthenticatedIaRoute: AuthenticatedIaRoute,
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
+  AuthenticatedPontoRoute: AuthenticatedPontoRoute,
   AuthenticatedVendasRoute: AuthenticatedVendasRoute,
 }
 

@@ -9,6 +9,7 @@ import { usePaywall, LockedArea } from "@/components/paywall";
 import { ProfileSection } from "@/components/profile-section";
 import { BranchesSection } from "@/components/branches-section";
 import { SupportSection } from "@/components/support-section";
+import { TimesheetClosingSection } from "@/components/timesheet-closing-section";
 import { openTictoCheckout } from "@/lib/ticto";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -117,6 +118,8 @@ function SettingsPage() {
       <SupportSection />
 
       {can("settings") && <BranchesSection />}
+
+      {can("settings") && <TimesheetClosingSection />}
 
       <LockedArea className="space-y-4">
       <div className="surface space-y-4 p-5">
