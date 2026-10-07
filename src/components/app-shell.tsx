@@ -12,6 +12,7 @@ import {
   Lock,
   Contact,
   MoreHorizontal,
+  Clock,
   type LucideIcon,
 } from "lucide-react";
 import { useState, type ReactNode } from "react";
@@ -28,7 +29,7 @@ import { CompanySwitcher } from "@/components/company-switcher";
 import { ActiveBranchProvider } from "@/hooks/use-active-branch";
 
 
-type NavItem = { to: string; label: string; icon: LucideIcon; module: AppModule };
+type NavItem = { to: string; label: string; icon: LucideIcon; module: AppModule | null };
 
 const NAV: NavItem[] = [
   { to: "/dashboard", label: "Início", icon: LayoutDashboard, module: "dashboard" },
@@ -37,6 +38,7 @@ const NAV: NavItem[] = [
   { to: "/crm", label: "CRM", icon: Contact, module: "crm" },
   { to: "/financeiro", label: "Financeiro", icon: Wallet, module: "finance" },
   { to: "/equipe", label: "Equipe", icon: Users, module: "team" },
+  { to: "/ponto", label: "Ponto", icon: Clock, module: null },
   { to: "/ia", label: "IA", icon: Sparkles, module: "ai" },
   { to: "/configuracoes", label: "Ajustes", icon: Settings, module: "settings" },
 ];
@@ -89,7 +91,7 @@ function Shell({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
-  const items = NAV.filter((item) => can(item.module));
+  const items = NAV.filter((item) => !item.module || can(item.module));
   const hasMore = items.length > 5;
   const mobileItems = hasMore ? items.slice(0, 4) : items;
   const moreItems = hasMore ? items.slice(4) : [];
