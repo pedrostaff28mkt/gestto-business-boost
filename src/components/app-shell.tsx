@@ -13,6 +13,7 @@ import {
   Contact,
   MoreHorizontal,
   Clock,
+  ListChecks,
   type LucideIcon,
 } from "lucide-react";
 import { useState, type ReactNode } from "react";
@@ -39,6 +40,7 @@ const NAV: NavItem[] = [
   { to: "/financeiro", label: "Financeiro", icon: Wallet, module: "finance" },
   { to: "/equipe", label: "Equipe", icon: Users, module: "team" },
   { to: "/ponto", label: "Ponto", icon: Clock, module: null },
+  { to: "/atividades", label: "Atividades", icon: ListChecks, module: null },
   { to: "/ia", label: "IA", icon: Sparkles, module: "ai" },
   { to: "/configuracoes", label: "Ajustes", icon: Settings, module: "settings" },
 ];
