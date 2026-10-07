@@ -103,6 +103,7 @@ export type Database = {
           quiz_employees: string | null
           quiz_revenue: string | null
           quiz_segment: string | null
+          timesheet_closing_day: number | null
           updated_at: string
         }
         Insert: {
@@ -117,6 +118,7 @@ export type Database = {
           quiz_employees?: string | null
           quiz_revenue?: string | null
           quiz_segment?: string | null
+          timesheet_closing_day?: number | null
           updated_at?: string
         }
         Update: {
@@ -131,6 +133,7 @@ export type Database = {
           quiz_employees?: string | null
           quiz_revenue?: string | null
           quiz_segment?: string | null
+          timesheet_closing_day?: number | null
           updated_at?: string
         }
         Relationships: []
@@ -293,6 +296,7 @@ export type Database = {
           id: string
           job_title: string | null
           module_permissions: Json
+          phone: string | null
           role: Database["public"]["Enums"]["app_role"]
           updated_at: string
           used_at: string | null
@@ -310,6 +314,7 @@ export type Database = {
           id?: string
           job_title?: string | null
           module_permissions?: Json
+          phone?: string | null
           role: Database["public"]["Enums"]["app_role"]
           updated_at?: string
           used_at?: string | null
@@ -327,6 +332,7 @@ export type Database = {
           id?: string
           job_title?: string | null
           module_permissions?: Json
+          phone?: string | null
           role?: Database["public"]["Enums"]["app_role"]
           updated_at?: string
           used_at?: string | null
@@ -937,6 +943,131 @@ export type Database = {
           },
         ]
       }
+      tasks: {
+        Row: {
+          assigned_by: string
+          assigned_to: string
+          company_id: string
+          completed_at: string | null
+          created_at: string
+          description: string | null
+          due_date: string | null
+          frequency: Database["public"]["Enums"]["task_frequency"]
+          id: string
+          observations: string | null
+          photo_url: string | null
+          status: Database["public"]["Enums"]["task_status"]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_by: string
+          assigned_to: string
+          company_id: string
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          frequency?: Database["public"]["Enums"]["task_frequency"]
+          id?: string
+          observations?: string | null
+          photo_url?: string | null
+          status?: Database["public"]["Enums"]["task_status"]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_by?: string
+          assigned_to?: string
+          company_id?: string
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          frequency?: Database["public"]["Enums"]["task_frequency"]
+          id?: string
+          observations?: string | null
+          photo_url?: string | null
+          status?: Database["public"]["Enums"]["task_status"]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tasks_assigned_by_fkey"
+            columns: ["assigned_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      time_entries: {
+        Row: {
+          branch_id: string | null
+          clocked_at: string
+          company_id: string
+          created_at: string
+          id: string
+          type: Database["public"]["Enums"]["time_entry_type"]
+          user_id: string
+        }
+        Insert: {
+          branch_id?: string | null
+          clocked_at?: string
+          company_id: string
+          created_at?: string
+          id?: string
+          type: Database["public"]["Enums"]["time_entry_type"]
+          user_id: string
+        }
+        Update: {
+          branch_id?: string | null
+          clocked_at?: string
+          company_id?: string
+          created_at?: string
+          id?: string
+          type?: Database["public"]["Enums"]["time_entry_type"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "time_entries_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "time_entries_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "time_entries_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       webhook_events_log: {
         Row: {
           id: string
@@ -1034,13 +1165,18 @@ export type Database = {
         | "crm"
         | "integrations"
         | "settings"
-      app_role: "owner" | "manager" | "seller" | "production"
+        | "timesheet"
+        | "tasks"
+      app_role: "owner" | "manager" | "seller" | "production" | "hr"
       financial_entry_status: "pending" | "paid" | "overdue"
       financial_entry_type: "income" | "expense"
       payment_method: "pix" | "card_credit" | "card_debit" | "cash"
       sale_status: "pending" | "paid" | "canceled"
       subscription_status: "trialing" | "active" | "past_due" | "canceled"
       support_ticket_status: "open" | "in_progress" | "resolved" | "closed"
+      task_frequency: "once" | "daily" | "weekly"
+      task_status: "pending" | "done"
+      time_entry_type: "in" | "out"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1178,14 +1314,19 @@ export const Constants = {
         "crm",
         "integrations",
         "settings",
+        "timesheet",
+        "tasks",
       ],
-      app_role: ["owner", "manager", "seller", "production"],
+      app_role: ["owner", "manager", "seller", "production", "hr"],
       financial_entry_status: ["pending", "paid", "overdue"],
       financial_entry_type: ["income", "expense"],
       payment_method: ["pix", "card_credit", "card_debit", "cash"],
       sale_status: ["pending", "paid", "canceled"],
       subscription_status: ["trialing", "active", "past_due", "canceled"],
       support_ticket_status: ["open", "in_progress", "resolved", "closed"],
+      task_frequency: ["once", "daily", "weekly"],
+      task_status: ["pending", "done"],
+      time_entry_type: ["in", "out"],
     },
   },
 } as const
