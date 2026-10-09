@@ -155,7 +155,7 @@ function IaPage() {
               type="button"
               disabled={pending}
               onClick={() => submit(c.label, c.prompt)}
-              className="rounded-full border border-border bg-surface px-3 py-1.5 text-xs transition-colors hover:border-primary hover:bg-primary-soft disabled:opacity-50"
+              className="rounded-full border border-border bg-background px-3 py-1.5 text-xs transition-colors hover:border-primary hover:bg-primary-soft disabled:opacity-50"
             >
               {c.label}
             </button>
