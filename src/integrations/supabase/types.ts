@@ -14,6 +14,32 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_usage: {
+        Row: {
+          company_id: string
+          count: number
+          day: string
+        }
+        Insert: {
+          company_id: string
+          count?: number
+          day: string
+        }
+        Update: {
+          company_id?: string
+          count?: number
+          day?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_usage_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       audit_logs: {
         Row: {
           action: string
@@ -1100,6 +1126,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      consume_ai_quota: { Args: { _company_id: string }; Returns: Json }
       create_additional_company: {
         Args: { _company_name: string }
         Returns: string
@@ -1134,6 +1161,7 @@ export type Database = {
       is_company_member: { Args: { _company_id: string }; Returns: boolean }
       membership_company: { Args: { _membership_id: string }; Returns: string }
       owns_membership: { Args: { _membership_id: string }; Returns: boolean }
+      refund_ai_quota: { Args: { _company_id: string }; Returns: undefined }
       register_sale: {
         Args: {
           _branch_id: string
