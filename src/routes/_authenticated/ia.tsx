@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { Sparkles, Send, Loader2 } from "lucide-react";
+import { Sparkles, Send, Loader2, Lock } from "lucide-react";
 import { useGestto, type AppModule } from "@/hooks/use-gestto";
 import { useActiveBranch } from "@/hooks/use-active-branch";
 import { usePaywall } from "@/components/paywall";
@@ -167,7 +167,7 @@ function IaPage() {
             <button
               key={c.label}
               type="button"
-              disabled={pending}
+              disabled={pending || locked}
               onClick={() => submit(c.label, c.prompt)}
               className="rounded-full border border-border bg-background px-3 py-1.5 text-xs transition-colors hover:border-primary hover:bg-primary-soft disabled:opacity-50"
             >
@@ -195,10 +195,11 @@ function IaPage() {
               submit(input);
             }
           }}
-          placeholder="Escreva sua pergunta…"
+          disabled={locked}
+          placeholder={locked ? "Disponível para assinantes" : "Escreva sua pergunta…"}
           className="min-h-[44px] resize-none"
         />
-        <Button type="submit" size="icon" className="size-11 shrink-0" disabled={pending || !input.trim()} aria-label="Enviar">
+        <Button type="submit" size="icon" className="size-11 shrink-0" disabled={locked || pending || !input.trim()} aria-label="Enviar">
           {pending ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}
         </Button>
       </form>
