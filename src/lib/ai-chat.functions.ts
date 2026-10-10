@@ -23,7 +23,9 @@ const Input = z.object({
 
 export type AiChatResult =
   | { ok: true; reply: string; used: number; limit: number }
-  | { ok: false; code: "daily_limit" | "subscription_required" | "no_access" | "credits" | "provider"; message: string; used?: number; limit?: number };
+  | { ok: false; code: "daily_limit" | "subscription_required" | "owner_only" | "no_access" | "credits" | "provider"; message: string; used?: number; limit?: number };
+
+const OWNER_ONLY_MSG = "A IA é exclusiva do dono da empresa.";
 
 export const sendAiMessage = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -43,7 +45,7 @@ export const sendAiMessage = createServerFn({ method: "POST" })
       .maybeSingle();
     if (!m) return { ok: false, code: "no_access", message: "Você não tem acesso a essa empresa." };
     const viewable = new Set((m.module_permissions ?? []).filter((p) => p.can_view).map((p) => p.module as string));
-    if (!viewable.has("ai")) return { ok: false, code: "no_access", message: "Você não tem permissão para usar a IA." };
+    if (m.role !== "owner") return { ok: false, code: "owner_only", message: OWNER_ONLY_MSG };
 
     // Escopo de filial: não-dono fica preso à própria filial.
     const scope = {
@@ -59,8 +61,10 @@ export const sendAiMessage = createServerFn({ method: "POST" })
     }
     const q = quota as unknown as { allowed: boolean; used: number; limit: number; reason?: string };
     if (!q.allowed) {
+      if (q.reason === "owner_only")
+        return { ok: false, code: "owner_only", message: OWNER_ONLY_MSG };
       if (q.reason === "subscription_required")
-        return { ok: false, code: "subscription_required", message: "A IA está disponível para quem tem o teste ativo ou assinatura.", used: q.used, limit: q.limit };
+        return { ok: false, code: "subscription_required", message: "A IA é exclusiva para assinantes. Ative sua assinatura para usar.", used: q.used, limit: q.limit };
       return { ok: false, code: "daily_limit", message: `Você usou suas ${q.limit} perguntas de hoje. Volta amanhã!`, used: q.used, limit: q.limit };
     }
 
