@@ -93,7 +93,9 @@ function Shell({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
-  const items = NAV.filter((item) => !item.module || can(item.module));
+  const items = NAV.filter(
+    (item) => (!item.module || can(item.module)) && (item.module !== "ai" || session?.role === "owner"),
+  );
   const hasMore = items.length > 5;
   const mobileItems = hasMore ? items.slice(0, 4) : items;
   const moreItems = hasMore ? items.slice(4) : [];

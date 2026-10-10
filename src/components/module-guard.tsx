@@ -21,9 +21,10 @@ export function ModuleGuard({ children }: { children: ReactNode }) {
   const { session, can, isLoading } = useGestto();
   const match = ROUTE_MODULES.find((r) => pathname === r.path || pathname.startsWith(r.path + "/"));
   if (!match || isLoading || !session) return <>{children}</>;
-  if (can(match.module, "view")) return <>{children}</>;
+  const allowed = (mod: AppModule) => can(mod, "view") && (mod !== "ai" || session.role === "owner");
+  if (allowed(match.module)) return <>{children}</>;
 
-  const home = ROUTE_MODULES.find((r) => can(r.module, "view"))?.path ?? "/configuracoes";
+  const home = ROUTE_MODULES.find((r) => allowed(r.module))?.path ?? "/configuracoes";
 
   return (
     <div className="surface mx-auto mt-10 max-w-md p-8 text-center">
