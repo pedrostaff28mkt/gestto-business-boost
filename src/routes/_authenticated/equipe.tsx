@@ -38,7 +38,6 @@ const MODULES: { key: AppModule; label: string }[] = [
   { key: "inventory", label: "Estoque" },
   { key: "finance", label: "Financeiro" },
   { key: "team", label: "Equipe" },
-  { key: "ai", label: "IA" },
   { key: "crm", label: "CRM" },
   { key: "integrations", label: "Integrações" },
   { key: "settings", label: "Ajustes" },
