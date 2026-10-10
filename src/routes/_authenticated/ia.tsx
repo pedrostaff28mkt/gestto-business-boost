@@ -37,7 +37,7 @@ const CHIPS: { label: string; prompt: string; modules: AppModule[] }[] = [
 function IaPage() {
   const { session, can } = useGestto();
   const { filterBranchId } = useActiveBranch();
-  const { guard } = usePaywall();
+  const { open: openPaywall } = usePaywall();
   const send = useServerFn(sendAiMessage);
   const [msgs, setMsgs] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
@@ -51,12 +51,13 @@ function IaPage() {
 
   if (!session) return null;
 
+  const locked = session.subscription.status !== "active";
   const anyData = (["sales", "inventory", "finance", "crm"] as AppModule[]).some((m) => can(m));
   const chips = CHIPS.filter((c) => (c.modules.length ? c.modules.every((m) => can(m)) : anyData));
 
   async function ask(display: string, prompt = display) {
     const text = prompt.trim();
-    if (!text || pending || !session) return;
+    if (!text || pending || !session || locked) return;
     const history = [...msgs.filter((m) => !m.error), { role: "user" as const, content: text }];
     setMsgs((m) => [...m, { role: "user", content: display.trim() }]);
     setInput("");
@@ -86,7 +87,10 @@ function IaPage() {
     }
   }
 
-  const submit = (display: string, prompt?: string) => guard(() => void ask(display, prompt));
+  const submit = (display: string, prompt?: string) => {
+    if (locked) return openPaywall();
+    void ask(display, prompt);
+  };
 
   return (
     <div className="mx-auto flex h-[calc(100dvh-10rem)] max-w-3xl flex-col gap-3">
@@ -95,12 +99,22 @@ function IaPage() {
           <Sparkles className="size-5 text-primary" />
           <h1 className="font-display text-2xl font-bold">IA do Gestto</h1>
         </div>
-        {usage && (
+        {usage && !locked && (
           <span className="num text-xs text-muted-foreground">
             {usage.used} de {usage.limit} perguntas hoje
           </span>
         )}
       </header>
+
+      {locked && (
+        <div className="flex flex-col gap-3 rounded-xl border border-warning/40 bg-warning-soft p-4 text-warning-foreground sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-2">
+            <Lock className="size-4 shrink-0" />
+            <p className="text-sm font-semibold">A IA é exclusiva para assinantes.</p>
+          </div>
+          <Button size="sm" onClick={openPaywall}>Ativar assinatura</Button>
+        </div>
+      )}
 
       <div className="surface flex-1 space-y-4 overflow-y-auto p-4">
         {msgs.length === 0 && (
