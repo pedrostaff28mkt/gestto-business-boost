@@ -1126,6 +1126,37 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      ai_finance_summary: {
+        Args: {
+          _branch_id: string
+          _company_id: string
+          _from: string
+          _since: string
+          _to: string
+        }
+        Returns: Json
+      }
+      ai_inactive_customers: {
+        Args: { _branch_id: string; _company_id: string; _days: number }
+        Returns: Json
+      }
+      ai_low_stock: {
+        Args: { _branch_id: string; _company_id: string }
+        Returns: Json
+      }
+      ai_sales_summary: {
+        Args: { _branch_id: string; _company_id: string; _since: string }
+        Returns: Json
+      }
+      ai_top_products: {
+        Args: {
+          _branch_id: string
+          _company_id: string
+          _limit: number
+          _since: string
+        }
+        Returns: Json
+      }
       consume_ai_quota: { Args: { _company_id: string }; Returns: Json }
       create_additional_company: {
         Args: { _company_name: string }
