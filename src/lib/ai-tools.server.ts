@@ -1,4 +1,5 @@
 // Ferramentas somente-leitura da IA. Rodam com o cliente Supabase do USUÁRIO (RLS aplicada).
+// As agregações pesadas rolam no banco via funções ai_* (SECURITY INVOKER): exatas e sem limite de linhas.
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
 import type { ToolDef } from "./ai-provider.server";
@@ -42,78 +43,66 @@ const METHOD_LABEL: Record<string, string> = {
 export async function getSalesSummary(db: Db, s: ToolScope, args: { period?: unknown }) {
   const period = pickPeriod(args.period);
   const { startIso } = periodStart(period);
-  let q = db
-    .from("sales")
-    .select("gross_amount, fee_amount, net_amount, method")
-    .eq("company_id", s.companyId)
-    .eq("status", "paid")
-    .gte("created_at", startIso)
-    .limit(5000);
-  if (s.branchId) q = q.eq("branch_id", s.branchId);
-  const { data, error } = await q;
+  const { data, error } = await db.rpc("ai_sales_summary" as never, {
+    _company_id: s.companyId,
+    _branch_id: s.branchId,
+    _since: startIso,
+  } as never);
   if (error) throw error;
+  const res = data as unknown as {
+    sales_count: number;
+    gross: number;
+    fees: number;
+    net: number;
+    by_method: Record<string, { count: number; total: number }>;
+  };
   const byMethod: Record<string, { count: number; total: number }> = {};
-  let gross = 0, fees = 0, net = 0;
-  for (const r of data ?? []) {
-    gross += Number(r.gross_amount); fees += Number(r.fee_amount); net += Number(r.net_amount);
-    const k = METHOD_LABEL[r.method] ?? r.method;
-    byMethod[k] ??= { count: 0, total: 0 };
-    byMethod[k].count++; byMethod[k].total += Number(r.gross_amount);
+  for (const [k, v] of Object.entries(res.by_method ?? {})) {
+    byMethod[METHOD_LABEL[k] ?? k] = { count: Number(v.count), total: r2(Number(v.total)) };
   }
-  for (const k in byMethod) byMethod[k].total = r2(byMethod[k].total);
-  return { period, sales_count: data?.length ?? 0, gross: r2(gross), fees: r2(fees), net: r2(net), by_method: byMethod };
+  return {
+    period,
+    sales_count: Number(res.sales_count),
+    gross: r2(Number(res.gross)),
+    fees: r2(Number(res.fees)),
+    net: r2(Number(res.net)),
+    by_method: byMethod,
+  };
 }
 
 export async function getTopProducts(db: Db, s: ToolScope, args: { period?: unknown; limit?: unknown }) {
   const period = pickPeriod(args.period, PERIODS, "30d");
   const limit = Math.min(10, Math.max(1, Number(args.limit) || 5));
   const { startIso } = periodStart(period);
-  let q = db
-    .from("sale_items")
-    .select("description, quantity, total, sales!inner(status, created_at, branch_id)")
-    .eq("company_id", s.companyId)
-    .eq("sales.status", "paid")
-    .gte("sales.created_at", startIso)
-    .limit(5000);
-  if (s.branchId) q = q.eq("sales.branch_id", s.branchId);
-  const { data, error } = await q;
+  const { data, error } = await db.rpc("ai_top_products" as never, {
+    _company_id: s.companyId,
+    _branch_id: s.branchId,
+    _since: startIso,
+    _limit: limit,
+  } as never);
   if (error) throw error;
-  const agg = new Map<string, { quantity: number; total: number }>();
-  for (const r of data ?? []) {
-    const a = agg.get(r.description) ?? { quantity: 0, total: 0 };
-    a.quantity += Number(r.quantity); a.total += Number(r.total);
-    agg.set(r.description, a);
-  }
-  const top = [...agg.entries()]
-    .map(([name, v]) => ({ name, quantity: r2(v.quantity), total: r2(v.total) }))
-    .sort((a, b) => b.quantity - a.quantity)
-    .slice(0, limit);
-  return { period, products: top };
+  const res = data as unknown as {
+    products: { name: string; quantity: number; total: number }[];
+    paid_sales_without_items: number;
+  };
+  return {
+    period,
+    products: (res.products ?? []).map((p) => ({ name: p.name, quantity: r2(Number(p.quantity)), total: r2(Number(p.total)) })),
+    paid_sales_without_items: Number(res.paid_sales_without_items ?? 0),
+  };
 }
 
 export async function getLowStock(db: Db, s: ToolScope) {
-  let q = db
-    .from("products")
-    .select("name, stock_qty, min_stock, unit, expires_at")
-    .eq("company_id", s.companyId)
-    .eq("active", true)
-    .limit(2000);
-  if (s.branchId) q = q.eq("branch_id", s.branchId);
-  const { data, error } = await q;
+  const { data, error } = await db.rpc("ai_low_stock" as never, {
+    _company_id: s.companyId,
+    _branch_id: s.branchId,
+  } as never);
   if (error) throw error;
-  const today = brToday();
-  const soon = addDays(today, 15);
-  const low = (data ?? [])
-    .filter((p) => Number(p.stock_qty) <= Number(p.min_stock))
-    .sort((a, b) => Number(a.stock_qty) - Number(b.stock_qty));
-  const expiring = (data ?? [])
-    .filter((p) => p.expires_at && p.expires_at <= soon)
-    .sort((a, b) => (a.expires_at! < b.expires_at! ? -1 : 1));
-  return {
-    low_stock_count: low.length,
-    low_stock: low.slice(0, 10).map((p) => ({ name: p.name, stock: Number(p.stock_qty), min: Number(p.min_stock), unit: p.unit })),
-    expiring_15d_count: expiring.length,
-    expiring_15d: expiring.slice(0, 10).map((p) => ({ name: p.name, expires_at: p.expires_at, expired: p.expires_at! < today })),
+  return data as unknown as {
+    low_stock_count: number;
+    low_stock: { name: string; stock: number; min: number; unit: string }[];
+    expiring_15d_count: number;
+    expiring_15d: { name: string; expires_at: string; expired: boolean }[];
   };
 }
 
@@ -121,40 +110,37 @@ export async function getFinancialSummary(db: Db, s: ToolScope, args: { period?:
   const period = pickPeriod(args.period, ["month", "30d"], "month");
   const { startYmd, startIso } = periodStart(period);
   const today = brToday();
-  let sq = db
-    .from("sales")
-    .select("gross_amount, fee_amount")
-    .eq("company_id", s.companyId)
-    .eq("status", "paid")
-    .gte("created_at", startIso)
-    .limit(5000);
-  let eq = db
-    .from("financial_entries")
-    .select("type, amount, category")
-    .eq("company_id", s.companyId)
-    .eq("status", "paid")
-    .gte("paid_date", startYmd)
-    .lte("paid_date", today)
-    .limit(5000);
-  if (s.branchId) { sq = sq.eq("branch_id", s.branchId); eq = eq.eq("branch_id", s.branchId); }
-  const [{ data: sales, error: e1 }, { data: entries, error: e2 }] = await Promise.all([sq, eq]);
-  if (e1) throw e1;
-  if (e2) throw e2;
-  let salesGross = 0, fees = 0, otherIncome = 0, expenses = 0;
-  const cats = new Map<string, number>();
-  for (const r of sales ?? []) { salesGross += Number(r.gross_amount); fees += Number(r.fee_amount); }
-  for (const e of entries ?? []) {
-    if (e.type === "income") otherIncome += Number(e.amount);
-    else { expenses += Number(e.amount); cats.set(e.category, (cats.get(e.category) ?? 0) + Number(e.amount)); }
-  }
+  const { data, error } = await db.rpc("ai_finance_summary" as never, {
+    _company_id: s.companyId,
+    _branch_id: s.branchId,
+    _since: startIso,
+    _from: startYmd,
+    _to: today,
+  } as never);
+  if (error) throw error;
+  const res = data as unknown as {
+    sales_gross: number;
+    card_fees: number;
+    other_income: number;
+    expenses_paid: number;
+    top_expense_categories: { category: string; total: number }[];
+  };
+  const salesGross = Number(res.sales_gross);
+  const fees = Number(res.card_fees);
+  const otherIncome = Number(res.other_income);
+  const expenses = Number(res.expenses_paid);
   const revenue = salesGross + otherIncome;
   const result = revenue - fees - expenses;
   return {
     period,
-    sales_gross: r2(salesGross), other_income: r2(otherIncome), revenue: r2(revenue),
-    card_fees: r2(fees), expenses_paid: r2(expenses), result: r2(result),
+    sales_gross: r2(salesGross),
+    other_income: r2(otherIncome),
+    revenue: r2(revenue),
+    card_fees: r2(fees),
+    expenses_paid: r2(expenses),
+    result: r2(result),
     margin_percent: revenue > 0 ? r2((result / revenue) * 100) : 0,
-    top_expense_categories: [...cats.entries()].sort((a, b) => b[1] - a[1]).slice(0, 5).map(([category, total]) => ({ category, total: r2(total) })),
+    top_expense_categories: (res.top_expense_categories ?? []).map((c) => ({ category: c.category, total: r2(Number(c.total)) })),
   };
 }
 
@@ -190,28 +176,18 @@ export async function getOverdueAccounts(db: Db, s: ToolScope) {
 
 export async function getInactiveCustomers(db: Db, s: ToolScope, args: { days?: unknown }) {
   const days = Math.min(365, Math.max(1, Number(args.days) || 45));
-  let cq = db.from("customers").select("id, name, created_at").eq("company_id", s.companyId).limit(5000);
-  let sq = db
-    .from("sales")
-    .select("customer_id, created_at")
-    .eq("company_id", s.companyId)
-    .eq("status", "paid")
-    .not("customer_id", "is", null)
-    .order("created_at", { ascending: false })
-    .limit(10000);
-  if (s.branchId) { cq = cq.eq("branch_id", s.branchId); sq = sq.eq("branch_id", s.branchId); }
-  const [{ data: customers, error: e1 }, { data: sales, error: e2 }] = await Promise.all([cq, sq]);
-  if (e1) throw e1;
-  if (e2) throw e2;
-  const last = new Map<string, string>();
-  for (const r of sales ?? []) if (r.customer_id && !last.has(r.customer_id)) last.set(r.customer_id, r.created_at);
-  const cutoff = Date.now() - days * 86400_000;
-  const inactive = (customers ?? [])
-    .filter((c) => last.has(c.id) && new Date(last.get(c.id)!).getTime() < cutoff)
-    .map((c) => ({ name: c.name, last_purchase: last.get(c.id)!.slice(0, 10), days_since: Math.floor((Date.now() - new Date(last.get(c.id)!).getTime()) / 86400_000) }))
-    .sort((a, b) => b.days_since - a.days_since);
-  const neverBought = (customers ?? []).filter((c) => !last.has(c.id)).length;
-  return { days, inactive_count: inactive.length, inactive: inactive.slice(0, 10), customers_never_bought: neverBought };
+  const { data, error } = await db.rpc("ai_inactive_customers" as never, {
+    _company_id: s.companyId,
+    _branch_id: s.branchId,
+    _days: days,
+  } as never);
+  if (error) throw error;
+  const res = data as unknown as {
+    inactive_count: number;
+    inactive: { name: string; last_purchase: string; days_since: number }[];
+    customers_never_bought: number;
+  };
+  return { days, ...res };
 }
 
 type Impl = (db: Db, s: ToolScope, args: Record<string, unknown>) => Promise<unknown>;
@@ -225,7 +201,7 @@ export const TOOLS: { module: Module; def: ToolDef; run: Impl }[] = [
   },
   {
     module: "sales",
-    def: { type: "function", function: { name: "get_top_products", description: "Produtos/serviços mais vendidos no período.", parameters: { type: "object", properties: { period: P, limit: { type: "integer", minimum: 1, maximum: 10 } }, required: ["period"], additionalProperties: false } } },
+    def: { type: "function", function: { name: "get_top_products", description: "Produtos/serviços mais vendidos no período. Só considera vendas lançadas com produtos vinculados; vendas de valor manual não entram no ranking.", parameters: { type: "object", properties: { period: P, limit: { type: "integer", minimum: 1, maximum: 10 } }, required: ["period"], additionalProperties: false } } },
     run: (db, s, a) => getTopProducts(db, s, a),
   },
   {
