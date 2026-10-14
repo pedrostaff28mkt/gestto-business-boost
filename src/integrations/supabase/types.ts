@@ -436,6 +436,13 @@ export type Database = {
             referencedRelation: "companies"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "memberships_user_id_profiles_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       module_permissions: {
@@ -969,12 +976,82 @@ export type Database = {
           },
         ]
       }
+      task_assignees: {
+        Row: {
+          company_id: string
+          created_at: string
+          task_id: string
+          user_id: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          task_id: string
+          user_id: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          task_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "task_assignees_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "task_assignees_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "task_assignees_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      task_completions: {
+        Row: {
+          completed_at: string
+          period_start: string
+          task_id: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string
+          period_start: string
+          task_id: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string
+          period_start?: string
+          task_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "task_completions_task_id_user_id_fkey"
+            columns: ["task_id", "user_id"]
+            isOneToOne: false
+            referencedRelation: "task_assignees"
+            referencedColumns: ["task_id", "user_id"]
+          },
+        ]
+      }
       tasks: {
         Row: {
           assigned_by: string
-          assigned_to: string
           company_id: string
-          completed_at: string | null
           created_at: string
           description: string | null
           due_date: string | null
@@ -982,15 +1059,12 @@ export type Database = {
           id: string
           observations: string | null
           photo_url: string | null
-          status: Database["public"]["Enums"]["task_status"]
           title: string
           updated_at: string
         }
         Insert: {
           assigned_by: string
-          assigned_to: string
           company_id: string
-          completed_at?: string | null
           created_at?: string
           description?: string | null
           due_date?: string | null
@@ -998,15 +1072,12 @@ export type Database = {
           id?: string
           observations?: string | null
           photo_url?: string | null
-          status?: Database["public"]["Enums"]["task_status"]
           title: string
           updated_at?: string
         }
         Update: {
           assigned_by?: string
-          assigned_to?: string
           company_id?: string
-          completed_at?: string | null
           created_at?: string
           description?: string | null
           due_date?: string | null
@@ -1014,7 +1085,6 @@ export type Database = {
           id?: string
           observations?: string | null
           photo_url?: string | null
-          status?: Database["public"]["Enums"]["task_status"]
           title?: string
           updated_at?: string
         }
@@ -1022,13 +1092,6 @@ export type Database = {
           {
             foreignKeyName: "tasks_assigned_by_fkey"
             columns: ["assigned_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "tasks_assigned_to_fkey"
-            columns: ["assigned_to"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -1157,9 +1220,23 @@ export type Database = {
         }
         Returns: Json
       }
+      complete_task: { Args: { _task_id: string }; Returns: undefined }
       consume_ai_quota: { Args: { _company_id: string }; Returns: Json }
       create_additional_company: {
         Args: { _company_name: string }
+        Returns: string
+      }
+      create_task: {
+        Args: {
+          _assignee_ids: string[]
+          _company_id: string
+          _description: string
+          _due_date: string
+          _frequency: Database["public"]["Enums"]["task_frequency"]
+          _observations: string
+          _photo_url: string
+          _title: string
+        }
         Returns: string
       }
       delete_sale: { Args: { _sale_id: string }; Returns: undefined }
@@ -1190,7 +1267,9 @@ export type Database = {
         Returns: boolean
       }
       is_company_member: { Args: { _company_id: string }; Returns: boolean }
+      is_tasks_manager: { Args: { _company_id: string }; Returns: boolean }
       membership_company: { Args: { _membership_id: string }; Returns: string }
+      my_tasks: { Args: { _company_id: string }; Returns: Json }
       owns_membership: { Args: { _membership_id: string }; Returns: boolean }
       refund_ai_quota: { Args: { _company_id: string }; Returns: undefined }
       register_sale: {
@@ -1208,6 +1287,15 @@ export type Database = {
         }
         Returns: string
       }
+      task_period_start: {
+        Args: {
+          _freq: Database["public"]["Enums"]["task_frequency"]
+          _ts?: string
+        }
+        Returns: string
+      }
+      team_tasks: { Args: { _company_id: string }; Returns: Json }
+      undo_task_completion: { Args: { _task_id: string }; Returns: undefined }
       update_my_monthly_goal: {
         Args: { _company_id: string; _goal: number }
         Returns: undefined
@@ -1234,7 +1322,6 @@ export type Database = {
       subscription_status: "trialing" | "active" | "past_due" | "canceled"
       support_ticket_status: "open" | "in_progress" | "resolved" | "closed"
       task_frequency: "once" | "daily" | "weekly"
-      task_status: "pending" | "done"
       time_entry_type: "in" | "out"
     }
     CompositeTypes: {
@@ -1384,7 +1471,6 @@ export const Constants = {
       subscription_status: ["trialing", "active", "past_due", "canceled"],
       support_ticket_status: ["open", "in_progress", "resolved", "closed"],
       task_frequency: ["once", "daily", "weekly"],
-      task_status: ["pending", "done"],
       time_entry_type: ["in", "out"],
     },
   },
