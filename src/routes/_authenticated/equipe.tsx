@@ -469,7 +469,7 @@ function MemberList({ companyId }: { companyId: string }) {
   const [commission, setCommission] = useState("");
   const [saving, setSaving] = useState(false);
 
-  const { data: members = [] } = useQuery({
+  const { data: members = [], isError: membersError, error: membersErr, refetch: refetchMembers, isFetching: membersFetching } = useQuery({
     queryKey: ["members", companyId],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -518,6 +518,9 @@ function MemberList({ companyId }: { companyId: string }) {
   return (
     <section className="surface p-5">
       <h2 className="font-display text-lg font-semibold">Pessoas na empresa</h2>
+      {membersError && (
+        <QueryError error={membersErr} onRetry={() => refetchMembers()} retrying={membersFetching} />
+      )}
       <ul className="mt-3 divide-y divide-border">
         {members.map((m) => (
           <li key={m.id} className="flex items-center justify-between gap-3 py-2.5">
