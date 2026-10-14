@@ -179,7 +179,13 @@ function TeamTimesheet({ companyId }: { companyId: string }) {
   );
   const [person, setPerson] = useState("all");
 
-  const { data: members = [] } = useQuery({
+  const {
+    data: members = [],
+    isError: membersError,
+    error: membersErr,
+    refetch: refetchMembers,
+    isFetching: membersFetching,
+  } = useQuery({
     queryKey: ["timesheet-members", companyId],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -193,7 +199,7 @@ function TeamTimesheet({ companyId }: { companyId: string }) {
       }));
     },
   });
-  const nameOf = (id: string) => members.find((m) => m.id === id)?.name ?? "—";
+  const nameOf = (id: string) => members.find((m) => m.id === id)?.name ?? "Pessoa removida";
 
   const { data: entries = [], isLoading } = useQuery({
     queryKey: ["team-time-entries", companyId, month, person],
