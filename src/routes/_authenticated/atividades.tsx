@@ -1,18 +1,45 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ListChecks, CheckCircle2, Loader2, CalendarDays, Plus, MessageCircle, ImagePlus, X } from "lucide-react";
+import {
+  ListChecks,
+  CheckCircle2,
+  Circle,
+  Loader2,
+  CalendarDays,
+  Plus,
+  MessageCircle,
+  ImagePlus,
+  X,
+  Trash2,
+  Undo2,
+  Search,
+  UserPlus,
+} from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { useGestto } from "@/hooks/use-gestto";
+import { useGestto, roleLabels, type AppRole } from "@/hooks/use-gestto";
+import { QueryError } from "@/components/query-error";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export const Route = createFileRoute("/_authenticated/atividades")({
   head: () => ({
@@ -27,7 +54,7 @@ export const Route = createFileRoute("/_authenticated/atividades")({
 });
 
 type Frequency = "once" | "daily" | "weekly";
-type Task = {
+type BaseTask = {
   id: string;
   title: string;
   description: string | null;
@@ -35,111 +62,167 @@ type Task = {
   photo_url: string | null;
   due_date: string | null;
   frequency: Frequency;
-  status: "pending" | "done";
-  completed_at: string | null;
-  assigned_to: string;
+  created_at: string;
+};
+type MyTask = BaseTask & { done_now: boolean; last_completed_at: string | null };
+type Assignee = { user_id: string; name: string | null; done_now: boolean; last_completed_at: string | null };
+type TeamTask = BaseTask & { assignees: Assignee[] };
+type Member = {
+  userId: string;
+  name: string;
+  subtitle: string;
+  phone: string | null;
+  email: string | null;
+  isMe: boolean;
 };
 
 const FREQ_LABEL: Record<Frequency, string> = { once: "Pontual", daily: "Diária", weekly: "Semanal" };
-const TASK_COLS = "id, title, description, observations, photo_url, due_date, frequency, status, completed_at, assigned_to";
-
-const fmtDue = (d: string) => new Date(d + "T00:00:00").toLocaleDateString("pt-BR");
-const isOverdue = (t: Task) => {
-  if (t.status !== "pending" || !t.due_date) return false;
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  return new Date(t.due_date + "T00:00:00") < today;
+const DONE_LABEL: Record<Frequency, string> = {
+  once: "Concluída",
+  daily: "Concluída hoje",
+  weekly: "Concluída esta semana",
 };
 
-function TaskCard({ task, onComplete, completing }: { task: Task; onComplete?: () => void; completing?: boolean }) {
+const fmtDue = (d: string) => new Date(d + "T00:00:00").toLocaleDateString("pt-BR");
+const isPastDue = (due: string | null) => {
+  if (!due) return false;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return new Date(due + "T00:00:00") < today;
+};
+
+const rpc = (fn: string, args: Record<string, unknown>) =>
+  (supabase.rpc as unknown as (f: string, a: Record<string, unknown>) => Promise<{ data: unknown; error: { message: string } | null }>)(fn, args);
+
+function PhotoThumb({ url, title }: { url: string; title: string }) {
   const [zoom, setZoom] = useState(false);
-  const overdue = isOverdue(task);
   return (
-    <li className="rounded-xl border border-border p-4">
-      <div className="flex gap-3">
-        {task.photo_url && (
-          <button type="button" onClick={() => setZoom(true)} className="shrink-0" aria-label="Ampliar foto">
-            <img src={task.photo_url} alt="" className="size-16 rounded-lg object-cover" loading="lazy" />
-          </button>
-        )}
-        <div className="min-w-0 flex-1 space-y-1.5">
-          <div className="flex flex-wrap items-center gap-2">
-            <p className="font-medium">{task.title}</p>
-            <Badge variant="secondary">{FREQ_LABEL[task.frequency]}</Badge>
-            {task.status === "done" && (
-              <Badge className="bg-success/10 text-success hover:bg-success/10">Concluída</Badge>
-            )}
-          </div>
-          {task.due_date && (
-            <p className={`flex items-center gap-1 text-xs ${overdue ? "font-medium text-chart-3" : "text-muted-foreground"}`}>
-              <CalendarDays className="size-3" /> Prazo {fmtDue(task.due_date)}
-              {overdue && " · vencida"}
-            </p>
-          )}
-          {task.description && <p className="text-sm">{task.description}</p>}
-          {task.observations && (
-            <p className="text-xs text-muted-foreground">
-              <span className="font-medium">Obs.:</span> {task.observations}
-            </p>
-          )}
-        </div>
-      </div>
-      {onComplete && task.status === "pending" && (
-        <Button size="sm" className="mt-3 w-full sm:w-auto" onClick={onComplete} disabled={completing}>
-          {completing ? <Loader2 className="size-4 animate-spin" /> : <CheckCircle2 className="size-4" />}
-          Marcar como concluída
-        </Button>
-      )}
-      {task.photo_url && (
-        <Dialog open={zoom} onOpenChange={setZoom}>
-          <DialogContent className="max-w-3xl">
-            <DialogHeader>
-              <DialogTitle>{task.title}</DialogTitle>
-            </DialogHeader>
-            <img src={task.photo_url} alt={task.title} className="max-h-[75vh] w-full rounded-lg object-contain" />
-          </DialogContent>
-        </Dialog>
-      )}
-    </li>
+    <>
+      <button type="button" onClick={() => setZoom(true)} className="shrink-0" aria-label="Ampliar foto">
+        <img src={url} alt="" className="size-16 rounded-lg object-cover" loading="lazy" />
+      </button>
+      <Dialog open={zoom} onOpenChange={setZoom}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>{title}</DialogTitle>
+          </DialogHeader>
+          <img src={url} alt={title} className="max-h-[75vh] w-full rounded-lg object-contain" />
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
+
+function TaskBody({ task, overdue }: { task: BaseTask; overdue: boolean }) {
+  return (
+    <>
+      {task.due_date && (
+        <p className={`flex items-center gap-1 text-xs ${overdue ? "font-medium text-warning" : "text-muted-foreground"}`}>
+          <CalendarDays className="size-3" /> Prazo {fmtDue(task.due_date)}
+          {overdue && " · vencida"}
+        </p>
+      )}
+      {task.description && <p className="text-sm">{task.description}</p>}
+      {task.observations && (
+        <p className="text-xs text-muted-foreground">
+          <span className="font-medium">Obs.:</span> {task.observations}
+        </p>
+      )}
+    </>
+  );
+}
+
+/* ----------------------------- Minhas atividades ----------------------------- */
 
 function MyTasks() {
   const { session } = useGestto();
   const queryClient = useQueryClient();
-  const { data: tasks = [], isLoading } = useQuery({
+  const { data: tasks = [], isLoading, isError, error, refetch, isFetching } = useQuery({
     queryKey: ["my-tasks", session?.companyId, session?.userId],
     enabled: !!session,
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("tasks")
-        .select(TASK_COLS)
-        .eq("company_id", session!.companyId)
-        .eq("assigned_to", session!.userId)
-        .order("created_at", { ascending: false });
-      if (error) throw error;
-      return data as Task[];
+      const { data, error } = await rpc("my_tasks", { _company_id: session!.companyId });
+      if (error) throw new Error(error.message);
+      return (data ?? []) as MyTask[];
     },
   });
 
+  const invalidate = () => {
+    queryClient.invalidateQueries({ queryKey: ["my-tasks"] });
+    queryClient.invalidateQueries({ queryKey: ["team-tasks"] });
+  };
   const complete = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from("tasks")
-        .update({ status: "done", completed_at: new Date().toISOString() })
-        .eq("id", id);
-      if (error) throw error;
+      const { error } = await rpc("complete_task", { _task_id: id });
+      if (error) throw new Error(error.message);
     },
     onSuccess: () => {
       toast.success("Atividade concluída");
-      queryClient.invalidateQueries({ queryKey: ["my-tasks"] });
-      queryClient.invalidateQueries({ queryKey: ["member-tasks"] });
+      invalidate();
     },
     onError: (e: Error) => toast.error("Não foi possível concluir", { description: e.message }),
   });
+  const undo = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await rpc("undo_task_completion", { _task_id: id });
+      if (error) throw new Error(error.message);
+    },
+    onSuccess: () => {
+      toast.success("Conclusão desfeita");
+      invalidate();
+    },
+    onError: (e: Error) => toast.error("Não foi possível desfazer", { description: e.message }),
+  });
 
-  const pending = tasks.filter((t) => t.status === "pending");
-  const done = tasks.filter((t) => t.status === "done");
+  const pending = tasks.filter((t) => !t.done_now);
+  const done = tasks.filter((t) => t.done_now);
+
+  const card = (t: MyTask) => {
+    const overdue = !t.done_now && isPastDue(t.due_date);
+    return (
+      <li key={t.id} className="rounded-xl border border-border p-4">
+        <div className="flex gap-3">
+          {t.photo_url && <PhotoThumb url={t.photo_url} title={t.title} />}
+          <div className="min-w-0 flex-1 space-y-1.5">
+            <div className="flex flex-wrap items-center gap-2">
+              <p className="font-medium">{t.title}</p>
+              <Badge variant="secondary">{FREQ_LABEL[t.frequency]}</Badge>
+              {t.done_now && (
+                <Badge className="bg-success/10 text-success hover:bg-success/10">{DONE_LABEL[t.frequency]}</Badge>
+              )}
+            </div>
+            <TaskBody task={t} overdue={overdue} />
+          </div>
+        </div>
+        {t.done_now ? (
+          <Button
+            size="sm"
+            variant="ghost"
+            className="mt-2 text-muted-foreground"
+            onClick={() => undo.mutate(t.id)}
+            disabled={undo.isPending && undo.variables === t.id}
+          >
+            {undo.isPending && undo.variables === t.id ? <Loader2 className="size-4 animate-spin" /> : <Undo2 className="size-4" />}
+            Desfazer
+          </Button>
+        ) : (
+          <Button
+            size="sm"
+            className="mt-3 w-full sm:w-auto"
+            onClick={() => complete.mutate(t.id)}
+            disabled={complete.isPending && complete.variables === t.id}
+          >
+            {complete.isPending && complete.variables === t.id ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <CheckCircle2 className="size-4" />
+            )}
+            Marcar como concluída
+          </Button>
+        )}
+      </li>
+    );
+  };
 
   return (
     <section className="surface p-5">
@@ -147,56 +230,66 @@ function MyTasks() {
         <ListChecks className="size-4 text-primary" />
         <h2 className="font-display text-lg font-semibold">Minhas atividades</h2>
       </div>
-      {isLoading ? (
+      {isError ? (
+        <QueryError message="Não foi possível carregar suas atividades" error={error} onRetry={() => refetch()} retrying={isFetching} />
+      ) : isLoading ? (
         <Loader2 className="mt-4 size-4 animate-spin text-muted-foreground" />
       ) : (
-        <Tabs defaultValue="pending" className="mt-4">
-          <TabsList>
-            <TabsTrigger value="pending">Pendentes ({pending.length})</TabsTrigger>
-            <TabsTrigger value="done">Concluídas ({done.length})</TabsTrigger>
-          </TabsList>
-          <TabsContent value="pending">
+        <div className="mt-4 space-y-5">
+          <div>
+            <p className="text-sm font-medium">Pendentes ({pending.length})</p>
             {pending.length === 0 ? (
-              <p className="py-4 text-sm text-muted-foreground">Nenhuma atividade pendente. 🎉</p>
+              <p className="py-2 text-sm text-muted-foreground">Nenhuma atividade pendente.</p>
             ) : (
-              <ul className="space-y-3">
-                {pending.map((t) => (
-                  <TaskCard
-                    key={t.id}
-                    task={t}
-                    onComplete={() => complete.mutate(t.id)}
-                    completing={complete.isPending && complete.variables === t.id}
-                  />
-                ))}
-              </ul>
+              <ul className="mt-2 space-y-3">{pending.map(card)}</ul>
             )}
-          </TabsContent>
-          <TabsContent value="done">
+          </div>
+          <div>
+            <p className="text-sm font-medium">Concluídas ({done.length})</p>
             {done.length === 0 ? (
-              <p className="py-4 text-sm text-muted-foreground">Nenhuma atividade concluída ainda.</p>
+              <p className="py-2 text-sm text-muted-foreground">Nenhuma atividade concluída neste período.</p>
             ) : (
-              <ul className="space-y-3">
-                {done.map((t) => (
-                  <TaskCard key={t.id} task={t} />
-                ))}
-              </ul>
+              <ul className="mt-2 space-y-3">{done.map(card)}</ul>
             )}
-          </TabsContent>
-        </Tabs>
+          </div>
+        </div>
       )}
     </section>
   );
 }
 
-type Member = { userId: string; name: string; phone: string | null; email: string | null };
+/* ------------------------------ Nova atividade ------------------------------ */
 
-function MemberTasksDialog({ member, companyId, onClose }: { member: Member | null; companyId: string; onClose: () => void }) {
-  const { session } = useGestto();
+function NewTaskDialog({
+  open,
+  onOpenChange,
+  companyId,
+  members,
+  initialSelected,
+}: {
+  open: boolean;
+  onOpenChange: (o: boolean) => void;
+  companyId: string;
+  members: Member[];
+  initialSelected: string[];
+}) {
   const queryClient = useQueryClient();
   const empty = { title: "", description: "", observations: "", due_date: "", frequency: "once" as Frequency };
   const [form, setForm] = useState(empty);
   const [photo, setPhoto] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [search, setSearch] = useState("");
+
+  useEffect(() => {
+    if (open) {
+      setForm(empty);
+      setPhoto(null);
+      setSearch("");
+      setSelected(new Set(initialSelected));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
 
   useEffect(() => {
     if (!photo) return setPreview(null);
@@ -205,89 +298,62 @@ function MemberTasksDialog({ member, companyId, onClose }: { member: Member | nu
     return () => URL.revokeObjectURL(url);
   }, [photo]);
 
-  useEffect(() => {
-    setForm(empty);
-    setPhoto(null);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [member?.userId]);
-
-  const { data: tasks = [], isLoading } = useQuery({
-    queryKey: ["member-tasks", companyId, member?.userId],
-    enabled: !!member,
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("tasks")
-        .select(TASK_COLS)
-        .eq("company_id", companyId)
-        .eq("assigned_to", member!.userId)
-        .order("created_at", { ascending: false });
-      if (error) throw error;
-      return data as Task[];
-    },
+  const filtered = members.filter((m) => {
+    const q = search.trim().toLowerCase();
+    return !q || m.name.toLowerCase().includes(q) || m.subtitle.toLowerCase().includes(q);
   });
+
+  const toggle = (id: string, on: boolean) =>
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (on) next.add(id);
+      else next.delete(id);
+      return next;
+    });
 
   const create = useMutation({
     mutationFn: async () => {
       if (!form.title.trim()) throw new Error("Informe o título da atividade.");
-      let photo_url: string | null = null;
+      if (selected.size === 0) throw new Error("Selecione pelo menos 1 pessoa.");
+      let photoUrl: string | null = null;
       if (photo) {
         const safe = photo.name.replace(/[^a-zA-Z0-9._-]/g, "_");
         const path = `${companyId}/${crypto.randomUUID()}-${safe}`;
         const up = await supabase.storage.from("task-photos").upload(path, photo, { contentType: photo.type });
         if (up.error) throw new Error("Falha ao enviar a foto: " + up.error.message);
-        photo_url = supabase.storage.from("task-photos").getPublicUrl(path).data.publicUrl;
+        photoUrl = supabase.storage.from("task-photos").getPublicUrl(path).data.publicUrl;
       }
-      const { error } = await supabase.from("tasks").insert({
-        company_id: companyId,
-        assigned_to: member!.userId,
-        assigned_by: session!.userId,
-        title: form.title.trim().slice(0, 200),
-        description: form.description.trim() || null,
-        observations: form.observations.trim() || null,
-        due_date: form.due_date || null,
-        frequency: form.frequency,
-        photo_url,
+      const { error } = await rpc("create_task", {
+        _company_id: companyId,
+        _title: form.title.trim().slice(0, 200),
+        _description: form.description.trim() || null,
+        _observations: form.observations.trim() || null,
+        _due_date: form.due_date || null,
+        _frequency: form.frequency,
+        _photo_url: photoUrl,
+        _assignee_ids: [...selected],
       });
-      if (error) throw error;
+      if (error) throw new Error(error.message);
     },
     onSuccess: () => {
-      toast.success("Atividade atribuída");
-      setForm(empty);
-      setPhoto(null);
-      queryClient.invalidateQueries({ queryKey: ["member-tasks"] });
+      toast.success("Atividade criada");
+      queryClient.invalidateQueries({ queryKey: ["team-tasks"] });
       queryClient.invalidateQueries({ queryKey: ["my-tasks"] });
+      onOpenChange(false);
     },
-    onError: (e: Error) => toast.error("Não foi possível salvar", { description: e.message }),
+    onError: (e: Error) => toast.error("Não foi possível criar a atividade", { description: e.message }),
   });
 
   return (
-    <Dialog open={!!member} onOpenChange={(o) => !o && onClose()}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Atividades de {member?.name}</DialogTitle>
+          <DialogTitle>Nova atividade</DialogTitle>
+          <DialogDescription>Defina o que precisa ser feito e quem vai fazer.</DialogDescription>
         </DialogHeader>
-
-        <div>
-          <p className="text-sm font-medium">Atribuídas</p>
-          {isLoading ? (
-            <Loader2 className="mt-2 size-4 animate-spin text-muted-foreground" />
-          ) : tasks.length === 0 ? (
-            <p className="mt-1 text-sm text-muted-foreground">Nenhuma atividade atribuída ainda.</p>
-          ) : (
-            <ul className="mt-2 space-y-2">
-              {tasks.map((t) => (
-                <TaskCard key={t.id} task={t} />
-              ))}
-            </ul>
-          )}
-        </div>
-
-        <div className="space-y-3 border-t border-border pt-4">
-          <p className="flex items-center gap-1.5 text-sm font-medium">
-            <Plus className="size-4 text-primary" /> Nova atividade
-          </p>
+        <div className="space-y-3">
           <div className="space-y-1.5">
-            <Label htmlFor="taskTitle">Título</Label>
+            <Label htmlFor="taskTitle">Título *</Label>
             <Input id="taskTitle" maxLength={200} value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))} />
           </div>
           <div className="space-y-1.5">
@@ -317,6 +383,12 @@ function MemberTasksDialog({ member, companyId, onClose }: { member: Member | nu
               </Select>
             </div>
           </div>
+          <p className="rounded-lg bg-secondary/60 p-2.5 text-xs text-muted-foreground">
+            <strong>Pontual:</strong> concluída uma vez, fica concluída. <strong>Diária:</strong> volta a ficar pendente
+            todo dia. <strong>Semanal:</strong> volta a ficar pendente toda segunda-feira. Os horários seguem o fuso de
+            São Paulo, e cada pessoa conclui a sua parte separadamente.
+          </p>
+
           <div className="space-y-1.5">
             <Label>Foto (opcional)</Label>
             {preview ? (
@@ -349,76 +421,316 @@ function MemberTasksDialog({ member, companyId, onClose }: { member: Member | nu
               </label>
             )}
           </div>
-          <Button className="w-full" onClick={() => create.mutate()} disabled={create.isPending || !form.title.trim()}>
-            {create.isPending && <Loader2 className="size-4 animate-spin" />} Atribuir atividade
-          </Button>
+
+          <div className="space-y-2">
+            <div className="flex items-center justify-between gap-2">
+              <Label>Quem vai fazer *</Label>
+              <Button
+                type="button"
+                size="sm"
+                variant="ghost"
+                onClick={() => setSelected(new Set(members.map((m) => m.userId)))}
+              >
+                Selecionar todos
+              </Button>
+            </div>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+              <Input className="pl-9" placeholder="Buscar pessoa" value={search} onChange={(e) => setSearch(e.target.value)} />
+            </div>
+            <ul className="max-h-56 divide-y divide-border overflow-y-auto rounded-xl border border-border">
+              {filtered.length === 0 ? (
+                <li className="p-3 text-sm text-muted-foreground">Ninguém encontrado.</li>
+              ) : (
+                filtered.map((m) => (
+                  <li key={m.userId}>
+                    <label className="flex cursor-pointer items-center gap-3 px-3 py-2 hover:bg-secondary/60">
+                      <Checkbox checked={selected.has(m.userId)} onCheckedChange={(v) => toggle(m.userId, v === true)} />
+                      <span className="min-w-0">
+                        <span className="block truncate text-sm font-medium">
+                          {m.name} {m.isMe && <span className="text-muted-foreground">(você)</span>}
+                        </span>
+                        <span className="block truncate text-xs text-muted-foreground">{m.subtitle}</span>
+                      </span>
+                    </label>
+                  </li>
+                ))
+              )}
+            </ul>
+            <p className="num text-xs text-muted-foreground">
+              {selected.size} {selected.size === 1 ? "pessoa selecionada" : "pessoas selecionadas"}
+            </p>
+          </div>
         </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Cancelar
+          </Button>
+          <Button onClick={() => create.mutate()} disabled={create.isPending || !form.title.trim() || selected.size === 0}>
+            {create.isPending && <Loader2 className="size-4 animate-spin" />} Criar atividade
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
 }
 
-function ManageTeam({ companyId }: { companyId: string }) {
-  const [selected, setSelected] = useState<Member | null>(null);
-  const { data: members = [], isLoading } = useQuery({
+/* --------------------------- Atribuir e acompanhar --------------------------- */
+
+function useCompanyMembers(companyId: string, myId: string) {
+  return useQuery({
     queryKey: ["tasks-members", companyId],
     queryFn: async () => {
       const [{ data: ms, error }, { data: inv }] = await Promise.all([
         supabase
           .from("memberships")
-          .select("user_id, profiles:user_id(full_name, phone)")
+          .select("user_id, role, job_title, profiles:user_id(full_name, phone)")
           .eq("company_id", companyId)
-          .eq("active", true),
+          .eq("active", true)
+          .order("created_at", { ascending: true }),
         supabase.from("invites").select("used_by, email").eq("company_id", companyId).not("used_by", "is", null),
       ]);
       if (error) throw error;
-      return (ms as unknown as { user_id: string; profiles: { full_name: string; phone: string | null } | null }[]).map(
-        (m) => ({
-          userId: m.user_id,
-          name: m.profiles?.full_name || "Sem nome",
-          phone: m.profiles?.phone ?? null,
-          email: inv?.find((i) => i.used_by === m.user_id)?.email ?? null,
-        }),
-      );
+      return (
+        ms as unknown as {
+          user_id: string;
+          role: AppRole;
+          job_title: string | null;
+          profiles: { full_name: string | null; phone: string | null } | null;
+        }[]
+      ).map<Member>((m) => ({
+        userId: m.user_id,
+        name: m.profiles?.full_name || "Sem nome",
+        subtitle: m.job_title || roleLabels[m.role] || "",
+        phone: m.profiles?.phone ?? null,
+        email: inv?.find((i) => i.used_by === m.user_id)?.email ?? null,
+        isMe: m.user_id === myId,
+      }));
+    },
+  });
+}
+
+function ManageTeam({ companyId, myId }: { companyId: string; myId: string }) {
+  const queryClient = useQueryClient();
+  const [person, setPerson] = useState("all");
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [preselect, setPreselect] = useState<string[]>([]);
+  const [toDelete, setToDelete] = useState<TeamTask | null>(null);
+
+  const membersQ = useCompanyMembers(companyId, myId);
+  const members = membersQ.data ?? [];
+  const tasksQ = useQuery({
+    queryKey: ["team-tasks", companyId],
+    queryFn: async () => {
+      const { data, error } = await rpc("team_tasks", { _company_id: companyId });
+      if (error) throw new Error(error.message);
+      return (data ?? []) as TeamTask[];
     },
   });
 
+  const del = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("tasks").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Atividade apagada");
+      setToDelete(null);
+      queryClient.invalidateQueries({ queryKey: ["team-tasks"] });
+      queryClient.invalidateQueries({ queryKey: ["my-tasks"] });
+    },
+    onError: (e: Error) => toast.error("Não foi possível apagar", { description: e.message }),
+  });
+
+  const tasks = useMemo(() => {
+    const all = tasksQ.data ?? [];
+    return person === "all" ? all : all.filter((t) => t.assignees?.some((a) => a.user_id === person));
+  }, [tasksQ.data, person]);
+
+  const selectedMember = members.find((m) => m.userId === person);
+  const nameOf = (a: Assignee) => a.name || members.find((m) => m.userId === a.user_id)?.name || "Pessoa removida";
+
+  const openNew = (ids: string[] = []) => {
+    setPreselect(ids);
+    setDialogOpen(true);
+  };
+
   return (
-    <section className="surface p-5">
-      <h2 className="font-display text-lg font-semibold">Atribuir e acompanhar</h2>
-      <p className="text-sm text-muted-foreground">Clique em uma pessoa para ver e atribuir atividades.</p>
-      {isLoading ? (
-        <Loader2 className="mt-4 size-4 animate-spin text-muted-foreground" />
-      ) : (
-        <ul className="mt-3 divide-y divide-border">
-          {members.map((m) => {
-            const digits = m.phone?.replace(/\D/g, "") ?? "";
-            const wa = digits ? (digits.startsWith("55") ? digits : `55${digits}`) : null;
-            return (
-              <li key={m.userId} className="flex items-center justify-between gap-3 py-2.5">
-                <button type="button" className="min-w-0 flex-1 text-left" onClick={() => setSelected(m)}>
-                  <span className="block truncate text-sm font-medium hover:text-primary">{m.name}</span>
-                  <span className="block truncate text-xs text-muted-foreground">
-                    {[m.email, m.phone].filter(Boolean).join(" · ") || "Sem contato cadastrado"}
-                  </span>
-                </button>
-                {wa && (
-                  <Button asChild variant="ghost" size="icon" className="text-success">
-                    <a href={`https://wa.me/${wa}`} target="_blank" rel="noreferrer" aria-label={`WhatsApp de ${m.name}`}>
-                      <MessageCircle className="size-4" />
-                    </a>
-                  </Button>
-                )}
-                <Button size="sm" variant="outline" onClick={() => setSelected(m)}>
-                  Atividades
-                </Button>
-              </li>
-            );
-          })}
-        </ul>
-      )}
-      <MemberTasksDialog member={selected} companyId={companyId} onClose={() => setSelected(null)} />
-    </section>
+    <div className="space-y-4">
+      <Button size="lg" className="w-full sm:w-auto" onClick={() => openNew()} disabled={membersQ.isLoading}>
+        <Plus className="size-5" /> Nova atividade
+      </Button>
+
+      <div className="grid gap-4 lg:grid-cols-[1fr_320px]">
+        <section className="surface p-5">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h2 className="font-display text-lg font-semibold">Atividades criadas</h2>
+            <Select value={person} onValueChange={setPerson}>
+              <SelectTrigger className="w-full sm:w-56">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todas as pessoas</SelectItem>
+                {members.map((m) => (
+                  <SelectItem key={m.userId} value={m.userId}>
+                    {m.name}
+                    {m.isMe ? " (você)" : ""}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          {selectedMember && (
+            <Button variant="outline" size="sm" className="mt-3" onClick={() => openNew([selectedMember.userId])}>
+              <UserPlus className="size-4" /> Atribuir a {selectedMember.name}
+            </Button>
+          )}
+
+          {tasksQ.isError ? (
+            <QueryError message="Não foi possível carregar as atividades" error={tasksQ.error} onRetry={() => tasksQ.refetch()} retrying={tasksQ.isFetching} />
+          ) : tasksQ.isLoading ? (
+            <Loader2 className="mt-4 size-4 animate-spin text-muted-foreground" />
+          ) : tasks.length === 0 ? (
+            <p className="mt-4 text-sm text-muted-foreground">Nenhuma atividade por aqui ainda.</p>
+          ) : (
+            <ul className="mt-4 space-y-3">
+              {tasks.map((t) => {
+                const as = t.assignees ?? [];
+                const doneCount = as.filter((a) => a.done_now).length;
+                const overdue = doneCount < as.length && isPastDue(t.due_date);
+                return (
+                  <li key={t.id} className="rounded-xl border border-border p-4">
+                    <div className="flex gap-3">
+                      {t.photo_url && <PhotoThumb url={t.photo_url} title={t.title} />}
+                      <div className="min-w-0 flex-1 space-y-1.5">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <p className="font-medium">{t.title}</p>
+                            <Badge variant="secondary">{FREQ_LABEL[t.frequency]}</Badge>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="shrink-0 text-muted-foreground hover:text-destructive"
+                            aria-label={`Apagar ${t.title}`}
+                            onClick={() => setToDelete(t)}
+                          >
+                            <Trash2 className="size-4" />
+                          </Button>
+                        </div>
+                        <TaskBody task={t} overdue={overdue} />
+                      </div>
+                    </div>
+                    <div className="mt-3 space-y-2">
+                      <div className="flex items-center gap-3">
+                        <Progress value={as.length ? (doneCount / as.length) * 100 : 0} className="h-2 flex-1" />
+                        <span className="num shrink-0 text-xs text-muted-foreground">
+                          {doneCount} de {as.length} concluíram
+                        </span>
+                      </div>
+                      <div className="flex flex-wrap gap-1.5">
+                        {as.map((a) => (
+                          <span
+                            key={a.user_id}
+                            className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${
+                              a.done_now ? "bg-success/10 text-success" : "bg-secondary text-muted-foreground"
+                            }`}
+                          >
+                            {a.done_now ? <CheckCircle2 className="size-3" /> : <Circle className="size-3" />}
+                            {nameOf(a)}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </section>
+
+        <section className="surface p-5">
+          <h2 className="font-display text-lg font-semibold">Equipe</h2>
+          <p className="text-xs text-muted-foreground">Clique em uma pessoa para ver as atividades dela.</p>
+          {membersQ.isError ? (
+            <QueryError error={membersQ.error} onRetry={() => membersQ.refetch()} retrying={membersQ.isFetching} />
+          ) : membersQ.isLoading ? (
+            <Loader2 className="mt-4 size-4 animate-spin text-muted-foreground" />
+          ) : (
+            <>
+              <ul className="mt-3 divide-y divide-border">
+                {members.map((m) => {
+                  const digits = m.phone?.replace(/\D/g, "") ?? "";
+                  const wa = digits ? (digits.startsWith("55") ? digits : `55${digits}`) : null;
+                  const active = person === m.userId;
+                  return (
+                    <li key={m.userId} className="flex items-center gap-2 py-2.5">
+                      <button
+                        type="button"
+                        className={`min-w-0 flex-1 rounded-lg px-2 py-1 text-left ${active ? "bg-primary/10" : "hover:bg-secondary/60"}`}
+                        onClick={() => setPerson(active ? "all" : m.userId)}
+                      >
+                        <span className="block truncate text-sm font-medium">
+                          {m.name} {m.isMe && <span className="text-muted-foreground">(você)</span>}
+                        </span>
+                        <span className="block truncate text-xs text-muted-foreground">
+                          {[m.subtitle, m.email].filter(Boolean).join(" · ")}
+                        </span>
+                      </button>
+                      {wa && (
+                        <Button asChild variant="ghost" size="icon" className="text-success">
+                          <a href={`https://wa.me/${wa}`} target="_blank" rel="noreferrer" aria-label={`WhatsApp de ${m.name}`}>
+                            <MessageCircle className="size-4" />
+                          </a>
+                        </Button>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+              {members.filter((m) => !m.isMe).length === 0 && (
+                <p className="mt-3 rounded-lg bg-secondary/60 p-3 text-xs text-muted-foreground">
+                  Ainda não há funcionários na empresa. Convide pessoas em Equipe — elas só aparecem aqui depois de
+                  criarem a conta pelo convite.
+                </p>
+              )}
+            </>
+          )}
+        </section>
+      </div>
+
+      <NewTaskDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        companyId={companyId}
+        members={members}
+        initialSelected={preselect}
+      />
+
+      <AlertDialog open={!!toDelete} onOpenChange={(o) => !o && setToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Apagar atividade?</AlertDialogTitle>
+            <AlertDialogDescription>
+              "{toDelete?.title}" será removida para todas as pessoas, junto com o histórico de conclusões.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={(e) => {
+                e.preventDefault();
+                if (toDelete) del.mutate(toDelete.id);
+              }}
+              disabled={del.isPending}
+            >
+              {del.isPending && <Loader2 className="size-4 animate-spin" />} Apagar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
   );
 }
 
@@ -442,7 +754,7 @@ function AtividadesPage() {
             <MyTasks />
           </TabsContent>
           <TabsContent value="team">
-            <ManageTeam companyId={session.companyId} />
+            <ManageTeam companyId={session.companyId} myId={session.userId} />
           </TabsContent>
         </Tabs>
       ) : (
