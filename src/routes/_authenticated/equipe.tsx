@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Pencil, Users, Copy, Link2, Check, Loader2, Trash2, UserPlus, Shield } from "lucide-react";
 import { toast } from "sonner";
+import { QueryError } from "@/components/query-error";
 import { supabase } from "@/integrations/supabase/client";
 import { useGestto, roleLabels, type AppModule, type AppRole } from "@/hooks/use-gestto";
 import { usePaywall } from "@/components/paywall";
