@@ -252,6 +252,8 @@ function TeamTimesheet({ companyId }: { companyId: string }) {
         </Button>
       </div>
 
+      {membersError && <QueryError error={membersErr} onRetry={() => refetchMembers()} retrying={membersFetching} />}
+
       <div className="mt-4 grid gap-3 sm:grid-cols-2">
         <div className="space-y-1.5">
           <Label>Funcionário</Label>
