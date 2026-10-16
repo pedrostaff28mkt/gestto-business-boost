@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { QueryError } from "@/components/query-error";
 
 export const Route = createFileRoute("/_authenticated/ponto")({
   head: () => ({
@@ -251,6 +252,8 @@ function TeamTimesheet({ companyId }: { companyId: string }) {
           <Download className="size-4" /> Exportar CSV
         </Button>
       </div>
+
+      {membersError && <QueryError error={membersErr} onRetry={() => refetchMembers()} retrying={membersFetching} />}
 
       <div className="mt-4 grid gap-3 sm:grid-cols-2">
         <div className="space-y-1.5">
