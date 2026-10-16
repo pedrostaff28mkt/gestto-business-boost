@@ -31,7 +31,7 @@ const Input = z.object({
 
 export type AiChatResult =
   | { ok: true; reply: string; used: number; limit: number }
-  | { ok: false; code: "daily_limit" | "subscription_required" | "owner_only" | "no_access" | "credits" | "provider"; message: string; used?: number; limit?: number };
+  | { ok: false; code: "daily_limit" | "subscription_required" | "owner_only" | "no_access" | "credits" | "provider" | "out_of_scope"; message: string; used?: number; limit?: number };
 
 const OWNER_ONLY_MSG = "A IA é exclusiva do dono da empresa.";
 
@@ -54,6 +54,11 @@ export const sendAiMessage = createServerFn({ method: "POST" })
     if (!m) return { ok: false, code: "no_access", message: "Você não tem acesso a essa empresa." };
     const viewable = new Set((m.module_permissions ?? []).filter((p) => p.can_view).map((p) => p.module as string));
     if (m.role !== "owner") return { ok: false, code: "owner_only", message: OWNER_ONLY_MSG };
+
+    // Filtro de escopo (1ª linha de defesa) — antes da cota, sem chamar o modelo.
+    const lastUser = [...data.messages].reverse().find((x) => x.role === "user");
+    if (lastUser && isBlockedQuestion(lastUser.content))
+      return { ok: false, code: "out_of_scope", message: `${REFUSAL} Tente algo como: "Quanto vendi hoje?".` };
 
     // Escopo de filial: não-dono fica preso à própria filial.
     const scope = {
