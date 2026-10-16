@@ -99,7 +99,7 @@ export const sendAiMessage = createServerFn({ method: "POST" })
       for (let round = 0; round < 5; round++) {
         const out = await callModel({ messages: msgs, tools: round < 4 ? tools.map((t) => t.def) : [], maxTokens: 700 });
         if (!out.toolCalls.length) {
-          const reply = (out.content ?? "").trim();
+          const reply = sanitizeReply((out.content ?? "").trim());
           if (!reply) throw new ProviderError(502, "empty");
           return { ok: true, reply, used: q.used, limit: q.limit };
         }
