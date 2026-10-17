@@ -17,6 +17,10 @@ const ALLOW = [
   "Como está meu financeiro neste mês?",
   "Qual foi meu faturamento de ontem?",
   "Qual minha chave pix?",
+  "Como está o faturamento de todas as lojas?",
+  "Como foi a outra loja ontem?",
+  "E as demais lojas, como estão?",
+  "Qual o meu cliente que mais compra, de todas as lojas?",
   "O que merece minha atenção hoje? Consulte as áreas que eu tenho acesso (vendas de hoje, estoque baixo, contas vencidas e clientes sumidos) e responda com NO MÁXIMO 3 prioridades, cada uma em uma linha começando com um verbo de ação, ordenadas por urgência.",
 ];
 describe("isBlockedQuestion", () => {
