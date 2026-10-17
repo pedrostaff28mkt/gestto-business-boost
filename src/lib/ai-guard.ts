@@ -18,9 +18,9 @@ const BLOCK_PATTERNS: RegExp[] = [
   /api[ _-]?key|service[ _-]?role|chave (secreta|de api|da api|privada)|token (de acesso|secreto|jwt)|access token|\bjwt\b/,
   /supabase|lovable|variave\w* de ambiente|environment variables?|(^|\s)\.env\b/,
   // outras empresas / clientes do Gestto
-  /\b(outra|outras|demais) (empresas?|lojas?|negocios?|companhias?)\b/,
-  /\b(de|da|das|do|dos) outros? (clientes do gestto|empresas?|lojas?)\b/,
-  /todas as (empresas|lojas|companhias)/,
+  /\b(outra|outras|demais) (empresas?|companhias?)\b/,
+  /\b(de|da|das|do|dos) outros? (clientes do gestto|empresas?)\b/,
+  /todas as (empresas|companhias)/,
   /quant[oa]s (clientes|empresas|usuarios|assinantes) (o|a) gestto/,
   /clientes do gestto|usuarios do gestto|assinantes do gestto/,
   // alegação de ser da equipe
